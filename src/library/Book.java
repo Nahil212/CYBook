@@ -15,7 +15,6 @@ public class Book {
 		this.year = year;
 		this.isbn = isbn;
 		this.format = format;
-		
 	}
 	
 	public String getTitle() {
@@ -64,7 +63,6 @@ public class Book {
 				"\nISBN: "+this.getIsbn()+
 				"\nFormat: "+this.getFormat();
 		return s;
-				
 	}
 	
 }

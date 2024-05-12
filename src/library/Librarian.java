@@ -134,10 +134,50 @@ public class Librarian {
 		}
 	}
 	
+	public ArrayList<Book> searchBook(ArrayList<String> listCreator, int yearStart, int yearEnd, ArrayList<DocType> listType, ArrayList<Universe> listUniverse, String searchTitle, int startResearch){
+		ArrayList<Book> searchedBooks = new ArrayList<Book>();
+		String uri = "http://catalogue.bnf.fr/api/SRU?version=1.2&operation=searchRetrieve&query=";
+		
+		if(!(listCreator == null)) {
+			String authors = "";
+			for(String creator: listCreator) {
+				authors += creator+" ";
+			}
+			uri += URLEncoder.encode("bib.author any \""+authors+"\"", StandardCharsets.UTF_8)+ "and ";
+		}
+		if(!(yearStart == -1) || !(yearEnd == -1)) {
+			if(yearStart == yearEnd) {
+				uri += URLEncoder.encode("bib.publicationdate = \""+yearStart+"\"", StandardCharsets.UTF_8)+ " and ";
+			}else if(yearStart == -1) {
+				uri += URLEncoder.encode("bib.publicationdate <= \""+yearEnd+"\"", StandardCharsets.UTF_8)+ " and ";
+			}else {
+				uri += URLEncoder.encode("bib.publicationdate >= \""+yearStart+"\"", StandardCharsets.UTF_8)+ " and ";
+			}
+		}
+		if(!(listType == null)) {
+			String types ="";
+			for(DocType type: listType) {
+				types+= type+" ";
+			}
+			uri += URLEncoder.encode("bib.doctype any \""+types+"\"", StandardCharsets.UTF_8)+ "and ";
+		}
+		if(!(listUniverse == null)) {
+			String universes = "";
+			for(Universe universe: listUniverse) {
+				universes+=universe+" ";
+			}
+			uri += URLEncoder.encode("bib.doctype all \""+universes+"\"", StandardCharsets.UTF_8)+ "and ";
+		}
+		if(!(searchTitle == null)) {
+			uri += URLEncoder.encode("bib.author any \""+searchTitle+"\"", StandardCharsets.UTF_8);
+		}
+		uri+= " &startRecord="+startResearch+"&maximumRecords=20&recorsSchema=dublincore";
+		System.out.println(uri);
+		return searchedBooks;
+	}
+	
 	public static void main(String[] args) throws Exception {
 		Librarian rayen = new Librarian("rayen", ":)");
-		Book miserable = rayen.searchBookFromIsbn(978-2344008966L);
-		System.out.println(miserable);
 	}
 
 }
