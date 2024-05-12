@@ -55,5 +55,16 @@ public class Book {
 		this.format = format;
 	}
 	
+	public String toString() {
+		String s = "";
+		s += "Title: "+this.getTitle()+
+				"\nAuthor: "+this.getCreator()+
+				"\nPublisher: "+this.getPublisher()+
+				"\nYear: "+this.getYear()+
+				"\nISBN: "+this.getIsbn()+
+				"\nFormat: "+this.getFormat();
+		return s;
+				
+	}
 	
 }
