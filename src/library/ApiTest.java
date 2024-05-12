@@ -21,9 +21,8 @@ public class ApiTest {
 				.build();
 		HttpClient httpclient = HttpClient.newHttpClient();
 		HttpResponse<String> getResponse = httpclient.send(getRequest, BodyHandlers.ofString());		
-        
 		JSONObject obj = XML.toJSONObject(getResponse.body());
-		String jsonPrettyPrintString = obj.toString(4);
+		String jsonPrettyPrintString = obj.toString(5);
         System.out.println(jsonPrettyPrintString);
 	}
 }
