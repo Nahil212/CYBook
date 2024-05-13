@@ -1,11 +1,14 @@
 package library;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 
 public class Customer {
     private int idNumber;
@@ -13,6 +16,7 @@ public class Customer {
     private String lastName;
     private Date birthDate;
     private ArrayList<Loan> loans;
+    private static final String filePath = "C:/Users/keizo/Downloads/LibraryData.json";
 
     public Customer(int idNumber, String firstName, String lastName, Date birthDate) {
         this.idNumber = idNumber;
@@ -24,20 +28,31 @@ public class Customer {
     }
 
     private void addToDatabase() {
-    	// A MODIFIER !!!!!!!!
-        String url = "jdbc:mysql://localhost:3306/Library";
-        String user = "username";
-        String password = "password";
+        try {
+            String content = new String(Files.readAllBytes(Paths.get(filePath)));
+            JSONObject root = new JSONObject(content);
+            JSONArray customers = root.getJSONArray("customers");
 
-        try (Connection conn = DriverManager.getConnection(url, user, password);
-             PreparedStatement pstmt = conn.prepareStatement("INSERT INTO Customer (id, firstName, lastName, birthDate) VALUES (?, ?, ?, ?)")) {
-            pstmt.setInt(1, this.idNumber);
-            pstmt.setString(2, this.firstName);
-            pstmt.setString(3, this.lastName);
-            pstmt.setDate(4, new java.sql.Date(this.birthDate.getTime()));
+            JSONObject customerDetails = new JSONObject();
+            customerDetails.put("idNumber", this.idNumber);
+            customerDetails.put("firstName", this.firstName);
+            customerDetails.put("lastName", this.lastName);
+            customerDetails.put("birthDate", new SimpleDateFormat("yyyy-MM-dd").format(this.birthDate));
 
-            pstmt.executeUpdate();
-        } catch (SQLException e) {
+            JSONArray customerLoans = new JSONArray();
+            for (Loan loan : this.loans) {
+                JSONObject loanDetails = new JSONObject();
+                customerLoans.put(loanDetails);
+            }
+            customerDetails.put("loans", customerLoans);
+
+            customers.put(customerDetails);
+
+            try (FileWriter file = new FileWriter(filePath)) {
+                file.write(root.toString(4));
+                file.flush();
+            }
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
