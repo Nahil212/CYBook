@@ -194,6 +194,61 @@ public class Librarian {
 	public void addCustomerToDataBase(Customer customer) {
 		
 	}
+
+		public void listAllLoans()
+	{
+		System.out.println("List of all loans:");
+		
+		for (Customer customer : customers)
+		{
+			System.out.println("Customer: " + customer.getFirstName() + " " + customer.getLastName());
+			
+			ArrayList<Loan> loans = customer.getLoans();
+			for (Loan loan : loans)
+			{
+				System.out.println("\tBook: " + loan.getBook().getTitle() + " - Due Date: " + loan.getDueDate());
+			}
+		}
+	}
+	
+	public boolean login(String username, String password)
+	{
+		boolean isAuthenticated = false;
+		Scanner scanner = new Scanner (System.in);
+		
+		System.out.println("Enter your username: ");
+		String inputUsername = scanner.nextLine();
+		System.out.println("Enter your password: ");
+		String inputPassword = scanner.nextLine();
+		try
+		{
+			String content = new String(Files.readAllBytes(Paths.get(filePath)));
+            JSONObject jsonObject = new JSONObject(content);
+            JSONArray librarians = jsonObject.getJSONArray("librarians");
+            for (int i = 0; i < librarians.length(); i++)
+            {
+                JSONObject librarian = librarians.getJSONObject(i);
+                if (librarian.getString("pseudonym").equals(inputUsername) && librarian.getString("password").equals(inputPassword))
+                {
+                	isAuthenticated = true;
+                	break;
+                }
+            }
+            if (isAuthenticated)
+            {
+            	System.out.println("Login successful!");
+            }
+            else
+            {
+            	System.out.println("Invalid username or password. Please try again.");
+            }
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
+		return isAuthenticated;
+	}
 	
 	public static void main(String[] args) throws Exception {
 		Librarian rayen = new Librarian("rayen", ":)");
