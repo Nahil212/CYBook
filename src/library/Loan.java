@@ -18,7 +18,7 @@ public class Loan {
     private Date effectiveDateBack;
     private boolean late;
     private boolean returned;
-    private static final String filePath = "C:/Users/keizo/Downloads/LibraryData.json";
+    private static final String filePath = "../../data/LibraryData.json";
 
     public Loan(long isbn) {
         this.isbn = isbn;

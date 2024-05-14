@@ -16,7 +16,7 @@ public class Customer {
     private String lastName;
     private Date birthDate;
     private ArrayList<Loan> loans;
-    private static final String filePath = "C:/Users/keizo/Downloads/LibraryData.json";
+    private static final String filePath = "../../data/LibraryData.json";
 
     public Customer(int idNumber, String firstName, String lastName, Date birthDate) {
         this.idNumber = idNumber;
