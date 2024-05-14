@@ -77,7 +77,7 @@ public class Loan {
 
             for (int i = 0; i < loans.length(); i++) {
                 JSONObject loan = loans.getJSONObject(i);
-                if (loan.getLong("isbn") == this.isbn) { // Assuming ISBN uniquely identifies a loan
+                if (loan.getLong("isbn") == this.isbn) { 
                     loan.put("effectiveDateBack", new SimpleDateFormat("yyyy-MM-dd").format(this.effectiveDateBack));
                     loan.put("late", this.late);
                     loan.put("returned", this.returned);
