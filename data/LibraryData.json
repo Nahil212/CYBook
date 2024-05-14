@@ -1,0 +1,36 @@
+{
+	"maxiIdLoan": 1,
+	"maxiIdCustomer": 1,
+    "loans": [
+        {
+            "effectiveDateBack": "2024-02-14",
+            "late": false,
+            "isbn": 1234567890123,
+            "customerId": 1,
+            "plannedDateBack": "2024-02-15",
+            "dateLoan": "2024-01-15",
+            "loanId": 1,
+            "returned": true
+        }
+    ],
+    "customers": [
+        {
+            "firstName": "John",
+            "lastName": "Doe",
+            "loans": [{
+                "effectiveDateBack": "2024-02-14",
+                "late": false,
+                "isbn": 1234567890123,
+                "plannedDateBack": "2024-02-15",
+                "dateLoan": "2024-01-15",
+                "loanId": 1
+            }],
+            "idNumber": 1,
+            "birthDate": "1990-01-01"
+        }
+    ],
+    "librarians": [{
+        "password": "groupe17",
+        "pseudonym": "Cy-Book"
+    }]
+}
