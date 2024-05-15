@@ -16,6 +16,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Date;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.XML;
 import java.util.Scanner;
@@ -25,7 +26,13 @@ public class Librarian {
     private String password;
     private ArrayList<Customer> customers;
     private static final String filePath = "../../data/LibraryData.json";
-
+    
+    /**
+     * Constructor for the Librarian class.
+     *
+     * @param pseudonym The pseudonym of the librarian.
+     * @param password  The password of the librarian.
+     */
     public Librarian(String pseudonym, String password) {
         this.pseudonym = pseudonym;
         this.password = password;
@@ -114,10 +121,13 @@ public class Librarian {
 	 * @throws URISyntaxException 
 	 * @throws IOException 
 	 * @throws InterruptedException 
+	 * @throws EmptyResearchException 
 	 * @throws BookNotInDataBaseException 
 	 */
-	public ArrayList<Book> searchBooks(ArrayList<String> listCreator, int yearStart, int yearEnd, ArrayList<Universe> listUniverse, String searchTitle, int startResearch) throws URISyntaxException, IOException, InterruptedException{
+	public ArrayList<Book> searchBooks(ArrayList<String> listCreator, int yearStart, int yearEnd, ArrayList<Universe> listUniverse, String searchTitle, int startResearch) throws URISyntaxException, IOException, InterruptedException, EmptyResearchException{
 		ArrayList<Book> searchedBooks = new ArrayList<Book>();
+		
+		// CREATING THE REQUEST TO THE API
 		String uri = "http://catalogue.bnf.fr/api/SRU?version=1.2&operation=searchRetrieve&query=";
 		uri += URLEncoder.encode("bib.doctype any \"A\"", StandardCharsets.UTF_8);
 		if( !(listCreator.isEmpty()) || !(yearStart == -1) || !(yearEnd == -1) || !(listUniverse.isEmpty()) || !(searchTitle == "")) {
@@ -176,59 +186,63 @@ public class Librarian {
 				.build();
 		HttpClient httpclient = HttpClient.newHttpClient();
 		HttpResponse<String> getResponse = httpclient.send(getRequest, BodyHandlers.ofString());	
-		JSONArray record = XML.toJSONObject(getResponse.body()).
-				getJSONObject("srw:searchRetrieveResponse").
-				getJSONObject("srw:records").
-				getJSONArray("srw:record");
-		JSONObject obj;
-		JSONObject data;
 		
 		// COLLECTING BOOK INFORMATIONS
-		for (int i=0;i<record.length();i++) {
-			 obj = record.getJSONObject(i);
-			 data = obj.getJSONObject("srw:recordData").getJSONObject("oai_dc:dc");
-			 
-			 String ark = obj.getString("srw:recordIdentifier");
-			 String publisher = data.optString("dc:publisher", "");
-			 String format;
-			 if(data.has("dc:format")) {
-				format = data.optString("dc:format", "");
-			 }else {
-				format = "Not specified";
-			 }
-			 int year;
-			 String dateString = data.optString("dc:date", "");
-			 if (dateString.contains("-")) {
-	                year = Integer.parseInt(dateString.split("-")[0]);
-	            } else {
-	                year = data.optInt("dc:date", 0);
-	            }
-			 Object titleObj = data.get("dc:title");
-	         String title = "";
-	         if (titleObj instanceof JSONArray) {
-	        	 JSONArray titles = (JSONArray) titleObj;
-	             for (int j=0;j<titles.length();j++) {
-	            	 title += titles.getString(j);
-	             }
-	         } else {
-	             title = data.getString("dc:title");
-	         }
-	         String creator = "Not specified";
-	         if(data.has("dc:creator")) {
-		         Object CreatorObj = data.get("dc:creator");
-		         creator = "";
-		         if (CreatorObj instanceof JSONArray) {
-		        	 JSONArray creators = (JSONArray) CreatorObj;
-		             for (int j=0;j<creators.length();j++) {
-		            	 creator += creators.getString(j)+" ";
+		try {
+			JSONArray record = XML.toJSONObject(getResponse.body()).
+					getJSONObject("srw:searchRetrieveResponse").
+					getJSONObject("srw:records").
+					getJSONArray("srw:record");
+			JSONObject obj;
+			JSONObject data;
+			for (int i=0;i<record.length();i++) {
+				 obj = record.getJSONObject(i);
+				 data = obj.getJSONObject("srw:recordData").getJSONObject("oai_dc:dc");
+				 
+				 String ark = obj.getString("srw:recordIdentifier");
+				 String publisher = data.optString("dc:publisher", "");
+				 String format;
+				 if(data.has("dc:format")) {
+					format = data.optString("dc:format", "");
+				 }else {
+					format = "Not specified";
+				 }
+				 int year;
+				 String dateString = data.optString("dc:date", "");
+				 if (dateString.contains("-")) {
+		                year = Integer.parseInt(dateString.split("-")[0]);
+		            } else {
+		                year = data.optInt("dc:date", 0);
+		            }
+				 Object titleObj = data.get("dc:title");
+		         String title = "";
+		         if (titleObj instanceof JSONArray) {
+		        	 JSONArray titles = (JSONArray) titleObj;
+		             for (int j=0;j<titles.length();j++) {
+		            	 title += titles.getString(j);
 		             }
 		         } else {
-		             creator = data.getString("dc:creator");
+		             title = data.getString("dc:title");
 		         }
-	         }
-	         searchedBooks.add(new Book(title,creator,publisher,year,ark,format));
+		         String creator = "Not specified";
+		         if(data.has("dc:creator")) {
+			         Object CreatorObj = data.get("dc:creator");
+			         creator = "";
+			         if (CreatorObj instanceof JSONArray) {
+			        	 JSONArray creators = (JSONArray) CreatorObj;
+			             for (int j=0;j<creators.length();j++) {
+			            	 creator += creators.getString(j)+" ";
+			             }
+			         } else {
+			             creator = data.getString("dc:creator");
+			         }
+		         }
+		         searchedBooks.add(new Book(title,creator,publisher,year,ark,format));
+			}
+			return searchedBooks;
+		}catch(JSONException je) {
+			throw new EmptyResearchException();
 		}
-		return searchedBooks;
 	}
 	
 	private static void addToDatabaseLoan(Loan loan, int customerId) {
@@ -386,10 +400,10 @@ public class Librarian {
 	public static void main(String[] args) throws Exception {
 		Librarian rayen = new Librarian("rayen", ":)");
 		ArrayList<String> listString = new ArrayList<>();
-		int year1 = 1800;
+		int year1 = -1;
 		int year2 = -1;
 		ArrayList<Universe> listUniverse = new ArrayList<>();
-		String searchTitle = "dragon ball";
+		String searchTitle = "One piece";
 		int startResearch = 1;
 		
 		ArrayList<Book> listBook = rayen.searchBooks(listString, year1, year2,listUniverse, searchTitle, startResearch);
