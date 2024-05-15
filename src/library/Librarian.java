@@ -187,27 +187,94 @@ public class Librarian {
 		return searchedBooks;
 	}
 	
-	public void addLoanToDataBase(Loan loan, Customer customer) {
-		
+	private static void addToDatabaseLoan(Loan loan, Customer customer) {
+		try {
+			String content = new String(Files.readAllBytes(Paths.get(filePath)));
+			JSONObject root = new JSONObject(content);
+			JSONArray loans = root.getJSONArray("loans");
+			JSONArray customers = root.getJSONArray("customers");
+
+			JSONObject loanDetails = new JSONObject();
+			loanDetails.put("isbn", loan.getIsbn());
+			loanDetails.put("customerId", customer.getIdNumber());
+			loanDetails.put("dateLoan", new SimpleDateFormat("yyyy-MM-dd").format(loan.getDateLoan()));
+			loanDetails.put("plannedDateBack", new SimpleDateFormat("yyyy-MM-dd").format(loan.getPlannedDateBack()));
+			loanDetails.put("effectiveDateBack", loan.getEffectiveDateBack() != null ? new SimpleDateFormat("yyyy-MM-dd").format(loan.getEffectiveDateBack()) : JSONObject.NULL);
+			loanDetails.put("late", loan.getLate());
+			loanDetails.put("returned", loan.getReturned());
+			loanDetails.put("loanId", loan.getId());
+
+			loans.put(loanDetails);
+
+			for (int i = 0; i < customers.length(); i++) {
+				JSONObject customerDetails = customers.getJSONObject(i);
+				if (customerDetails.getInt("idNumber") == customer.getIdNumber()) {
+					JSONArray customerLoans = customerDetails.getJSONArray("loans");
+					customerLoans.put(loanDetails);
+				}
+			}
+
+			try (FileWriter file = new FileWriter(filePath)) {
+				file.write(root.toString(4));
+				file.flush();
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 	
-	public void addCustomerToDataBase(Customer customer) {
-		
+	private static void addToDatabaseCustomer(Customer customer) {
+		try {
+			String content = new String(Files.readAllBytes(Paths.get(filePath)));
+			JSONObject root = new JSONObject(content);
+			JSONArray customers = root.getJSONArray("customers");
+
+			JSONObject customerDetails = new JSONObject();
+			customerDetails.put("idNumber", customer.getIdNumber());
+			customerDetails.put("firstName", customer.getFirstName());
+			customerDetails.put("lastName", customer.getLastName());
+			customerDetails.put("birthDate", new SimpleDateFormat("yyyy-MM-dd").format(customer.getBirthDate()));
+
+			JSONArray customerLoans = new JSONArray();
+			for (Loan loan : customer.getLoans()) {
+				JSONObject loanDetails = new JSONObject();
+				customerLoans.put(loanDetails);
+			}
+			customerDetails.put("loans", customerLoans);
+
+			customers.put(customerDetails);
+
+			try (FileWriter file = new FileWriter(filePath)) {
+				file.write(root.toString(4));
+				file.flush();
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
-		public void listAllLoans()
-	{
-		System.out.println("List of all loans:");
-		
-		for (Customer customer : customers)
-		{
-			System.out.println("Customer: " + customer.getFirstName() + " " + customer.getLastName());
-			
-			ArrayList<Loan> loans = customer.getLoans();
-			for (Loan loan : loans)
-			{
-				System.out.println("\tBook: " + loan.getBook().getTitle() + " - Due Date: " + loan.getDueDate());
+	private void updateDatabaseOnReturn(Loan loan) {
+		try {
+			String content = new String(Files.readAllBytes(Paths.get(filePath)));
+			JSONObject root = new JSONObject(content);
+			JSONArray loans = root.getJSONArray("loans");
+
+			for (int i = 0; i < loans.length(); i++) {
+				JSONObject jsonLoan = loans.getJSONObject(i);
+				if (jsonLoan.getLong("isbn") == loan.getIsbn()) {
+					jsonLoan.put("effectiveDateBack", new SimpleDateFormat("yyyy-MM-dd").format(loan.getEffectiveDateBack()));
+					jsonLoan.put("late", loan.getLate());
+					jsonLoan.put("returned", loan.getReturned());
+					break;
+				}
 			}
+
+			try (FileWriter file = new FileWriter(filePath)) {
+				file.write(root.toString(4));
+				file.flush();
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
 	
@@ -248,6 +315,13 @@ public class Librarian {
 			e.printStackTrace();
 		}
 		return isAuthenticated;
+	}
+
+	public void markBack(Loan loan) {
+		loan.setEffectiveDateBack(new Date());
+		loan.setLate(loan.calculateLate());
+		loan.setReturned(true);
+		updateDatabaseOnReturn(loan);
 	}
 	
 	public static void main(String[] args) throws Exception {
