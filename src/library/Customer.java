@@ -1,60 +1,23 @@
 package library;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class Customer {
+    private static final AtomicInteger nextId = new AtomicInteger(2);
     private int idNumber;
     private String firstName;
     private String lastName;
     private Date birthDate;
     private ArrayList<Loan> loans;
-    private static final String filePath = "../../data/LibraryData.json";
 
-    public Customer(int idNumber, String firstName, String lastName, Date birthDate) {
-        this.idNumber = idNumber;
+    public Customer( String firstName, String lastName, Date birthDate) {
+        this.idNumber = nextId.getAndIncrement();
         this.firstName = firstName;
         this.lastName = lastName;
         this.birthDate = birthDate;
         this.loans = new ArrayList<Loan>();
-        addToDatabase();
-    }
-
-    private void addToDatabase() {
-        try {
-            String content = new String(Files.readAllBytes(Paths.get(filePath)));
-            JSONObject root = new JSONObject(content);
-            JSONArray customers = root.getJSONArray("customers");
-
-            JSONObject customerDetails = new JSONObject();
-            customerDetails.put("idNumber", this.idNumber);
-            customerDetails.put("firstName", this.firstName);
-            customerDetails.put("lastName", this.lastName);
-            customerDetails.put("birthDate", new SimpleDateFormat("yyyy-MM-dd").format(this.birthDate));
-
-            JSONArray customerLoans = new JSONArray();
-            for (Loan loan : this.loans) {
-                JSONObject loanDetails = new JSONObject();
-                customerLoans.put(loanDetails);
-            }
-            customerDetails.put("loans", customerLoans);
-
-            customers.put(customerDetails);
-
-            try (FileWriter file = new FileWriter(filePath)) {
-                file.write(root.toString(4));
-                file.flush();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     public int getIdNumber()
