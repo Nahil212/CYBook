@@ -1,6 +1,7 @@
 package library;
 
 import java.text.SimpleDateFormat;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -86,6 +87,7 @@ public class Librarian {
 	public String getPassword() {
 		return password;
 	}
+	
 	public void setPassword(String password) {
 		this.password = password;
 	}
@@ -114,67 +116,59 @@ public class Librarian {
 	 * @throws InterruptedException 
 	 * @throws BookNotInDataBaseException 
 	 */
-	public ArrayList<Book> searchBook(ArrayList<String> listCreator, int yearStart, int yearEnd, ArrayList<DocType> listType, ArrayList<Universe> listUniverse, String searchTitle, int startResearch) throws URISyntaxException, IOException, InterruptedException{
+	public ArrayList<Book> searchBook(ArrayList<String> listCreator, int yearStart, int yearEnd, ArrayList<Universe> listUniverse, String searchTitle, int startResearch) throws URISyntaxException, IOException, InterruptedException{
 		ArrayList<Book> searchedBooks = new ArrayList<Book>();
 		String uri = "http://catalogue.bnf.fr/api/SRU?version=1.2&operation=searchRetrieve&query=";
-		
-		if(!(listCreator.isEmpty())) {
-			String authors = "";
-			for(String creator: listCreator) {
-				authors += creator+" ";
-			}
-			authors = authors.trim();
-			uri += URLEncoder.encode("bib.author any \""+authors+"\"", StandardCharsets.UTF_8);
-			if( !(yearStart == -1) || !(yearEnd == -1) || !(listType.isEmpty()) || !(listUniverse.isEmpty()) || !(searchTitle == "")) {
-				uri += " and ";
-			}
+		uri += URLEncoder.encode("bib.doctype any \"A\"", StandardCharsets.UTF_8);
+		if( !(listCreator.isEmpty()) || !(yearStart == -1) || !(yearEnd == -1) || !(listUniverse.isEmpty()) || !(searchTitle == "")) {
+			uri += "+and+";
 		}
-		if(!(yearStart == -1) || !(yearEnd == -1)) {
-			if(yearStart == yearEnd) {
-				uri += URLEncoder.encode("bib.publicationdate= \""+yearStart+"\"", StandardCharsets.UTF_8);
-				if(!(listType.isEmpty()) || !(listUniverse.isEmpty()) || !(searchTitle == "")) {
-					uri += " and ";
+			if(!(listCreator.isEmpty())) {
+				String authors = "";
+				for(String creator: listCreator) {
+					authors += creator+" ";
 				}
-			}else {
-				if (yearEnd > -1) {
-					uri += URLEncoder.encode("bib.publicationdate<= \""+yearEnd+"\"", StandardCharsets.UTF_8);
-					if( !(yearStart == -1) || !(listType.isEmpty()) || !(listUniverse.isEmpty()) || !(searchTitle == "")) {
-						uri += " and ";
+				authors = authors.trim();
+				uri += URLEncoder.encode("bib.author any \""+authors+"\"", StandardCharsets.UTF_8);
+				if( !(yearStart == -1) || !(yearEnd == -1) || !(listUniverse.isEmpty()) || !(searchTitle == "")) {
+					uri += "+and+";
+				}
+			}
+			if(!(yearStart == -1) || !(yearEnd == -1)) {
+				if(yearStart == yearEnd) {
+					uri += URLEncoder.encode("bib.publicationdate= \""+yearStart+"\"", StandardCharsets.UTF_8);
+					if(!(listUniverse.isEmpty()) || !(searchTitle == "")) {
+						uri += "+and+";
+					}
+				}else {
+					if (yearEnd > -1) {
+						uri += URLEncoder.encode("bib.publicationdate<= \""+yearEnd+"\"", StandardCharsets.UTF_8);
+						if( !(yearStart == -1) || !(listUniverse.isEmpty()) || !(searchTitle == "")) {
+							uri += "+and+";
+						}
+					}
+					if (yearStart > -1) {
+						uri += URLEncoder.encode("bib.publicationdate>= \""+yearStart+"\"", StandardCharsets.UTF_8);
+						if( !(listUniverse.isEmpty()) || !(searchTitle == "")) {
+							uri += "+and+";
+						}
 					}
 				}
-				if (yearStart > -1) {
-					uri += URLEncoder.encode("bib.publicationdate>= \""+yearStart+"\"", StandardCharsets.UTF_8);
-					if(!(listType.isEmpty()) || !(listUniverse.isEmpty()) || !(searchTitle == "")) {
-						uri += " and ";
-					}
+			}
+			if(!(listUniverse.isEmpty())) {
+				String universes = "";
+				for(Universe universe: listUniverse) {
+					universes+=universe+" ";
+				}
+				universes = universes.trim();
+				uri += URLEncoder.encode("bib.doctype all \""+universes+"\"", StandardCharsets.UTF_8);
+				if(!(searchTitle == "")) {
+					uri += "+and+";
 				}
 			}
-		}
-		if(!(listType.isEmpty())) {
-			String types ="";
-			for(DocType type: listType) {
-				types+= type.toString()+" ";
-			}
-			types = types.trim();
-			uri += URLEncoder.encode("bib.doctype any \""+types+"\"", StandardCharsets.UTF_8);
-			if(!(listUniverse.isEmpty()) || !(searchTitle == "")) {
-				uri += " and ";
-			}
-		}
-		if(!(listUniverse.isEmpty())) {
-			String universes = "";
-			for(Universe universe: listUniverse) {
-				universes+=universe+" ";
-			}
-			universes = universes.trim();
-			uri += URLEncoder.encode("bib.doctype all \""+universes+"\"", StandardCharsets.UTF_8);
 			if(!(searchTitle == "")) {
-				uri += " and ";
+				uri += URLEncoder.encode("bib.title any \""+searchTitle+"\"", StandardCharsets.UTF_8);
 			}
-		}
-		if(!(searchTitle == "")) {
-			uri += URLEncoder.encode("bib.title any \""+searchTitle+"", StandardCharsets.UTF_8);
-		}
 		uri+= "&startRecord="+startResearch+"&maximumRecords=20&recordSchema=dublincore";
 		System.out.println(uri);
 		HttpRequest getRequest = HttpRequest.newBuilder()
@@ -183,8 +177,24 @@ public class Librarian {
 				.build();
 		HttpClient httpclient = HttpClient.newHttpClient();
 		HttpResponse<String> getResponse = httpclient.send(getRequest, BodyHandlers.ofString());	
-		JSONObject obj = XML.toJSONObject(getResponse.body());
-		System.out.println(obj.toString(5));
+		JSONArray record = XML.toJSONObject(getResponse.body()).
+				getJSONObject("srw:searchRetrieveResponse").
+				getJSONObject("srw:records").
+				getJSONArray("srw:record");
+		JSONObject obj;
+		JSONObject data;
+		Book searched;
+		for (int i=0;i<record.length();i++) {
+			 obj = record.getJSONObject(i);
+			 data = obj.getJSONObject("srw:recordData").getJSONObject("oai_dc:dc");
+			 System.out.println(data.toString(4));
+			 searched = new Book(data.getJSONObject("dc:title").toString(), 
+					 data.getJSONObject("dc:creator").toString(), 
+					 data.getJSONObject("dc:publisher").toString(), 
+					 Integer.parseInt(data.getJSONObject("dc:date").toString()), 
+					 Long.parseLong(data.getJSONObject("dc:identifier").toString()), 
+					 data.getJSONObject("dc:format").toString());
+		}
 		return searchedBooks;
 	}
 	
@@ -329,13 +339,12 @@ public class Librarian {
 	public static void main(String[] args) throws Exception {
 		Librarian rayen = new Librarian("rayen", ":)");
 		ArrayList<String> listString = new ArrayList<>();
-		int year1 = 1500;
-		int year2 = 1500;
-		ArrayList<DocType> typeString = new ArrayList<>();
+		int year1 = 1800;
+		int year2 = -1;
 		ArrayList<Universe> listUniverse = new ArrayList<>();
-		String searchTitle = "";
+		String searchTitle = "dragon ball";
 		int startResearch = 1;
 		
-		//rayen.searchBook(listString, year1, year2, typeString, listUniverse, searchTitle, startResearch);
+		rayen.searchBook(listString, year1, year2,listUniverse, searchTitle, startResearch);
 	}
 }
