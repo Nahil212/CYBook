@@ -1,16 +1,11 @@
 package library;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class Loan {
+    private static final AtomicInteger nextId = new AtomicInteger(2);
     private int id;
     private long isbn;
     private Date dateLoan;
@@ -18,7 +13,6 @@ public class Loan {
     private Date effectiveDateBack;
     private boolean late;
     private boolean returned;
-    private static final String filePath = "../../data/LibraryData.json";
 
     public Loan(long isbn) {
         this.isbn = isbn;
@@ -27,32 +21,7 @@ public class Loan {
         this.effectiveDateBack = null;
         this.late = false;
         this.returned = false;
-        addToDatabase();
-    }
-
-    private void addToDatabase() {
-        try {
-            String content = new String(Files.readAllBytes(Paths.get(filePath)));
-            JSONObject root = new JSONObject(content);
-            JSONArray loans = root.getJSONArray("loans");
-
-            JSONObject loanDetails = new JSONObject();
-            loanDetails.put("isbn", this.isbn);
-            loanDetails.put("dateLoan", new SimpleDateFormat("yyyy-MM-dd").format(this.dateLoan));
-            loanDetails.put("plannedDateBack", new SimpleDateFormat("yyyy-MM-dd").format(this.plannedDateBack));
-            loanDetails.put("effectiveDateBack", this.effectiveDateBack != null ? new SimpleDateFormat("yyyy-MM-dd").format(this.effectiveDateBack) : JSONObject.NULL);
-            loanDetails.put("late", this.late);
-            loanDetails.put("returned", this.returned);
-
-            loans.put(loanDetails);
-
-            try (FileWriter file = new FileWriter(filePath)) {
-                file.write(root.toString(4));
-                file.flush();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        this.id = nextId.getAndIncrement();
     }
 
     private Date calculateScheduledReturnDate() {
@@ -62,39 +31,63 @@ public class Loan {
         return calendar.getTime();
     }
 
-    public void markBack() {
-        this.effectiveDateBack = new Date();
-        this.late = calculateLate();
-        this.returned = true;
-        updateDatabaseOnReturn();
-    }
-
-    private void updateDatabaseOnReturn() {
-        try {
-            String content = new String(Files.readAllBytes(Paths.get(filePath)));
-            JSONObject root = new JSONObject(content);
-            JSONArray loans = root.getJSONArray("loans");
-
-            for (int i = 0; i < loans.length(); i++) {
-                JSONObject loan = loans.getJSONObject(i);
-                if (loan.getLong("isbn") == this.isbn) { 
-                    loan.put("effectiveDateBack", new SimpleDateFormat("yyyy-MM-dd").format(this.effectiveDateBack));
-                    loan.put("late", this.late);
-                    loan.put("returned", this.returned);
-                    break;
-                }
-            }
-
-            try (FileWriter file = new FileWriter(filePath)) {
-                file.write(root.toString(4));
-                file.flush();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private boolean calculateLate() {
+    protected boolean calculateLate() {
         return this.effectiveDateBack != null && this.effectiveDateBack.after(this.plannedDateBack);
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public long getIsbn() {
+        return isbn;
+    }
+
+    public void setIsbn(long isbn) {
+        this.isbn = isbn;
+    }
+
+    public Date getDateLoan() {
+        return dateLoan;
+    }
+
+    public void setDateLoan(Date dateLoan) {
+        this.dateLoan = dateLoan;
+    }
+
+    public Date getPlannedDateBack() {
+        return plannedDateBack;
+    }
+
+    public void setPlannedDateBack(Date plannedDateBack) {
+        this.plannedDateBack = plannedDateBack;
+    }
+
+    public Date getEffectiveDateBack() {
+        return effectiveDateBack;
+    }
+
+    public void setEffectiveDateBack(Date effectiveDateBack) {
+        this.effectiveDateBack = effectiveDateBack;
+    }
+
+    public boolean getLate() {
+        return late;
+    }
+
+    public void setLate(boolean late) {
+        this.late = late;
+    }
+
+    public boolean getReturned() {
+        return returned;
+    }
+
+    public void setReturned(boolean returned) {
+        this.returned = returned;
     }
 }
