@@ -241,24 +241,38 @@ public class Librarian {
 			JSONObject root = new JSONObject(content);
 			JSONArray customers = root.getJSONArray("customers");
 
-			JSONObject customerDetails = new JSONObject();
-			customerDetails.put("idNumber", customer.getIdNumber());
-			customerDetails.put("firstName", customer.getFirstName());
-			customerDetails.put("lastName", customer.getLastName());
-			customerDetails.put("birthDate", new SimpleDateFormat("yyyy-MM-dd").format(customer.getBirthDate()));
-
-			JSONArray customerLoans = new JSONArray();
-			for (Loan loan : customer.getLoans()) {
-				JSONObject loanDetails = new JSONObject();
-				customerLoans.put(loanDetails);
+			boolean customerExists = false;
+			for (int i = 0; i < customers.length(); i++) {
+				JSONObject existingCustomer = customers.getJSONObject(i);
+				if (existingCustomer.getString("firstName").equals(customer.getFirstName()) &&
+						existingCustomer.getString("lastName").equals(customer.getLastName()) &&
+						existingCustomer.getString("birthDate").equals(new SimpleDateFormat("yyyy-MM-dd").format(customer.getBirthDate()))) {
+					customerExists = true;
+					break;
+				}
 			}
-			customerDetails.put("loans", customerLoans);
+			if (!customerExists) {
+				JSONObject customerDetails = new JSONObject();
+				customerDetails.put("idNumber", customer.getIdNumber());
+				customerDetails.put("firstName", customer.getFirstName());
+				customerDetails.put("lastName", customer.getLastName());
+				customerDetails.put("birthDate", new SimpleDateFormat("yyyy-MM-dd").format(customer.getBirthDate()));
 
-			customers.put(customerDetails);
+				JSONArray customerLoans = new JSONArray();
+				for (Loan loan : customer.getLoans()) {
+					JSONObject loanDetails = new JSONObject();
+					customerLoans.put(loanDetails);
+				}
+				customerDetails.put("loans", customerLoans);
 
-			try (FileWriter file = new FileWriter(filePath)) {
-				file.write(root.toString(4));
-				file.flush();
+				customers.put(customerDetails);
+
+				try (FileWriter file = new FileWriter(filePath)) {
+					file.write(root.toString(4));
+					file.flush();
+				}
+			} else {
+				System.out.println("Customer already exists and was not added.");
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
