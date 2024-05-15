@@ -188,7 +188,7 @@ public class Librarian {
 		return searchedBooks;
 	}
 	
-	private static void addToDatabaseLoan(Loan loan, Customer customer) {
+	private static void addToDatabaseLoan(Loan loan, int customerId) {
 		try {
 			String content = new String(Files.readAllBytes(Paths.get(filePath)));
 			JSONObject root = new JSONObject(content);
@@ -197,7 +197,7 @@ public class Librarian {
 
 			JSONObject loanDetails = new JSONObject();
 			loanDetails.put("isbn", loan.getIsbn());
-			loanDetails.put("customerId", customer.getIdNumber());
+			loanDetails.put("customerId", customerId);
 			loanDetails.put("dateLoan", new SimpleDateFormat("yyyy-MM-dd").format(loan.getDateLoan()));
 			loanDetails.put("plannedDateBack", new SimpleDateFormat("yyyy-MM-dd").format(loan.getPlannedDateBack()));
 			loanDetails.put("effectiveDateBack", loan.getEffectiveDateBack() != null ? new SimpleDateFormat("yyyy-MM-dd").format(loan.getEffectiveDateBack()) : JSONObject.NULL);
@@ -209,9 +209,10 @@ public class Librarian {
 
 			for (int i = 0; i < customers.length(); i++) {
 				JSONObject customerDetails = customers.getJSONObject(i);
-				if (customerDetails.getInt("idNumber") == customer.getIdNumber()) {
+				if (customerDetails.getInt("idNumber") == customerId) {
 					JSONArray customerLoans = customerDetails.getJSONArray("loans");
 					customerLoans.put(loanDetails);
+					break;
 				}
 			}
 
