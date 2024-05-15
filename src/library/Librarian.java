@@ -116,7 +116,7 @@ public class Librarian {
 	 * @throws InterruptedException 
 	 * @throws BookNotInDataBaseException 
 	 */
-	public ArrayList<Book> searchBook(ArrayList<String> listCreator, int yearStart, int yearEnd, ArrayList<Universe> listUniverse, String searchTitle, int startResearch) throws URISyntaxException, IOException, InterruptedException{
+	public ArrayList<Book> searchBooks(ArrayList<String> listCreator, int yearStart, int yearEnd, ArrayList<Universe> listUniverse, String searchTitle, int startResearch) throws URISyntaxException, IOException, InterruptedException{
 		ArrayList<Book> searchedBooks = new ArrayList<Book>();
 		String uri = "http://catalogue.bnf.fr/api/SRU?version=1.2&operation=searchRetrieve&query=";
 		uri += URLEncoder.encode("bib.doctype any \"A\"", StandardCharsets.UTF_8);
@@ -170,7 +170,6 @@ public class Librarian {
 				uri += URLEncoder.encode("bib.title any \""+searchTitle+"\"", StandardCharsets.UTF_8);
 			}
 		uri+= "&startRecord="+startResearch+"&maximumRecords=20&recordSchema=dublincore";
-		System.out.println(uri);
 		HttpRequest getRequest = HttpRequest.newBuilder()
 				.uri(new URI(uri))
 				.GET()
@@ -183,17 +182,51 @@ public class Librarian {
 				getJSONArray("srw:record");
 		JSONObject obj;
 		JSONObject data;
-		Book searched;
-		System.out.println(record.toString(4));
+		
+		// COLLECTING BOOK INFORMATIONS
 		for (int i=0;i<record.length();i++) {
 			 obj = record.getJSONObject(i);
 			 data = obj.getJSONObject("srw:recordData").getJSONObject("oai_dc:dc");
-			 searched = new Book(data.getJSONObject("dc:title").toString(), 
-					 data.getJSONObject("dc:creator").toString(), 
-					 data.getJSONObject("dc:publisher").toString(), 
-					 Integer.parseInt(data.getJSONObject("dc:date").toString()), 
-					 Long.parseLong(data.getJSONObject("dc:identifier").toString()), 
-					 data.getJSONObject("dc:format").toString());
+			 
+			 String ark = obj.getString("srw:recordIdentifier");
+			 String publisher = data.optString("dc:publisher", "");
+			 String format;
+			 if(data.has("dc:format")) {
+				format = data.optString("dc:format", "");
+			 }else {
+				format = "Not specified";
+			 }
+			 int year;
+			 String dateString = data.optString("dc:date", "");
+			 if (dateString.contains("-")) {
+	                year = Integer.parseInt(dateString.split("-")[0]);
+	            } else {
+	                year = data.optInt("dc:date", 0);
+	            }
+			 Object titleObj = data.get("dc:title");
+	         String title = "";
+	         if (titleObj instanceof JSONArray) {
+	        	 JSONArray titles = (JSONArray) titleObj;
+	             for (int j=0;j<titles.length();j++) {
+	            	 title += titles.getString(j);
+	             }
+	         } else {
+	             title = data.getString("dc:title");
+	         }
+	         String creator = "Not specified";
+	         if(data.has("dc:creator")) {
+		         Object CreatorObj = data.get("dc:creator");
+		         creator = "";
+		         if (CreatorObj instanceof JSONArray) {
+		        	 JSONArray creators = (JSONArray) CreatorObj;
+		             for (int j=0;j<creators.length();j++) {
+		            	 creator += creators.getString(j)+" ";
+		             }
+		         } else {
+		             creator = data.getString("dc:creator");
+		         }
+	         }
+	         searchedBooks.add(new Book(title,creator,publisher,year,ark,format));
 		}
 		return searchedBooks;
 	}
@@ -359,6 +392,9 @@ public class Librarian {
 		String searchTitle = "dragon ball";
 		int startResearch = 1;
 		
-		rayen.searchBook(listString, year1, year2,listUniverse, searchTitle, startResearch);
+		ArrayList<Book> listBook = rayen.searchBooks(listString, year1, year2,listUniverse, searchTitle, startResearch);
+		for(Book book: listBook) {
+			System.out.println(book+ "\n");
+		}
 	}
 }

@@ -5,15 +5,15 @@ public class Book {
 	private String creator;
 	private String publisher;
 	private int year;
-	private long isbn;
+	private String identifier;
 	private String format;
 	
-	public Book(String title, String creator, String publisher, int year, long isbn,String format) {
+	public Book(String title, String creator, String publisher, int year, String identifier,String format) {
 		this.title = title;
 		this.creator = creator;
 		this.publisher = publisher;
 		this.year = year;
-		this.isbn = isbn;
+		this.identifier = identifier;
 		this.format = format;
 	}
 	
@@ -41,11 +41,11 @@ public class Book {
 	public void setYear(int year) {
 		this.year = year;
 	}
-	public long getIsbn() {
-		return isbn;
+	public String getIdentifier() {
+		return identifier;
 	}
-	public void setIsbn(long isbn) {
-		this.isbn = isbn;
+	public void setIdentifier(String identifier) {
+		this.identifier = identifier;
 	}
 	public String getFormat() {
 		return format;
@@ -60,7 +60,7 @@ public class Book {
 				"\nAuthor: "+this.getCreator()+
 				"\nPublisher: "+this.getPublisher()+
 				"\nYear: "+this.getYear()+
-				"\nISBN: "+this.getIsbn()+
+				"\nIdentifier: "+this.getIdentifier()+
 				"\nFormat: "+this.getFormat();
 		return s;
 	}
