@@ -184,10 +184,10 @@ public class Librarian {
 		JSONObject obj;
 		JSONObject data;
 		Book searched;
+		System.out.println(record.toString(4));
 		for (int i=0;i<record.length();i++) {
 			 obj = record.getJSONObject(i);
 			 data = obj.getJSONObject("srw:recordData").getJSONObject("oai_dc:dc");
-			 System.out.println(data.toString(4));
 			 searched = new Book(data.getJSONObject("dc:title").toString(), 
 					 data.getJSONObject("dc:creator").toString(), 
 					 data.getJSONObject("dc:publisher").toString(), 
