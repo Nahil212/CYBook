@@ -67,7 +67,7 @@ public class Librarian {
 				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 				Date birthDate = sdf.parse(birthDateStr);
 
-				Customer customer = new Customer(id, firstName, lastName, birthDate);
+				Customer customer = new Customer(firstName, lastName, birthDate);
 				this.customers.add(customer);
 			}
 		} catch (Exception e) {
