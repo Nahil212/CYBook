@@ -26,7 +26,7 @@ public class Librarian {
 	private String password;
 	private ArrayList<Customer> customers;
 	private ArrayList<Loan> loans;
-	private static final String filePath = "C:/Users/keizo/Downloads/LibraryData.json";
+	private static final String filePath = "/home/cytech/CYBookultime/data/LibraryData.json";
 	private JSONObject jsonObject;
     /**
      * Constructor for the Librarian class.
@@ -38,6 +38,7 @@ public class Librarian {
 		this.pseudonym = pseudonym;
 		this.password = password;
 		this.customers = new ArrayList<>(); // Initialiser la liste customers ici
+		this.loans = new ArrayList<>();
 
 		try {
 			String content = new String(Files.readAllBytes(Paths.get(filePath)));
@@ -120,6 +121,30 @@ public class Librarian {
 			e.printStackTrace();
 		}
 	}
+
+	protected void fetchLoans() {
+		try {
+			JSONArray loansArray = this.jsonObject.getJSONArray("loans");
+			for (int i = 0; i < loansArray.length(); i++) {
+				JSONObject loanObj = loansArray.getJSONObject(i);
+				int loanId = loanObj.getInt("loanId");
+				String identifier = loanObj.getString("identifier");
+				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+				Date dateLoan = sdf.parse(loanObj.getString("dateLoan"));
+				Date plannedDateBack = sdf.parse(loanObj.getString("plannedDateBack"));
+				Date effectiveDateBack = loanObj.isNull("effectiveDateBack") ? null : sdf.parse(loanObj.getString("effectiveDateBack"));
+				boolean returned = loanObj.getBoolean("returned");
+				boolean late = loanObj.getBoolean("late");
+				int customerId = loanObj.getInt("customerId");
+
+				Loan loan = new Loan(loanId, identifier, dateLoan, plannedDateBack, effectiveDateBack, returned, late, customerId);
+				this.loans.add(loan);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
 	public String getPseudonym() {
 		return pseudonym;
 	}
@@ -144,13 +169,34 @@ public class Librarian {
 		this.customers = customers;
 	}
 
-	public String printCustomers(){
-		return "pseudonyme = "+pseudonym+" customers list:"+customers;
-	}
-	public String printLoans(){
-		return "pseudonyme = "+pseudonym+" loans list:"+loans;
-	}
+	public String printCustomers() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("Customers list:\n");
+		for (Customer customer : customers) {
+			sb.append("Customer ID: ").append(customer.getIdNumber()).append("\n");
+			sb.append("First Name: ").append(customer.getFirstName()).append("\n");
+			sb.append("Last Name: ").append(customer.getLastName()).append("\n");
+			sb.append("Birth Date: ").append(customer.getBirthDate()).append("\n");
 
+		}
+		return sb.toString();
+	}
+	public String printLoans() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("Loans list:\n");
+		for (Loan loan : loans) {
+			sb.append("Loan ID: ").append(loan.getId()).append("\n");
+			sb.append("Identifier: ").append(loan.getIdentifier()).append("\n");
+			sb.append("Date Loan: ").append(loan.getDateLoan()).append("\n");
+			sb.append("Planned Date Back: ").append(loan.getPlannedDateBack()).append("\n");
+			sb.append("Effective Date Back: ").append(loan.getEffectiveDateBack()).append("\n");
+			sb.append("Late: ").append(loan.getLate()).append("\n");
+			sb.append("Returned: ").append(loan.getReturned()).append("\n");
+			sb.append("CustomerId: ").append(loan.getcustomerId()).append("\n");
+			sb.append("\n");
+		}
+		return sb.toString();
+	}
 
 
 	/**
@@ -421,5 +467,6 @@ public class Librarian {
 		loan.setReturned(true);
 		updateDatabaseOnReturn(loan);
 	}
+
 
 }
