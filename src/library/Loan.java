@@ -58,12 +58,12 @@ public class Loan {
         this.id = id;
     }
 
-    public long getIsbn() {
-        return isbn;
+    public String getIdentifier() {
+        return identifier;
     }
 
-    public void setIsbn(long isbn) {
-        this.isbn = isbn;
+    public void setIdentifier(String identifier) {
+        this.identifier = identifier;
     }
 
     public Date getDateLoan() {
