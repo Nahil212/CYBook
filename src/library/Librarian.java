@@ -81,7 +81,7 @@ public class Librarian {
 		return isAuthenticated;
     }
 
-    private void fetchCustomers() {
+    protected void fetchCustomers() {
 		try {
 			JSONArray customersArray = this.jsonObject.getJSONArray("customers");
 			for (int i = 0; i < customersArray.length(); i++) {
