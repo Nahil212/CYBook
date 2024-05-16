@@ -34,14 +34,18 @@ public class Librarian {
      * @param pseudonym The pseudonym of the librarian.
      * @param password  The password of the librarian.
      */
-    public Librarian(String pseudonym, String password) {
-        this.pseudonym = pseudonym;
-        this.password = password;
-        this.customers = new ArrayList<Customer>();
-        if (authentificate()) {
-            fetchCustomers();
-        }
-    }
+    public Librarian(String pseudonym, String password, String filePath) {
+		this.pseudonym = pseudonym;
+		this.password = password;
+		this.customers = new ArrayList<>(); // Initialiser la liste customers ici
+
+		try {
+			String content = new String(Files.readAllBytes(Paths.get(filePath)));
+			this.jsonObject = new JSONObject(content);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 
 
     private boolean loadData() {
