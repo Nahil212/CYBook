@@ -25,8 +25,9 @@ public class Librarian {
 	private String pseudonym;
     private String password;
     private ArrayList<Customer> customers;
-    private static final String filePath = "../../data/LibraryData.json";
-    
+	private ArrayList<Loan> loans;
+    private static final String filePath = "/home/cytech/CYBook/data/LibraryData.json";
+
     /**
      * Constructor for the Librarian class.
      *
@@ -61,7 +62,7 @@ public class Librarian {
 		return isAuthenticated;
     }
 
-    private void fetchCustomers() {
+    public void fetchCustomers() {
     	try {
 			String content = new String(Files.readAllBytes(Paths.get(filePath)));
 			JSONObject jsonObject = new JSONObject(content);
@@ -94,7 +95,7 @@ public class Librarian {
 	public String getPassword() {
 		return password;
 	}
-	
+
 	public void setPassword(String password) {
 		this.password = password;
 	}
@@ -106,7 +107,16 @@ public class Librarian {
 	public void setCustomers(ArrayList<Customer> customers) {
 		this.customers = customers;
 	}
-	
+
+	public String printCustomers(){
+		return "pseudonyme = "+pseudonym+" customers list:"+customers;
+	}
+	public String printLoans(){
+		return "pseudonyme = "+pseudonym+" loans list:"+loans;
+	}
+
+
+
 	/**
 	 * This method call the BNF API to search a list of book according to filters
 	 *
@@ -118,15 +128,15 @@ public class Librarian {
 	 * @param searchTitle Enter text to search in titles (can be empty)
 	 * @param startResearch Where to start the call of the API so we can manage pages
 	 * @return List of Book object corresponding to filters
-	 * @throws URISyntaxException 
-	 * @throws IOException 
-	 * @throws InterruptedException 
-	 * @throws EmptyResearchException 
-	 * @throws BookNotInDataBaseException 
+	 * @throws URISyntaxException
+	 * @throws IOException
+	 * @throws InterruptedException
+	 * @throws EmptyResearchException
+	 * @throws BookNotInDataBaseException
 	 */
 	public ArrayList<Book> searchBooks(ArrayList<String> listCreator, int yearStart, int yearEnd, ArrayList<Universe> listUniverse, String searchTitle, int startResearch) throws URISyntaxException, IOException, InterruptedException, EmptyResearchException{
 		ArrayList<Book> searchedBooks = new ArrayList<Book>();
-		
+
 		// CREATING THE REQUEST TO THE API
 		String uri = "http://catalogue.bnf.fr/api/SRU?version=1.2&operation=searchRetrieve&query=";
 		uri += URLEncoder.encode("bib.doctype any \"A\"", StandardCharsets.UTF_8);
@@ -185,8 +195,8 @@ public class Librarian {
 				.GET()
 				.build();
 		HttpClient httpclient = HttpClient.newHttpClient();
-		HttpResponse<String> getResponse = httpclient.send(getRequest, BodyHandlers.ofString());	
-		
+		HttpResponse<String> getResponse = httpclient.send(getRequest, BodyHandlers.ofString());
+
 		// COLLECTING BOOK INFORMATIONS
 		try {
 			JSONArray record = XML.toJSONObject(getResponse.body()).
@@ -198,7 +208,7 @@ public class Librarian {
 			for (int i=0;i<record.length();i++) {
 				 obj = record.getJSONObject(i);
 				 data = obj.getJSONObject("srw:recordData").getJSONObject("oai_dc:dc");
-				 
+
 				 String ark = obj.getString("srw:recordIdentifier");
 				 String publisher = data.optString("dc:publisher", "");
 				 String format;
@@ -244,7 +254,7 @@ public class Librarian {
 			throw new EmptyResearchException();
 		}
 	}
-	
+
 	private static void addToDatabaseLoan(Loan loan, int customerId) {
 		try {
 			String content = new String(Files.readAllBytes(Paths.get(filePath)));
@@ -281,7 +291,7 @@ public class Librarian {
 			e.printStackTrace();
 		}
 	}
-	
+
 	private static void addToDatabaseCustomer(Customer customer) {
 		try {
 			String content = new String(Files.readAllBytes(Paths.get(filePath)));
@@ -350,45 +360,7 @@ public class Librarian {
 			e.printStackTrace();
 		}
 	}
-	
-	public boolean login(String username, String password)
-	{
-		boolean isAuthenticated = false;
-		Scanner scanner = new Scanner (System.in);
-		
-		System.out.println("Enter your username: ");
-		String inputUsername = scanner.nextLine();
-		System.out.println("Enter your password: ");
-		String inputPassword = scanner.nextLine();
-		try
-		{
-			String content = new String(Files.readAllBytes(Paths.get(filePath)));
-            JSONObject jsonObject = new JSONObject(content);
-            JSONArray librarians = jsonObject.getJSONArray("librarians");
-            for (int i = 0; i < librarians.length(); i++)
-            {
-                JSONObject librarian = librarians.getJSONObject(i);
-                if (librarian.getString("pseudonym").equals(inputUsername) && librarian.getString("password").equals(inputPassword))
-                {
-                	isAuthenticated = true;
-                	break;
-                }
-            }
-            if (isAuthenticated)
-            {
-            	System.out.println("Login successful!");
-            }
-            else
-            {
-            	System.out.println("Invalid username or password. Please try again.");
-            }
-		}
-		catch (IOException e)
-		{
-			e.printStackTrace();
-		}
-		return isAuthenticated;
-	}
+
 
 	public void markBack(Loan loan) {
 		loan.setEffectiveDateBack(new Date());
@@ -396,7 +368,7 @@ public class Librarian {
 		loan.setReturned(true);
 		updateDatabaseOnReturn(loan);
 	}
-	
+
 	public static void main(String[] args) throws Exception {
 		Librarian rayen = new Librarian("rayen", ":)");
 		ArrayList<String> listString = new ArrayList<>();
@@ -405,7 +377,7 @@ public class Librarian {
 		ArrayList<Universe> listUniverse = new ArrayList<>();
 		String searchTitle = "One piece";
 		int startResearch = 1;
-		
+
 		ArrayList<Book> listBook = rayen.searchBooks(listString, year1, year2,listUniverse, searchTitle, startResearch);
 		for(Book book: listBook) {
 			System.out.println(book+ "\n");
