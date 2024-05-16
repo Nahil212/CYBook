@@ -23,11 +23,11 @@ import java.util.Scanner;
 
 public class Librarian {
 	private String pseudonym;
-    private String password;
-    private ArrayList<Customer> customers;
+	private String password;
+	private ArrayList<Customer> customers;
 	private ArrayList<Loan> loans;
-    private static final String filePath = "/home/cytech/CYBook/data/LibraryData.json";
-
+	private static final String filePath = "C:/Users/keizo/Downloads/LibraryData.json";
+	private JSONObject jsonObject;
     /**
      * Constructor for the Librarian class.
      *
@@ -42,6 +42,25 @@ public class Librarian {
             fetchCustomers();
         }
     }
+
+
+    private boolean loadData() {
+		try {
+			String content = new String(Files.readAllBytes(Paths.get(filePath)));
+			this.jsonObject = new JSONObject(content);
+
+			int maxIdCustomer = this.jsonObject.getInt("maxiIdCustomer");
+			Customer.initializeNextId(maxIdCustomer);
+
+			int maxIdLoan = this.jsonObject.getInt("maxiIdLoan");
+			Loan.initializeNextId(maxIdLoan);
+
+			return true;
+		} catch (IOException e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
 
     private boolean authentificate() {
     	boolean isAuthenticated = false;
@@ -62,13 +81,11 @@ public class Librarian {
 		return isAuthenticated;
     }
 
-    public void fetchCustomers() {
-    	try {
-			String content = new String(Files.readAllBytes(Paths.get(filePath)));
-			JSONObject jsonObject = new JSONObject(content);
-			JSONArray customers = jsonObject.getJSONArray("customers");
-			for (int i = 0; i < customers.length(); i++) {
-				JSONObject customerObj = customers.getJSONObject(i);
+    private void fetchCustomers() {
+		try {
+			JSONArray customersArray = this.jsonObject.getJSONArray("customers");
+			for (int i = 0; i < customersArray.length(); i++) {
+				JSONObject customerObj = customersArray.getJSONObject(i);
 				int id = customerObj.getInt("idNumber");
 				String firstName = customerObj.getString("firstName");
 				String lastName = customerObj.getString("lastName");
@@ -76,14 +93,29 @@ public class Librarian {
 				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 				Date birthDate = sdf.parse(birthDateStr);
 
-				Customer customer = new Customer(firstName, lastName, birthDate);
+				Customer customer = new Customer(id, firstName, lastName, birthDate);
 				this.customers.add(customer);
+
+				JSONArray loansArray = customerObj.getJSONArray("loans");
+				for (int j = 0; j < loansArray.length(); j++) {
+					JSONObject loanObj = loansArray.getJSONObject(j);
+					int loanId = loanObj.getInt("loanId");
+					String identifier = loanObj.getString("identifier");
+					Date dateLoan = sdf.parse(loanObj.getString("dateLoan"));
+					Date plannedDateBack = sdf.parse(loanObj.getString("plannedDateBack"));
+					Date effectiveDateBack = loanObj.isNull("effectiveDateBack") ? null : sdf.parse(loanObj.getString("effectiveDateBack"));
+
+					boolean returned = loanObj.has("returned") && loanObj.getBoolean("returned");
+					boolean late = loanObj.has("late") && loanObj.getBoolean("late");
+
+					Loan loan = new Loan(loanId, identifier, dateLoan, plannedDateBack, effectiveDateBack, returned, late);
+					customer.addLoan(loan);
+				}
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-    }
-
+	}
 	public String getPseudonym() {
 		return pseudonym;
 	}
@@ -262,8 +294,13 @@ public class Librarian {
 			JSONArray loans = root.getJSONArray("loans");
 			JSONArray customers = root.getJSONArray("customers");
 
+			int maxIdLoan = root.getInt("maxiIdLoan");
+			maxIdLoan += 1;
+			loan.setId(maxIdLoan);
+			root.put("maxiIdLoan", maxIdLoan);
+
 			JSONObject loanDetails = new JSONObject();
-			loanDetails.put("isbn", loan.getIsbn());
+			loanDetails.put("identifier", loan.getIdentifier());
 			loanDetails.put("customerId", customerId);
 			loanDetails.put("dateLoan", new SimpleDateFormat("yyyy-MM-dd").format(loan.getDateLoan()));
 			loanDetails.put("plannedDateBack", new SimpleDateFormat("yyyy-MM-dd").format(loan.getPlannedDateBack()));
@@ -291,12 +328,17 @@ public class Librarian {
 			e.printStackTrace();
 		}
 	}
-
+	
 	private static void addToDatabaseCustomer(Customer customer) {
 		try {
 			String content = new String(Files.readAllBytes(Paths.get(filePath)));
 			JSONObject root = new JSONObject(content);
 			JSONArray customers = root.getJSONArray("customers");
+
+			int maxIdCustomer = root.getInt("maxiIdCustomer");
+			maxIdCustomer += 1;
+			customer.setIdNumber(maxIdCustomer);
+			root.put("maxiIdCustomer", maxIdCustomer);
 
 			boolean customerExists = false;
 			for (int i = 0; i < customers.length(); i++) {
@@ -308,6 +350,7 @@ public class Librarian {
 					break;
 				}
 			}
+
 			if (!customerExists) {
 				JSONObject customerDetails = new JSONObject();
 				customerDetails.put("idNumber", customer.getIdNumber());
@@ -318,6 +361,13 @@ public class Librarian {
 				JSONArray customerLoans = new JSONArray();
 				for (Loan loan : customer.getLoans()) {
 					JSONObject loanDetails = new JSONObject();
+					loanDetails.put("identifier", loan.getIdentifier());
+					loanDetails.put("loanId", loan.getId());
+					loanDetails.put("dateLoan", new SimpleDateFormat("yyyy-MM-dd").format(loan.getDateLoan()));
+					loanDetails.put("plannedDateBack", new SimpleDateFormat("yyyy-MM-dd").format(loan.getPlannedDateBack()));
+					loanDetails.put("effectiveDateBack", loan.getEffectiveDateBack() != null ? new SimpleDateFormat("yyyy-MM-dd").format(loan.getEffectiveDateBack()) : JSONObject.NULL);
+					loanDetails.put("late", loan.getLate());
+					loanDetails.put("returned", loan.getReturned());
 					customerLoans.put(loanDetails);
 				}
 				customerDetails.put("loans", customerLoans);
@@ -344,7 +394,7 @@ public class Librarian {
 
 			for (int i = 0; i < loans.length(); i++) {
 				JSONObject jsonLoan = loans.getJSONObject(i);
-				if (jsonLoan.getLong("isbn") == loan.getIsbn()) {
+				if (jsonLoan.getString("identifier").equals(loan.getIdentifier())) {
 					jsonLoan.put("effectiveDateBack", new SimpleDateFormat("yyyy-MM-dd").format(loan.getEffectiveDateBack()));
 					jsonLoan.put("late", loan.getLate());
 					jsonLoan.put("returned", loan.getReturned());
@@ -360,7 +410,6 @@ public class Librarian {
 			e.printStackTrace();
 		}
 	}
-
 
 	public void markBack(Loan loan) {
 		loan.setEffectiveDateBack(new Date());
