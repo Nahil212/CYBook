@@ -5,23 +5,38 @@ import java.util.Date;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class Loan {
-    private static final AtomicInteger nextId = new AtomicInteger(2);
+    private static AtomicInteger nextId = new AtomicInteger(2);
+
     private int id;
-    private long isbn;
+    private String identifier;
     private Date dateLoan;
     private Date plannedDateBack;
     private Date effectiveDateBack;
     private boolean late;
     private boolean returned;
 
-    public Loan(long isbn) {
-        this.isbn = isbn;
+    public Loan(String identifier) {
+        this.identifier = identifier;
         this.dateLoan = new Date();
         this.plannedDateBack = calculateScheduledReturnDate();
         this.effectiveDateBack = null;
         this.late = false;
         this.returned = false;
         this.id = nextId.getAndIncrement();
+    }
+
+    public Loan(int id, String identifier, Date dateLoan, Date plannedDateBack, Date effectiveDateBack, boolean returned, boolean late) {
+        this.id = id;
+        this.identifier = identifier;
+        this.dateLoan = dateLoan;
+        this.plannedDateBack = plannedDateBack;
+        this.effectiveDateBack = effectiveDateBack;
+        this.late = late;
+        this.returned = returned;
+    }
+
+    public static void initializeNextId(int maxIdLoan) {
+        nextId.set(maxIdLoan + 1);
     }
 
     private Date calculateScheduledReturnDate() {
