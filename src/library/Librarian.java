@@ -422,18 +422,4 @@ public class Librarian {
 		updateDatabaseOnReturn(loan);
 	}
 
-	public static void main(String[] args) throws Exception {
-		Librarian rayen = new Librarian("rayen", ":)");
-		ArrayList<String> listString = new ArrayList<>();
-		int year1 = -1;
-		int year2 = -1;
-		ArrayList<Universe> listUniverse = new ArrayList<>();
-		String searchTitle = "One piece";
-		int startResearch = 1;
-
-		ArrayList<Book> listBook = rayen.searchBooks(listString, year1, year2,listUniverse, searchTitle, startResearch);
-		for(Book book: listBook) {
-			System.out.println(book+ "\n");
-		}
-	}
 }
