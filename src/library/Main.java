@@ -5,7 +5,11 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Scanner;
+
 
 
 public class Main {
@@ -21,6 +25,7 @@ public class Main {
         System.out.print("Your choice: ");
         int choice = scanner.nextInt();
         scanner.nextLine();
+
 
         if (choice == 1) {
             while (!isAuthenticated) {
@@ -54,7 +59,7 @@ public class Main {
                 currentUser.fetchCustomers();
                 currentUser.fetchLoans();
 
-                if (choice == 1){
+                if (choice == 1) {
                     System.out.println("1. List of users");
                     System.out.println("2. List of loans");
                     System.out.println("3. Book");
@@ -64,25 +69,36 @@ public class Main {
                     scanner.nextLine();
                 }
 
+                if (choice == 1) {
+                    System.out.println(currentUser.printCustomers());
+                    System.out.println("1. Add a new user");
+                    System.out.println("2. Delete a user");
+                    System.out.println("3. Exit");
+                    choice = scanner.nextInt();
+                    scanner.nextLine();
                     if (choice == 1) {
-                        System.out.println(currentUser.printCustomers());
-                        System.out.println("1. Add a new user");
-                        System.out.println("2. Delete a user");
-                        System.out.println("3. Exit");
-                    } else if (choice == 2) {
-                        System.out.println(currentUser.printLoans());
-                        System.out.println("1. Return a book");
-                        System.out.println("2. Exit");
-                    } else if (choice == 3) {
-                        System.out.println("1. Borrow a book");
-                        System.out.println("2. Search a book");
-                        System.out.println("3. Exit");
-                    } else if (choice == 4) {
+                        System.out.println("Enter the firstName :");
+                        String firstName = scanner.nextLine();
+                        System.out.println("Enter the lastName : ");
+                        String lastName = scanner.nextLine();
+                        System.out.println("Enter the birthDate (yyyy-MM-dd) : ");
+                        String birthDateStr = scanner.nextLine();
+
+                        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+                        Date birthDate = null;
+                        try {
+                            birthDate = dateFormat.parse(birthDateStr);
+                        } catch (ParseException e) {
+                            e.printStackTrace();
+                        }
+
+                        Customer newcustomer = new Customer(firstName, lastName, birthDate);
+                        currentUser.addToDatabaseCustomer(newcustomer);
+
 
                     }
                 }
             }
         }
     }
-
-
+}
