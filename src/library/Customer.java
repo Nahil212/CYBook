@@ -5,19 +5,32 @@ import java.util.Date;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class Customer {
-    private static final AtomicInteger nextId = new AtomicInteger(2);
+    private static AtomicInteger nextId = new AtomicInteger(2);
+
     private int idNumber;
     private String firstName;
     private String lastName;
     private Date birthDate;
     private ArrayList<Loan> loans;
 
-    public Customer( String firstName, String lastName, Date birthDate) {
+    public Customer(String firstName, String lastName, Date birthDate) {
         this.idNumber = nextId.getAndIncrement();
         this.firstName = firstName;
         this.lastName = lastName;
         this.birthDate = birthDate;
-        this.loans = new ArrayList<Loan>();
+        this.loans = new ArrayList<>();
+    }
+
+    public Customer(int idNumber, String firstName, String lastName, Date birthDate) {
+        this.idNumber = idNumber;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.birthDate = birthDate;
+        this.loans = new ArrayList<>();
+    }
+
+    public static void initializeNextId(int maxIdCustomer) {
+        nextId.set(maxIdCustomer + 1);
     }
 
     public int getIdNumber()
