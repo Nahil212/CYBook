@@ -173,10 +173,11 @@ public class Librarian {
 		StringBuilder sb = new StringBuilder();
 		sb.append("Customers list:\n");
 		for (Customer customer : customers) {
-			sb.append("Customer ID: ").append(customer.getIdNumber()).append("\n");
+
 			sb.append("First Name: ").append(customer.getFirstName()).append("\n");
 			sb.append("Last Name: ").append(customer.getLastName()).append("\n");
 			sb.append("Birth Date: ").append(customer.getBirthDate()).append("\n");
+			sb.append("Customer ID: ").append(customer.getIdNumber()).append("\n");
 
 		}
 		return sb.toString();
@@ -378,8 +379,8 @@ public class Librarian {
 			e.printStackTrace();
 		}
 	}
-	
-	private static void addToDatabaseCustomer(Customer customer) {
+
+	protected void addToDatabaseCustomer(Customer customer) {
 		try {
 			String content = new String(Files.readAllBytes(Paths.get(filePath)));
 			JSONObject root = new JSONObject(content);
