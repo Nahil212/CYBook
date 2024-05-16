@@ -14,7 +14,7 @@ public class Main {
         String inputPassword = "";
         Scanner scanner = new Scanner(System.in);
         boolean isAuthenticated = false;
-        String filePath = "C:/Users/keizo/Downloads/CYBook-main2/data/LibraryData.json";
+        String filePath = "/home/cytech/CYBookultime/data/LibraryData.json";
 
         System.out.println("1. Connect");
         System.out.println("2. Exit");
@@ -52,8 +52,9 @@ public class Main {
             if (isAuthenticated) {
                 Librarian currentUser = new Librarian(inputUsername, inputPassword, filePath);
                 currentUser.fetchCustomers();
+                currentUser.fetchLoans();
 
-                while (true) {
+                if (choice == 1){
                     System.out.println("1. List of users");
                     System.out.println("2. List of loans");
                     System.out.println("3. Book");
@@ -61,6 +62,7 @@ public class Main {
                     System.out.print("Your choice: ");
                     choice = scanner.nextInt();
                     scanner.nextLine();
+                }
 
                     if (choice == 1) {
                         System.out.println(currentUser.printCustomers());
@@ -68,7 +70,7 @@ public class Main {
                         System.out.println("2. Delete a user");
                         System.out.println("3. Exit");
                     } else if (choice == 2) {
-                        // afficher liste emprunts
+                        System.out.println(currentUser.printLoans());
                         System.out.println("1. Return a book");
                         System.out.println("2. Exit");
                     } else if (choice == 3) {
@@ -76,11 +78,11 @@ public class Main {
                         System.out.println("2. Search a book");
                         System.out.println("3. Exit");
                     } else if (choice == 4) {
-                        break;
+
                     }
                 }
             }
         }
     }
-}
+
 
