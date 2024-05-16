@@ -5,7 +5,7 @@
         {
             "effectiveDateBack": "2024-02-14",
             "late": false,
-            "isbn": 1234567890123,
+            "identifier": "okokokokok",
             "customerId": 1,
             "plannedDateBack": "2024-02-15",
             "dateLoan": "2024-01-15",
@@ -20,7 +20,7 @@
             "loans": [{
                 "effectiveDateBack": "2024-02-14",
                 "late": false,
-                "isbn": 1234567890123,
+                "identifier": "okokokokok",
                 "plannedDateBack": "2024-02-15",
                 "dateLoan": "2024-01-15",
                 "loanId": 1
