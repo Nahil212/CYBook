@@ -28,6 +28,7 @@ public class Librarian {
 	private ArrayList<Loan> loans;
 	private static final String filePath = "/home/cytech/CYBookultime/data/LibraryData.json";
 	private JSONObject jsonObject;
+	
     /**
      * Constructor for the Librarian class.
      *
@@ -39,7 +40,6 @@ public class Librarian {
 		this.password = password;
 		this.customers = new ArrayList<>(); // Initialiser la liste customers ici
 		this.loans = new ArrayList<>();
-
 		try {
 			String content = new String(Files.readAllBytes(Paths.get(filePath)));
 			this.jsonObject = new JSONObject(content);
@@ -47,8 +47,6 @@ public class Librarian {
 			e.printStackTrace();
 		}
 	}
-
-
     private boolean loadData() {
 		try {
 			String content = new String(Files.readAllBytes(Paths.get(filePath)));
@@ -66,7 +64,6 @@ public class Librarian {
 			return false;
 		}
 	}
-
     private boolean authentificate() {
     	boolean isAuthenticated = false;
 		try {
@@ -85,7 +82,6 @@ public class Librarian {
 		}
 		return isAuthenticated;
     }
-
     protected void fetchCustomers() {
 		try {
 			JSONArray customersArray = this.jsonObject.getJSONArray("customers");
@@ -121,7 +117,6 @@ public class Librarian {
 			e.printStackTrace();
 		}
 	}
-
 	protected void fetchLoans() {
 		try {
 			JSONArray loansArray = this.jsonObject.getJSONArray("loans");
@@ -144,41 +139,32 @@ public class Librarian {
 			e.printStackTrace();
 		}
 	}
-
 	public String getPseudonym() {
 		return pseudonym;
 	}
-
 	public void setPseudonym(String pseudonym) {
 		this.pseudonym = pseudonym;
 	}
-
 	public String getPassword() {
 		return password;
 	}
-
 	public void setPassword(String password) {
 		this.password = password;
 	}
-
 	public ArrayList<Customer> getCustomers() {
 		return customers;
 	}
-
 	public void setCustomers(ArrayList<Customer> customers) {
 		this.customers = customers;
 	}
-
 	public String printCustomers() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("Customers list:\n");
 		for (Customer customer : customers) {
-
 			sb.append("First Name: ").append(customer.getFirstName()).append("\n");
 			sb.append("Last Name: ").append(customer.getLastName()).append("\n");
 			sb.append("Birth Date: ").append(customer.getBirthDate()).append("\n");
 			sb.append("Customer ID: ").append(customer.getIdNumber()).append("\n");
-
 		}
 		return sb.toString();
 	}
@@ -198,8 +184,7 @@ public class Librarian {
 		}
 		return sb.toString();
 	}
-
-
+	
 	/**
 	 * This method call the BNF API to search a list of book according to filters
 	 *
@@ -290,54 +275,13 @@ public class Librarian {
 			JSONObject data;
 			for (int i=0;i<record.length();i++) {
 				 obj = record.getJSONObject(i);
-				 data = obj.getJSONObject("srw:recordData").getJSONObject("oai_dc:dc");
-
-				 String ark = obj.getString("srw:recordIdentifier");
-				 String publisher = data.optString("dc:publisher", "");
-				 String format;
-				 if(data.has("dc:format")) {
-					format = data.optString("dc:format", "");
-				 }else {
-					format = "Not specified";
-				 }
-				 int year;
-				 String dateString = data.optString("dc:date", "");
-				 if (dateString.contains("-")) {
-		                year = Integer.parseInt(dateString.split("-")[0]);
-		            } else {
-		                year = data.optInt("dc:date", 0);
-		            }
-				 Object titleObj = data.get("dc:title");
-		         String title = "";
-		         if (titleObj instanceof JSONArray) {
-		        	 JSONArray titles = (JSONArray) titleObj;
-		             for (int j=0;j<titles.length();j++) {
-		            	 title += titles.getString(j);
-		             }
-		         } else {
-		             title = data.getString("dc:title");
-		         }
-		         String creator = "Not specified";
-		         if(data.has("dc:creator")) {
-			         Object CreatorObj = data.get("dc:creator");
-			         creator = "";
-			         if (CreatorObj instanceof JSONArray) {
-			        	 JSONArray creators = (JSONArray) CreatorObj;
-			             for (int j=0;j<creators.length();j++) {
-			            	 creator += creators.getString(j)+" ";
-			             }
-			         } else {
-			             creator = data.getString("dc:creator");
-			         }
-		         }
-		         searchedBooks.add(new Book(title,creator,publisher,year,ark,format));
+		         searchedBooks.add(createBookFromJSON(obj));
 			}
 			return searchedBooks;
 		}catch(JSONException je) {
 			throw new EmptyResearchException();
 		}
 	}
-
 	private static void addToDatabaseLoan(Loan loan, int customerId) {
 		try {
 			String content = new String(Files.readAllBytes(Paths.get(filePath)));
@@ -379,7 +323,6 @@ public class Librarian {
 			e.printStackTrace();
 		}
 	}
-
 	protected void addToDatabaseCustomer(Customer customer) {
 		try {
 			String content = new String(Files.readAllBytes(Paths.get(filePath)));
@@ -436,7 +379,6 @@ public class Librarian {
 			e.printStackTrace();
 		}
 	}
-
 	private void updateDatabaseOnReturn(Loan loan) {
 		try {
 			String content = new String(Files.readAllBytes(Paths.get(filePath)));
@@ -461,13 +403,148 @@ public class Librarian {
 			e.printStackTrace();
 		}
 	}
-
 	public void markBack(Loan loan) {
 		loan.setEffectiveDateBack(new Date());
 		loan.setLate(loan.calculateLate());
 		loan.setReturned(true);
 		updateDatabaseOnReturn(loan);
 	}
-
-
+	
+	/**
+	 * Searches for a book in the BNF catalog using the provided ISBN.
+	 *
+	 * @param isbn The ISBN (International Standard Book Number) of the book to search for.
+	 * @return A Book object representing the book found in the BNF catalog.
+	 * @throws URISyntaxException If the constructed URI for the BNF API request is malformed.
+	 * @throws IOException If an I/O error occurs while sending the HTTP request or receiving the response.
+	 * @throws InterruptedException If the operation is interrupted while waiting for the HTTP response.
+	 * @throws BookNotInDataBaseException If the book with the provided ISBN is not found in the BNF catalog.
+	 */
+	public Book searchBookFromISBN(long isbn) throws URISyntaxException, IOException, InterruptedException, BookNotInDataBaseException {
+		String uri = "http://catalogue.bnf.fr/api/SRU?version=1.2&operation=searchRetrieve&query="+ URLEncoder.encode("bib.isbn= \""+isbn+"\"", StandardCharsets.UTF_8)+"&recordSchema=dublincore";
+		HttpRequest getRequest = HttpRequest.newBuilder()
+				.uri(new URI(uri))
+				.GET()
+				.build();
+		HttpClient httpclient = HttpClient.newHttpClient();
+		HttpResponse<String> getResponse = httpclient.send(getRequest, BodyHandlers.ofString());
+		try {
+			JSONObject obj = XML.toJSONObject(getResponse.body()).
+					getJSONObject("srw:searchRetrieveResponse").
+					getJSONObject("srw:records").
+					getJSONObject("srw:record");
+			return createBookFromJSON(obj);
+		}catch(JSONException je) {
+			throw new BookNotInDataBaseException();
+		}
+	}
+	
+	/**
+	 * Searches for a book in the BNF catalog using the provided ISSN.
+	 *
+	 * @param issn The ISSN (International Standard Serial Number) of the book to search for.
+	 * @return A Book object representing the book found in the BNF catalog.
+	 * @throws URISyntaxException If the constructed URI for the BNF API request is malformed.
+	 * @throws IOException If an I/O error occurs while sending the HTTP request or receiving the response.
+	 * @throws InterruptedException If the operation is interrupted while waiting for the HTTP response.
+	 * @throws BookNotInDataBaseException If the book with the provided ISSN is not found in the BNF catalog.
+	 */
+	public Book searchBookFromISSN(long issn) throws URISyntaxException, IOException, InterruptedException, BookNotInDataBaseException {
+		String uri = "http://catalogue.bnf.fr/api/SRU?version=1.2&operation=searchRetrieve&query="+ URLEncoder.encode("bib.issn= \""+issn+"\"", StandardCharsets.UTF_8)+"&recordSchema=dublincore";
+		HttpRequest getRequest = HttpRequest.newBuilder()
+				.uri(new URI(uri))
+				.GET()
+				.build();
+		HttpClient httpclient = HttpClient.newHttpClient();
+		HttpResponse<String> getResponse = httpclient.send(getRequest, BodyHandlers.ofString());
+		try {
+			JSONObject obj = XML.toJSONObject(getResponse.body()).
+					getJSONObject("srw:searchRetrieveResponse").
+					getJSONObject("srw:records").
+					getJSONObject("srw:record");
+			return createBookFromJSON(obj);
+		}catch(JSONException je) {
+			throw new BookNotInDataBaseException();
+		}
+	}
+	
+	/**
+	 * Searches for a book in the BNF catalog using the provided identifier (ARK).
+	 *
+	 * @param ark The ARK (Archival Resource Key) identifier of the book to search for.
+	 * @return A Book object representing the book found in the BNF catalog.
+	 * @throws URISyntaxException If the constructed URI for the BNF API request is malformed.
+	 * @throws IOException If an I/O error occurs while sending the HTTP request or receiving the response.
+	 * @throws InterruptedException If the operation is interrupted while waiting for the HTTP response.
+	 * @throws BookNotInDataBaseException If the book with the provided identifier is not found in the BNF catalog.
+	 */
+	public Book searchBookFromIdentifier(String ark) throws URISyntaxException, IOException, InterruptedException, BookNotInDataBaseException {
+		String uri = "http://catalogue.bnf.fr/api/SRU?version=1.2&operation=searchRetrieve&query="+ URLEncoder.encode("bib.persistentid= \""+ark+"\"", StandardCharsets.UTF_8)+"&recordSchema=dublincore";
+		HttpRequest getRequest = HttpRequest.newBuilder()
+				.uri(new URI(uri))
+				.GET()
+				.build();
+		HttpClient httpclient = HttpClient.newHttpClient();
+		HttpResponse<String> getResponse = httpclient.send(getRequest, BodyHandlers.ofString());
+		try {
+			JSONObject obj = XML.toJSONObject(getResponse.body()).
+					getJSONObject("srw:searchRetrieveResponse").
+					getJSONObject("srw:records").
+					getJSONObject("srw:record");
+			return createBookFromJSON(obj);
+		}catch(JSONException je) {
+			throw new BookNotInDataBaseException();
+		}
+	}
+	
+	/**
+	 * Creates a Book object from the provided JSON data obtained from the BNF catalog API response.
+	 *
+	 * @param obj The JSONObject containing the book data.
+	 * @return A Book object representing the book data.
+	 */
+	private Book createBookFromJSON(JSONObject obj) {
+		 JSONObject data = obj.getJSONObject("srw:recordData").getJSONObject("oai_dc:dc");
+		 String ark = obj.getString("srw:recordIdentifier");
+		 String publisher = data.optString("dc:publisher", "");
+		 String format;
+		 
+		 if(data.has("dc:format")) {
+			format = data.optString("dc:format", "");
+		 }else {
+			format = "Not specified";
+		 }
+		 int year;
+		 String dateString = data.optString("dc:date", "");
+		 if (dateString.contains("-")) {
+               year = Integer.parseInt(dateString.split("-")[0]);
+           } else {
+               year = data.optInt("dc:date", 0);
+           }
+		 Object titleObj = data.get("dc:title");
+        String title = "";
+        if (titleObj instanceof JSONArray) {
+       	 JSONArray titles = (JSONArray) titleObj;
+            for (int j=0;j<titles.length();j++) {
+           	 title += titles.getString(j);
+            }
+        } else {
+            title = data.getString("dc:title");
+        }
+        String creator = "Not specified";
+        if(data.has("dc:creator")) {
+	         Object CreatorObj = data.get("dc:creator");
+	         creator = "";
+	         if (CreatorObj instanceof JSONArray) {
+	        	 JSONArray creators = (JSONArray) CreatorObj;
+	             for (int j=0;j<creators.length();j++) {
+	            	 creator += creators.getString(j)+" ";
+	             }
+	         } else {
+	             creator = data.getString("dc:creator");
+	         }
+        }
+        return (new Book(title,creator,publisher,year,ark,format));
+	}
+	
 }
