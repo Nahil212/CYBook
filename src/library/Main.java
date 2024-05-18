@@ -171,7 +171,7 @@ public class Main {
                                 int yearStart = -1;
                                 int yearEnd = -1;
                                 String searchTitle = "";
-                                int startResearch = 20; // Default value is 20
+                                int startResearch = 20; 
 
                                 System.out.print("Enter authors (comma separated, or 'null' to skip): ");
                                 String authorsInput = scanner.nextLine();
@@ -188,7 +188,7 @@ public class Main {
                                     yearStart = Integer.parseInt(yearStartInput);
                                 }
 
-                                System.out.print("Enter end year (or -1 if not applicable, or 'null' to skip): ");
+                                System.out.print("Enter end year ('null' to skip): ");
                                 String yearEndInput = scanner.nextLine();
                                 if (!yearEndInput.equalsIgnoreCase("null")) {
                                     yearEnd = Integer.parseInt(yearEndInput);
