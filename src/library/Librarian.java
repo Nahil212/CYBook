@@ -26,7 +26,7 @@ public class Librarian {
 	private String password;
 	private ArrayList<Customer> customers;
 	private ArrayList<Loan> loans;
-	private static final String filePath = "/home/cytech/CYBookultime/data/LibraryData.json";
+	private static final String filePath = "/home/cytech/CYBookult2/data/LibraryData.json";
 	private JSONObject jsonObject;
 	
     /**
@@ -109,8 +109,9 @@ public class Librarian {
 					boolean returned = loanObj.has("returned") && loanObj.getBoolean("returned");
 					boolean late = loanObj.has("late") && loanObj.getBoolean("late");
 
+
 					Loan loan = new Loan(loanId, identifier, dateLoan, plannedDateBack, effectiveDateBack, returned, late);
-					customer.addLoan(loan);
+					this.loans.add(loan);
 				}
 			}
 		} catch (Exception e) {
@@ -179,7 +180,7 @@ public class Librarian {
 			sb.append("Effective Date Back: ").append(loan.getEffectiveDateBack()).append("\n");
 			sb.append("Late: ").append(loan.getLate()).append("\n");
 			sb.append("Returned: ").append(loan.getReturned()).append("\n");
-			sb.append("CustomerId: ").append(loan.getcustomerId()).append("\n");
+			sb.append("CustomerId: ").append(loan.getCustomerId()).append("\n");
 			sb.append("\n");
 		}
 		return sb.toString();
