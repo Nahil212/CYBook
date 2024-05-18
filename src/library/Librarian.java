@@ -368,6 +368,7 @@ public class Librarian {
 				customerDetails.put("loans", customerLoans);
 
 				customers.put(customerDetails);
+				System.out.println("the user has been added ::) ");
 
 				try (FileWriter file = new FileWriter(filePath)) {
 					file.write(root.toString(4));
