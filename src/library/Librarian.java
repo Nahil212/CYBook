@@ -426,10 +426,15 @@ public class Librarian {
 	}
 	
 	public void markBack(Loan loan) {
-		loan.setEffectiveDateBack(new Date());
-		loan.setLate(loan.calculateLate());
-		loan.setReturned(true);
-		updateDatabaseOnReturn(loan);
+		for (Loan l : loans) {
+			if (l.getId() == loan.getId()) {
+				l.setEffectiveDateBack(new Date());
+				l.setReturned(true);
+				l.setLate(l.calculateLate());
+				updateDatabaseOnReturn(l);
+				return;
+			}
+		}
 	}
 	
 	/**
