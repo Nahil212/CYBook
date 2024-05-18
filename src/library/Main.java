@@ -3,6 +3,7 @@ package library;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.ParseException;
@@ -16,7 +17,7 @@ public class Main {
         String inputPassword = "";
         Scanner scanner = new Scanner(System.in);
         boolean isAuthenticated = false;
-        String filePath = "/home/cytech/CYBookult3/data/LibraryData.json";
+        String filePath = "/home/cytech/CYBookult4/data/LibraryData.json";
 
         System.out.println("1. Connect");
         System.out.println("2. Exit");
@@ -74,11 +75,11 @@ public class Main {
                         scanner.nextLine();
 
                         if (choice == 1) {
-                            System.out.println("Enter the firstName :");
+                            System.out.print("Enter the firstName: ");
                             String firstName = scanner.nextLine();
-                            System.out.println("Enter the lastName : ");
+                            System.out.print("Enter the lastName: ");
                             String lastName = scanner.nextLine();
-                            System.out.println("Enter the birthDate (yyyy-MM-dd) : ");
+                            System.out.print("Enter the birthDate (yyyy-MM-dd): ");
                             String birthDateStr = scanner.nextLine();
 
                             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
@@ -91,8 +92,9 @@ public class Main {
 
                             Customer newCustomer = new Customer(firstName, lastName, birthDate);
                             currentUser.addToDatabaseCustomer(newCustomer);
+
                         } else if (choice == 2) {
-                            // supp lutilisateur 
+                            // cdode pour supp un utilisateur
                         }
                     } else if (choice == 2) {
                         System.out.println(currentUser.printLoans());
@@ -102,13 +104,51 @@ public class Main {
                         scanner.nextLine();
 
                         if (choice == 1) {
-                            // retourner livree
+                            // ode pour retoun un livre
                         }
                     } else if (choice == 3) {
-                        // Code pour gérer les livres
                         System.out.println("1. Borrow a book");
                         System.out.println("2. Search a book");
                         System.out.println("3. Exit");
+                        choice = scanner.nextInt();
+                        scanner.nextLine();
+
+                        if (choice == 1) {
+                            System.out.print("Enter the book identifier: ");
+                            String identifier = scanner.nextLine();
+
+                            System.out.print("Enter the customer ID: ");
+                            int customerId = scanner.nextInt();
+                            scanner.nextLine();
+
+                            Loan newLoan = new Loan(identifier);
+                            currentUser.addToDatabaseLoan(newLoan, customerId);
+                            System.out.println("Book borrowed is a success yahouuu!");
+                        } else if (choice == 2) {
+                            System.out.println("1. Search by ISBN");
+                            System.out.println("2. Search by filters");
+                            System.out.print("Your choice: ");
+                            int searchChoice = scanner.nextInt();
+                            scanner.nextLine();
+
+                            if (searchChoice == 1) {
+                                System.out.print("Enter the ISBN: ");
+                                long isbn = scanner.nextLong();
+                                scanner.nextLine();
+
+                                try {
+                                    Book book = currentUser.searchBookFromISBN(isbn);
+                                    System.out.println(book);
+                                } catch (IOException | InterruptedException |
+                                         BookNotInDataBaseException | URISyntaxException e) {
+                                    System.out.println("Error: " + e.getClass());
+                                }
+                            } else if (searchChoice == 2) {
+                                // code pour cherhcer un livrepar diff filtres
+                            }
+                        } else if (choice == 3) {
+                            break;
+                        }
                     } else if (choice == 4) {
                         break;
                     } else {
@@ -119,4 +159,3 @@ public class Main {
         }
     }
 }
-
