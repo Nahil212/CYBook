@@ -92,7 +92,7 @@ public class Main {
                             Customer newCustomer = new Customer(firstName, lastName, birthDate);
                             currentUser.addToDatabaseCustomer(newCustomer);
                         } else if (choice == 2) {
-                            // Code pour supprimer un utilisateur
+                            // supp lutilisateur 
                         }
                     } else if (choice == 2) {
                         System.out.println(currentUser.printLoans());
@@ -102,7 +102,7 @@ public class Main {
                         scanner.nextLine();
 
                         if (choice == 1) {
-                            // Code pour retourner un livre
+                            // retourner livree
                         }
                     } else if (choice == 3) {
                         // Code pour gérer les livres
