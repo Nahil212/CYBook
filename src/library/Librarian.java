@@ -168,6 +168,10 @@ public class Librarian {
     public void setCustomers(ArrayList<Customer> customers) {
 		this.customers = customers;
 	}
+
+		public ArrayList<Loan> getLoans() {
+		return loans;
+	}
 	
     public String printCustomers() {
 		StringBuilder sb = new StringBuilder();
