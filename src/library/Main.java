@@ -110,7 +110,7 @@ public class Main {
                                 int loanId = scanner.nextInt();
                                 scanner.nextLine();
 
-                                // Trouver le prêt correspondant dans la liste des prêts de l'utilisateur
+                                
                                 Loan loanToReturn = null;
                                 for (Loan loan : currentUser.getLoans()) {
                                     if (loan.getId() == loanId) {
@@ -120,7 +120,7 @@ public class Main {
                                 }
 
                                 if (loanToReturn != null) {
-                                    // Marquer le livre comme retourné en utilisant la méthode markBack
+                                    
                                     currentUser.markBack(loanToReturn);
                                     System.out.println("Book returned successfully!");
                                 } else {
