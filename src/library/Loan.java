@@ -128,9 +128,5 @@ public class Loan {
         this.customerId= customerId;
     }
 
-     public JSONObject toJSON() {
-        JSONObject loanJson = new JSONObject();
-        loanJson.put("identifier", identifier);
-        return loanJson;
-    }
+  
 }
