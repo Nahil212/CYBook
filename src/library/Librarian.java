@@ -26,7 +26,7 @@ public class Librarian {
 	private String password;
 	private ArrayList<Customer> customers;
 	private ArrayList<Loan> loans;
-	private static final String filePath = "/home/cytech/CYBookult2/data/LibraryData.json";
+	private static final String filePath = "data/LibraryData.json";
 	private JSONObject jsonObject;
 	
     /**
@@ -47,6 +47,7 @@ public class Librarian {
 			e.printStackTrace();
 		}
 	}
+    
     private boolean loadData() {
 		try {
 			String content = new String(Files.readAllBytes(Paths.get(filePath)));
@@ -64,6 +65,7 @@ public class Librarian {
 			return false;
 		}
 	}
+    
     private boolean authentificate() {
     	boolean isAuthenticated = false;
 		try {
@@ -82,6 +84,7 @@ public class Librarian {
 		}
 		return isAuthenticated;
     }
+    
     protected void fetchCustomers() {
 		try {
 			JSONArray customersArray = this.jsonObject.getJSONArray("customers");
@@ -118,7 +121,8 @@ public class Librarian {
 			e.printStackTrace();
 		}
 	}
-	protected void fetchLoans() {
+	
+    protected void fetchLoans() {
 		try {
 			JSONArray loansArray = this.jsonObject.getJSONArray("loans");
 			for (int i = 0; i < loansArray.length(); i++) {
@@ -140,25 +144,32 @@ public class Librarian {
 			e.printStackTrace();
 		}
 	}
-	public String getPseudonym() {
+	
+    public String getPseudonym() {
 		return pseudonym;
 	}
-	public void setPseudonym(String pseudonym) {
+	
+    public void setPseudonym(String pseudonym) {
 		this.pseudonym = pseudonym;
 	}
-	public String getPassword() {
+	
+    public String getPassword() {
 		return password;
 	}
-	public void setPassword(String password) {
+	
+    public void setPassword(String password) {
 		this.password = password;
 	}
-	public ArrayList<Customer> getCustomers() {
+	
+    public ArrayList<Customer> getCustomers() {
 		return customers;
 	}
-	public void setCustomers(ArrayList<Customer> customers) {
+	
+    public void setCustomers(ArrayList<Customer> customers) {
 		this.customers = customers;
 	}
-	public String printCustomers() {
+	
+    public String printCustomers() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("Customers list:\n");
 		for (Customer customer : customers) {
@@ -169,6 +180,7 @@ public class Librarian {
 		}
 		return sb.toString();
 	}
+	
 	public String printLoans() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("Loans list:\n");
@@ -283,7 +295,8 @@ public class Librarian {
 			throw new EmptyResearchException();
 		}
 	}
-	private static void addToDatabaseLoan(Loan loan, int customerId) {
+	
+	public static void addToDatabaseLoan(Loan loan, int customerId) {
 		try {
 			String content = new String(Files.readAllBytes(Paths.get(filePath)));
 			JSONObject root = new JSONObject(content);
@@ -324,6 +337,7 @@ public class Librarian {
 			e.printStackTrace();
 		}
 	}
+	
 	protected void addToDatabaseCustomer(Customer customer) {
 		try {
 			String content = new String(Files.readAllBytes(Paths.get(filePath)));
@@ -381,6 +395,7 @@ public class Librarian {
 			e.printStackTrace();
 		}
 	}
+	
 	private void updateDatabaseOnReturn(Loan loan) {
 		try {
 			String content = new String(Files.readAllBytes(Paths.get(filePath)));
@@ -405,6 +420,7 @@ public class Librarian {
 			e.printStackTrace();
 		}
 	}
+	
 	public void markBack(Loan loan) {
 		loan.setEffectiveDateBack(new Date());
 		loan.setLate(loan.calculateLate());
@@ -549,4 +565,8 @@ public class Librarian {
         return (new Book(title,creator,publisher,year,ark,format));
 	}
 	
+	public static void main(String[] args) {
+		Librarian r2loop = new Librarian("r2","loop", filePath);
+		System.out.println("ok");
+	}
 }
