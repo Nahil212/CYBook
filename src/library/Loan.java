@@ -127,4 +127,10 @@ public class Loan {
     public void setCustomerId(int customerId){
         this.customerId= customerId;
     }
+
+     public JSONObject toJSON() {
+        JSONObject loanJson = new JSONObject();
+        loanJson.put("identifier", identifier);
+        return loanJson;
+    }
 }
