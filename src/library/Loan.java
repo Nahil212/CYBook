@@ -15,6 +15,7 @@ public class Loan {
     private boolean late;
     private boolean returned;
 
+    private int customerId;
     public Loan(String identifier) {
         this.identifier = identifier;
         this.dateLoan = new Date();
@@ -34,6 +35,19 @@ public class Loan {
         this.late = late;
         this.returned = returned;
     }
+
+    public Loan(int id, String identifier, Date dateLoan, Date plannedDateBack, Date effectiveDateBack, boolean returned, boolean late, int customerId) {
+        this.id = id;
+        this.identifier = identifier;
+        this.dateLoan = dateLoan;
+        this.plannedDateBack = plannedDateBack;
+        this.effectiveDateBack = effectiveDateBack;
+        this.late = late;
+        this.returned = returned;
+        this.customerId = customerId;
+    }
+
+
 
     public static void initializeNextId(int maxIdLoan) {
         nextId.set(maxIdLoan + 1);
@@ -104,5 +118,13 @@ public class Loan {
 
     public void setReturned(boolean returned) {
         this.returned = returned;
+    }
+
+    public int getCustomerId(){
+        return customerId;
+    }
+
+    public void setCustomerId(int customerId){
+        this.customerId= customerId;
     }
 }
