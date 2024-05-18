@@ -10,6 +10,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Scanner;
+import java.util.ArrayList;
 
 public class Main {
     public static void main(String[] args) {
@@ -17,7 +18,7 @@ public class Main {
         String inputPassword = "";
         Scanner scanner = new Scanner(System.in);
         boolean isAuthenticated = false;
-        String filePath = "/home/cytech/CYBookult4/data/LibraryData.json";
+        String filePath = "data/LibraryData.json";
 
         System.out.println("1. Connect");
         System.out.println("2. Exit");
@@ -69,8 +70,7 @@ public class Main {
                     if (choice == 1) {
                         System.out.println(currentUser.printCustomers());
                         System.out.println("1. Add a new user");
-                        System.out.println("2. Delete a user");
-                        System.out.println("3. Exit");
+                        System.out.println("2. Exit");
                         choice = scanner.nextInt();
                         scanner.nextLine();
 
@@ -88,13 +88,14 @@ public class Main {
                                 birthDate = dateFormat.parse(birthDateStr);
                             } catch (ParseException e) {
                                 e.printStackTrace();
+
                             }
 
                             Customer newCustomer = new Customer(firstName, lastName, birthDate);
                             currentUser.addToDatabaseCustomer(newCustomer);
 
                         } else if (choice == 2) {
-                            // cdode pour supp un utilisateur
+
                         }
                     } else if (choice == 2) {
                         System.out.println(currentUser.printLoans());
@@ -103,9 +104,30 @@ public class Main {
                         choice = scanner.nextInt();
                         scanner.nextLine();
 
-                        if (choice == 1) {
-                            // ode pour retoun un livre
-                        }
+
+                            if (choice == 1) {
+                                System.out.print("Enter the loan ID of the book to return: ");
+                                int loanId = scanner.nextInt();
+                                scanner.nextLine();
+
+                                // Trouver le prêt correspondant dans la liste des prêts de l'utilisateur
+                                Loan loanToReturn = null;
+                                for (Loan loan : currentUser.getLoans()) {
+                                    if (loan.getId() == loanId) {
+                                        loanToReturn = loan;
+                                        break;
+                                    }
+                                }
+
+                                if (loanToReturn != null) {
+                                    // Marquer le livre comme retourné en utilisant la méthode markBack
+                                    currentUser.markBack(loanToReturn);
+                                    System.out.println("Book returned successfully!");
+                                } else {
+                                    System.out.println("Loan ID not found. Please enter a valid loan ID.");
+                                }
+                            }
+
                     } else if (choice == 3) {
                         System.out.println("1. Borrow a book");
                         System.out.println("2. Search a book");
@@ -144,10 +166,63 @@ public class Main {
                                     System.out.println("Error: " + e.getClass());
                                 }
                             } else if (searchChoice == 2) {
-                                // code pour cherhcer un livrepar diff filtres
+                                ArrayList<String> listCreator = new ArrayList<>();
+                                ArrayList<Universe> listUniverse = new ArrayList<>();
+                                int yearStart = -1;
+                                int yearEnd = -1;
+                                String searchTitle = "";
+                                int startResearch = 20; // Default value is 20
+
+                                System.out.print("Enter authors (comma separated, or 'null' to skip): ");
+                                String authorsInput = scanner.nextLine();
+                                if (!authorsInput.equalsIgnoreCase("null")) {
+                                    String[] authorsArray = authorsInput.split(",");
+                                    for (String author : authorsArray) {
+                                        listCreator.add(author.trim());
+                                    }
+                                }
+
+                                System.out.print("Enter start year ('null' to skip): ");
+                                String yearStartInput = scanner.nextLine();
+                                if (!yearStartInput.equalsIgnoreCase("null")) {
+                                    yearStart = Integer.parseInt(yearStartInput);
+                                }
+
+                                System.out.print("Enter end year (or -1 if not applicable, or 'null' to skip): ");
+                                String yearEndInput = scanner.nextLine();
+                                if (!yearEndInput.equalsIgnoreCase("null")) {
+                                    yearEnd = Integer.parseInt(yearEndInput);
+                                }
+
+                                System.out.print("Enter universes (comma separated, options: MUSIC, YOUTH, IMAGEANDMAP, or 'null' to skip): ");
+                                String universesInput = scanner.nextLine();
+                                if (!universesInput.equalsIgnoreCase("null")) {
+                                    String[] universesArray = universesInput.split(",");
+                                    for (String universe : universesArray) {
+                                        listUniverse.add(Universe.valueOf(universe.trim().toUpperCase()));
+                                    }
+                                }
+
+                                System.out.print("Enter book title (or 'null' to skip): ");
+                                searchTitle = scanner.nextLine();
+                                if (searchTitle.equalsIgnoreCase("null")) {
+                                    searchTitle = "";
+                                }
+
+                                try {
+                                    ArrayList<Book> searchedBooks = currentUser.searchBooks(
+                                            listCreator, yearStart, yearEnd, listUniverse, searchTitle, startResearch
+                                    );
+                                    for (Book book : searchedBooks) {
+                                        System.out.println(book);
+                                    }
+                                } catch (IOException | InterruptedException |
+                                         URISyntaxException | EmptyResearchException e) {
+                                    System.out.println("Error: " + e.getClass());
+                                }
+                            } else if (choice == 3) {
+
                             }
-                        } else if (choice == 3) {
-                            break;
                         }
                     } else if (choice == 4) {
                         break;
