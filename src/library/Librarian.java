@@ -578,4 +578,24 @@ public class Librarian {
 		Librarian r2loop = new Librarian("r2","loop", filePath);
 		System.out.println("ok");
 	}
+
+
+	public boolean isIdentifierOverBorrowed(String identifier) {
+		try {
+			int count = 0;
+			JSONArray loansArray = this.jsonObject.getJSONArray("loans");
+			for (int i = 0; i < loansArray.length(); i++) {
+				JSONObject loanObj = loansArray.getJSONObject(i);
+				if (loanObj.getString("identifier").equals(identifier) && !loanObj.getBoolean("returned")) {
+					count++;
+					if (count == 10) {
+						return true;
+					}
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return false;
+	}
 }
