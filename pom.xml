@@ -4,22 +4,40 @@
   <artifactId>Project</artifactId>
   <version>0.0.1-SNAPSHOT</version>
   <dependencies>
-  	<dependency>
-	  <groupId>org.json</groupId>
-	  <artifactId>json</artifactId>
-	  <version>20180813</version>
-	</dependency>
+    <dependency>
+      <groupId>org.json</groupId>
+      <artifactId>json</artifactId>
+      <version>20180813</version>
+    </dependency>
+        <dependency>
+        <groupId>org.openjfx</groupId>
+        <artifactId>javafx-controls</artifactId>
+        <version>19</version>
+    </dependency>
+    <dependency>
+        <groupId>org.openjfx</groupId>
+        <artifactId>javafx-fxml</artifactId>
+        <version>19</version>
+    </dependency>
   </dependencies>
   <build>
     <sourceDirectory>src</sourceDirectory>
     <plugins>
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.8.1</version>
+        <version>3.10.1</version>
         <configuration>
-          <release>15</release>
+          <release>11</release>
         </configuration>
       </plugin>
+      <plugin>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-maven-plugin</artifactId>
+            <version>0.0.8</version>
+            <configuration>
+                <mainClass>library.LibraryApplication</mainClass>
+            </configuration>
+        </plugin>
     </plugins>
   </build>
 </project>

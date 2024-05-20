@@ -35,7 +35,7 @@ public class Librarian {
      * @param pseudonym The pseudonym of the librarian.
      * @param password  The password of the librarian.
      */
-    public Librarian(String pseudonym, String password, String filePath) {
+    public Librarian(String pseudonym, String password) {
 		this.pseudonym = pseudonym;
 		this.password = password;
 		this.customers = new ArrayList<>(); // Initialiser la liste customers ici
@@ -575,7 +575,7 @@ public class Librarian {
 	}
 	
 	public static void main(String[] args) {
-		Librarian r2loop = new Librarian("r2","loop", filePath);
+		Librarian r2loop = new Librarian("r2","loop");
 		System.out.println("ok");
 	}
 

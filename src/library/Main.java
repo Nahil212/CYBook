@@ -54,7 +54,7 @@ public class Main {
             }
 
             if (isAuthenticated) {
-                Librarian currentUser = new Librarian(inputUsername, inputPassword, filePath);
+                Librarian currentUser = new Librarian(inputUsername, inputPassword);
                 currentUser.fetchCustomers();
                 currentUser.fetchLoans();
 
