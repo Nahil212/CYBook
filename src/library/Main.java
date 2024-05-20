@@ -166,20 +166,17 @@ public class Main {
                                     System.out.println("Error: " + e.getClass());
                                 }
                             } else if (searchChoice == 2) {
-                                ArrayList<String> listCreator = new ArrayList<>();
-                                ArrayList<Universe> listUniverse = new ArrayList<>();
+                                String creator ="";
+                                Universe univ = Universe.NONE;
                                 int yearStart = -1;
                                 int yearEnd = -1;
                                 String searchTitle = "";
                                 int startResearch = 20; 
 
-                                System.out.print("Enter authors (comma separated, or 'null' to skip): ");
+                                System.out.print("Enter author (or 'null' to skip): ");
                                 String authorsInput = scanner.nextLine();
                                 if (!authorsInput.equalsIgnoreCase("null")) {
-                                    String[] authorsArray = authorsInput.split(",");
-                                    for (String author : authorsArray) {
-                                        listCreator.add(author.trim());
-                                    }
+                                    creator = authorsInput;
                                 }
 
                                 System.out.print("Enter start year ('null' to skip): ");
@@ -197,9 +194,11 @@ public class Main {
                                 System.out.print("Enter universes (comma separated, options: MUSIC, YOUTH, IMAGEANDMAP, or 'null' to skip): ");
                                 String universesInput = scanner.nextLine();
                                 if (!universesInput.equalsIgnoreCase("null")) {
-                                    String[] universesArray = universesInput.split(",");
-                                    for (String universe : universesArray) {
-                                        listUniverse.add(Universe.valueOf(universe.trim().toUpperCase()));
+                                	try {
+                                        univ = Universe.valueOf(universesInput.toUpperCase());
+                                    } catch (IllegalArgumentException e) {
+                                        System.out.println("Invalid universe. Please enter a valid universe.");
+                                        continue;
                                     }
                                 }
 
@@ -211,7 +210,7 @@ public class Main {
 
                                 try {
                                     ArrayList<Book> searchedBooks = currentUser.searchBooks(
-                                            listCreator, yearStart, yearEnd, listUniverse, searchTitle, startResearch
+                                            creator, yearStart, yearEnd, univ, searchTitle, startResearch
                                     );
                                     for (Book book : searchedBooks) {
                                         System.out.println(book);
