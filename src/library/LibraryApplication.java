@@ -11,6 +11,8 @@ import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -21,14 +23,18 @@ public class LibraryApplication extends Application{
 	@Override
 	public void start(Stage stage) throws Exception {
 		
+		stage.setTitle("CY-Book");
+		Image logoshessh = new Image("file:img/book.png");
+		stage.getIcons().add(logoshessh);
 		Librarian l = new Librarian("l","l");
 		String author = "";
 		int yearStart = -1;
 		int yearEnd = -1;
 		String searchTitle = "Dragon ball GT";
 		int searchStart = 1;
+		Universe univ = Universe.NONE;
 		
-		ArrayList<Book> searchedBooks = l.searchBooks(author, yearStart, yearEnd, Universe.NONE, searchTitle, searchStart);
+		ArrayList<Book> searchedBooks = l.searchBooks(author, yearStart, yearEnd, univ, searchTitle, searchStart);
 
 		// SIGN IN PAGE
 		VBox signInVBox = new VBox();
@@ -57,7 +63,9 @@ public class LibraryApplication extends Application{
 		
 		// Top
 		VBox filter = new VBox();
-		filter.setAlignment(Pos.TOP_CENTER);
+		filter.setAlignment(Pos.CENTER);
+		filter.setSpacing(10);
+		filter.setPrefHeight(125);
 		
 		Label idSearch = new Label("Search by identifier");
 		HBox idFields = new HBox();
@@ -74,10 +82,43 @@ public class LibraryApplication extends Application{
 		idFields.getChildren().addAll(isbn,searchISBN,issn,searchISSN,ark,searchARK);
 		
 		Label filterSearch = new Label("Search by filters");
+		HBox filterFields = new HBox();
+		filterFields.setAlignment(Pos.TOP_CENTER);
+		TextField titleField = new TextField();
+		titleField.setPromptText("Title");
+		TextField authorField = new TextField();
+		authorField.setPromptText("Author");
+		TextField yearStartField = new TextField();
+		yearStartField.setPromptText("Minimal year");
+		TextField yearEndField = new TextField();
+		yearEndField.setPromptText("Maximal year");
 		ChoiceBox<Universe> universeBox = new ChoiceBox<>();
 		universeBox.getItems().addAll(Universe.values());
+		filterFields.getChildren().addAll(titleField,authorField,yearStartField,yearEndField,universeBox);
+		filter.getChildren().addAll(idSearch,idFields,filterSearch,filterFields);
 		
-		filter.getChildren().addAll(idSearch,idFields,filterSearch,universeBox);
+		
+		// Left
+		VBox icons = new VBox();
+		icons.setAlignment(Pos.TOP_CENTER);
+		icons.setPrefWidth(150);
+		icons.setSpacing(10);
+		ImageView imgSearch = new ImageView(new Image("file:img/search.png"));
+		ImageView imgBook = new ImageView(new Image("file:img/book.png"));
+		ImageView imgUser = new ImageView(new Image("file:img/user.png"));
+		imgSearch.setFitWidth(75); 
+		imgSearch.setFitHeight(75);
+		imgBook.setFitWidth(75); 
+		imgBook.setFitHeight(75);
+		imgUser.setFitWidth(75); 
+		imgUser.setFitHeight(75);
+		Button searchButton = new Button();
+		Button loanButton = new Button();
+		Button userButton = new Button();
+		searchButton.setGraphic(imgSearch);
+		loanButton.setGraphic(imgBook);
+		userButton.setGraphic(imgUser);
+		icons.getChildren().addAll(searchButton,loanButton,userButton);
 		
 		
 		// Middle
@@ -100,6 +141,7 @@ public class LibraryApplication extends Application{
 		changePage.setPrefHeight(50);
 		changePage.setSpacing(10);
 		
+		borderPane.setLeft(icons);
 		borderPane.setTop(filter);
 		borderPane.setCenter(scrollBook);
 		borderPane.setBottom(changePage);
