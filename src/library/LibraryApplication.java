@@ -46,8 +46,7 @@ public class LibraryApplication extends Application{
 		BorderPane borderPane = new BorderPane();
 		Scene homePage = new Scene(borderPane);
 		VBox bookInfo = new VBox();
-
-		Image image = new Image("book.png");
+		
 		Label title = new Label(book.getTitle());
 		Label author = new Label(book.getCreator());
 		Label year = new Label(book.getYear()+"");
