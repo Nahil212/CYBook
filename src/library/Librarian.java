@@ -205,11 +205,10 @@ public class Librarian {
 	/**
 	 * This method call the BNF API to search a list of book according to filters
 	 *
-	 * @param listCreator Searched authors (can be empty)
+	 * @param creator Searched author (can be empty)
 	 * @param yearStart Minimum year publication (-1 means no filter)
 	 * @param yearEnd Maximum year publication (-1 means no filter)
-	 * @param listType Searched document types (can be empty)
-	 * @param listUniverse Searched document universes (can be empty)
+	 * @param universe Searched document universe (can be empty)
 	 * @param searchTitle Enter text to search in titles (can be empty)
 	 * @param startResearch Where to start the call of the API so we can manage pages
 	 * @return List of Book object corresponding to filters
@@ -219,53 +218,44 @@ public class Librarian {
 	 * @throws EmptyResearchException
 	 * @throws BookNotInDataBaseException
 	 */
-	public ArrayList<Book> searchBooks(ArrayList<String> listCreator, int yearStart, int yearEnd, ArrayList<Universe> listUniverse, String searchTitle, int startResearch) throws URISyntaxException, IOException, InterruptedException, EmptyResearchException{
+	public ArrayList<Book> searchBooks(String creator, int yearStart, int yearEnd, Universe universe, String searchTitle, int startResearch) throws URISyntaxException, IOException, InterruptedException, EmptyResearchException{
 		ArrayList<Book> searchedBooks = new ArrayList<Book>();
 
 		// CREATING THE REQUEST TO THE API
 		String uri = "http://catalogue.bnf.fr/api/SRU?version=1.2&operation=searchRetrieve&query=";
 		uri += URLEncoder.encode("bib.doctype any \"A\"", StandardCharsets.UTF_8);
-		if( !(listCreator.isEmpty()) || !(yearStart == -1) || !(yearEnd == -1) || !(listUniverse.isEmpty()) || !(searchTitle == "")) {
+		if( !(creator == "") || !(yearStart == -1) || !(yearEnd == -1) || !(universe == Universe.NONE) || !(searchTitle == "")) {
 			uri += "+and+";
 		}
-			if(!(listCreator.isEmpty())) {
-				String authors = "";
-				for(String creator: listCreator) {
-					authors += creator+" ";
-				}
-				authors = authors.trim();
-				uri += URLEncoder.encode("bib.author any \""+authors+"\"", StandardCharsets.UTF_8);
-				if( !(yearStart == -1) || !(yearEnd == -1) || !(listUniverse.isEmpty()) || !(searchTitle == "")) {
+			if(!(creator == "")) {
+				uri += URLEncoder.encode("bib.author any \""+creator+"\"", StandardCharsets.UTF_8);
+				if( !(yearStart == -1) || !(yearEnd == -1) || !(universe == Universe.NONE) || !(searchTitle == "")) {
 					uri += "+and+";
 				}
 			}
 			if(!(yearStart == -1) || !(yearEnd == -1)) {
 				if(yearStart == yearEnd) {
 					uri += URLEncoder.encode("bib.publicationdate= \""+yearStart+"\"", StandardCharsets.UTF_8);
-					if(!(listUniverse.isEmpty()) || !(searchTitle == "")) {
+					if(!(universe == Universe.NONE) || !(searchTitle == "")) {
 						uri += "+and+";
 					}
 				}else {
 					if (yearEnd > -1) {
 						uri += URLEncoder.encode("bib.publicationdate<= \""+yearEnd+"\"", StandardCharsets.UTF_8);
-						if( !(yearStart == -1) || !(listUniverse.isEmpty()) || !(searchTitle == "")) {
+						if( !(yearStart == -1) || !(universe == Universe.NONE) || !(searchTitle == "")) {
 							uri += "+and+";
 						}
 					}
 					if (yearStart > -1) {
 						uri += URLEncoder.encode("bib.publicationdate>= \""+yearStart+"\"", StandardCharsets.UTF_8);
-						if( !(listUniverse.isEmpty()) || !(searchTitle == "")) {
+						if( !(universe == Universe.NONE) || !(searchTitle == "")) {
 							uri += "+and+";
 						}
 					}
 				}
 			}
-			if(!(listUniverse.isEmpty())) {
-				String universes = "";
-				for(Universe universe: listUniverse) {
-					universes+=universe+" ";
-				}
-				universes = universes.trim();
+			if(!(universe == Universe.NONE)) {
+				String universes = ""+universe;
 				uri += URLEncoder.encode("bib.doctype all \""+universes+"\"", StandardCharsets.UTF_8);
 				if(!(searchTitle == "")) {
 					uri += "+and+";
@@ -574,12 +564,6 @@ public class Librarian {
         return (new Book(title,creator,publisher,year,ark,format));
 	}
 	
-	public static void main(String[] args) {
-		Librarian r2loop = new Librarian("r2","loop");
-		System.out.println("ok");
-	}
-
-
 	public boolean isIdentifierOverBorrowed(String identifier) {
 		try {
 			int count = 0;
