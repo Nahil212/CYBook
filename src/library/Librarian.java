@@ -20,6 +20,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.XML;
 import java.util.Scanner;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Librarian {
 	private String pseudonym;
@@ -582,4 +585,49 @@ public class Librarian {
 		}
 		return false;
 	}
-}
+
+	public void MostFamousLoan() throws BookNotInDataBaseException, URISyntaxException, IOException, InterruptedException {
+
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+
+		Date currentDate = new Date();
+
+		ArrayList<Loan> loans = getLoans();
+
+		HashMap<String, Integer> loanCount = new HashMap<>();
+
+
+		for (Loan loan : loans) {
+
+			if (loan.getDateLoan() != null) {
+
+				long diff = currentDate.getTime() - loan.getDateLoan().getTime();
+				long diffDays = diff / (24 * 60 * 60 * 1000);
+
+				if (diffDays <= 30) {
+
+					String identifier = loan.getIdentifier();
+
+					loanCount.put(identifier, loanCount.getOrDefault(identifier, 0) + 1);
+				}
+			}
+		}
+
+		Book currentBook = new Book("", "", "", 0, "","");
+		String ark = "";
+
+		System.out.println("Most Famous loans:");
+		for (Map.Entry<String, Integer> entry : loanCount.entrySet()) {
+			ark = entry.getKey();
+			currentBook = this.searchBookFromIdentifier(ark);
+			System.out.println(currentBook);
+			System.out.println("Number of loans: " + entry.getValue());
+		}
+	}
+
+
+	}
+
+
+
+
