@@ -1,7 +1,13 @@
 package library;
 
 
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import javafx.application.Application;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -26,16 +32,12 @@ public class LibraryApplication extends Application{
 		stage.setTitle("CY-Book");
 		Image logoshessh = new Image("file:img/book.png");
 		stage.getIcons().add(logoshessh);
-		Librarian l = new Librarian("l","l");
-		String author = "";
-		int yearStart = -1;
-		int yearEnd = -1;
-		String searchTitle = "Dragon ball GT";
-		int searchStart = 1;
-		Universe univ = Universe.NONE;
+		BorderPane borderPane = new BorderPane();
+		Scene homePage = new Scene(borderPane);
+		String content = new String(Files.readAllBytes(Paths.get(Librarian.filePath)));
+        JSONObject jsonObject = new JSONObject(content);
+        JSONArray librarians = jsonObject.getJSONArray("librarians");
 		
-		ArrayList<Book> searchedBooks = l.searchBooks(author, yearStart, yearEnd, univ, searchTitle, searchStart);
-
 		// SIGN IN PAGE
 		VBox signInVBox = new VBox();
 		signInVBox.setAlignment(Pos.CENTER);
@@ -49,18 +51,35 @@ public class LibraryApplication extends Application{
 		PasswordField passwordField = new PasswordField();
 		passwordField.setMaxWidth(200);
 		Button signInButton = new Button("Sign in");
+		Label incorrect = new Label("Incorrect informations");
+		signInButton.setOnAction(signIn->{
+			boolean isAuthentificated = false;
+			for (int i = 0; i < librarians.length(); i++) {
+                JSONObject librarian = librarians.getJSONObject(i);
+                if(librarian.getString("pseudonym").equals(pseudoField.getText()) && librarian.getString("password").equals(passwordField.getText())) {
+                	isAuthentificated = true;
+                	break;
+                }
+            }
+			if (isAuthentificated) {
+				stage.setScene(homePage);
+			}else {
+				incorrect.setVisible(true);
+			}
+		});
 				
-		signInVBox.getChildren().add(pseudonym);
-		signInVBox.getChildren().add(pseudoField);
-		signInVBox.getChildren().add(password);
-		signInVBox.getChildren().add(passwordField);
-		signInVBox.getChildren().add(signInButton);
-		
+		signInVBox.getChildren().addAll(pseudonym,pseudoField,password,passwordField,signInButton,incorrect);
+		incorrect.setVisible(false);
 		
 		// HOME PAGE
-		BorderPane borderPane = new BorderPane();
-		Scene homePage = new Scene(borderPane);
-		
+		String author = "";
+		int yearStart = -1;
+		int yearEnd = -1;
+		String searchTitle = "Dragon ball GT";
+		int searchStart = 1;
+		Universe univ = Universe.NONE;
+		ArrayList<Book> searchedBooks = new ArrayList<Book>();
+				
 		// Top
 		VBox filter = new VBox();
 		filter.setAlignment(Pos.CENTER);
@@ -94,7 +113,12 @@ public class LibraryApplication extends Application{
 		yearEndField.setPromptText("Maximal year");
 		ChoiceBox<Universe> universeBox = new ChoiceBox<>();
 		universeBox.getItems().addAll(Universe.values());
-		filterFields.getChildren().addAll(titleField,authorField,yearStartField,yearEndField,universeBox);
+		ImageView imgSearchFilter = new ImageView(new Image("file:img/search.png"));
+		imgSearchFilter.setFitWidth(15); 
+		imgSearchFilter.setFitHeight(15);
+		Button searchButtonFilter = new Button();
+		searchButtonFilter.setGraphic(imgSearchFilter);
+		filterFields.getChildren().addAll(titleField,authorField,yearStartField,yearEndField,universeBox,searchButtonFilter);
 		filter.getChildren().addAll(idSearch,idFields,filterSearch,filterFields);
 		
 		
@@ -145,7 +169,7 @@ public class LibraryApplication extends Application{
 		borderPane.setTop(filter);
 		borderPane.setCenter(scrollBook);
 		borderPane.setBottom(changePage);
-		stage.setScene(homePage);
+		stage.setScene(signInPage);
 		stage.show();
 	}
 	

@@ -29,7 +29,7 @@ public class Librarian {
 	private String password;
 	private ArrayList<Customer> customers;
 	private ArrayList<Loan> loans;
-	private static final String filePath = "data/LibraryData.json";
+	protected static final String filePath = "data/LibraryData.json";
 	private JSONObject jsonObject;
 	
     /**
