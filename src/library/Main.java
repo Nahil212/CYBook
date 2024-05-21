@@ -13,7 +13,7 @@ import java.util.Scanner;
 import java.util.ArrayList;
 
 public class Main {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws BookNotInDataBaseException, URISyntaxException, IOException, InterruptedException {
         String inputUsername = "";
         String inputPassword = "";
         Scanner scanner = new Scanner(System.in);
@@ -62,7 +62,7 @@ public class Main {
                     System.out.println("1. List of users");
                     System.out.println("2. List of loans");
                     System.out.println("3. Book");
-                    System.out.println("4. Exit");
+                    System.out.println("4. List of most famous loans");
                     System.out.print("Your choice: ");
                     choice = scanner.nextInt();
                     scanner.nextLine();
@@ -135,21 +135,21 @@ public class Main {
                         choice = scanner.nextInt();
                         scanner.nextLine();
 
-                    if (choice == 1) {  //ajouter  isIdentifierOverBorrowed
-                    System.out.print("Enter the book identifier: ");
-                    String identifier = scanner.nextLine();
+                        if (choice == 1) {
+                            System.out.print("Enter the book identifier: ");
+                            String identifier = scanner.nextLine();
 
-                    System.out.print("Enter the customer ID: ");
-                    int customerId = scanner.nextInt();
-                    scanner.nextLine();
+                            System.out.print("Enter the customer ID: ");
+                            int customerId = scanner.nextInt();
+                            scanner.nextLine();
 
-                    if (currentUser.isIdentifierOverBorrowed(identifier)) {
-                    System.out.println("This book has been borrowed too many times.");
-        } else {
-            Loan newLoan = new Loan(identifier);
-            currentUser.addToDatabaseLoan(newLoan, customerId);
-            System.out.println("Book borrowed successfully!");
-        }
+                            if (currentUser.isIdentifierOverBorrowed(identifier)) {
+                                System.out.println("This book has been borrowed too many times.");
+                            } else {
+                                Loan newLoan = new Loan(identifier);
+                                currentUser.addToDatabaseLoan(newLoan, customerId);
+                                System.out.println("Book borrowed successfully!");
+                            }
                         } else if (choice == 2) {
                             System.out.println("1. Search by ISBN");
                             System.out.println("2. Search by filters");
@@ -228,7 +228,7 @@ public class Main {
                             }
                         }
                     } else if (choice == 4) {
-                        break;
+                        currentUser.MostFamousLoan();
                     } else {
                         System.out.println("Invalid choice. Please try again.");
                     }
