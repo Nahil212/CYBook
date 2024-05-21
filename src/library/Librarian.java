@@ -24,6 +24,17 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Constructor for the Librarian class.
+  * @param pseudonym The pseudonym of the librarian.
+  * @param password  The password of the librarian. 
+  * @param list of customers.
+  * @param list of loans.
+  * @param The file path to the library data JSON file.
+  * @param The JSON object representing the library data.
+ */
+
+
 public class Librarian {
 	private String pseudonym;
 	private String password;
@@ -50,7 +61,12 @@ public class Librarian {
 			e.printStackTrace();
 		}
 	}
-    
+
+       /**
+ 	* Loads data from a file and initializes the next IDs for Customer and Loan classes.
+ 	*
+ 	* @return boolean indicating success or failure
+ 	*/	
     private boolean loadData() {
 		try {
 			String content = new String(Files.readAllBytes(Paths.get(filePath)));
@@ -69,6 +85,12 @@ public class Librarian {
 		}
 	}
     
+/**
+ * Authenticates a librarian by checking the pseudonym and password against stored data.
+ *
+ * @return boolean indicating whether authentication was successful
+ */
+
     private boolean authentificate() {
     	boolean isAuthenticated = false;
 		try {
@@ -87,7 +109,11 @@ public class Librarian {
 		}
 		return isAuthenticated;
     }
-    
+
+	
+/**
+ * Fetches customers and their loans from the JSON object and populates the respective lists.
+ */
     protected void fetchCustomers() {
 		try {
 			JSONArray customersArray = this.jsonObject.getJSONArray("customers");
@@ -124,7 +150,10 @@ public class Librarian {
 			e.printStackTrace();
 		}
 	}
-	
+/**
+ * Fetches loans from the JSON object and populates the loans list.
+ */
+
     protected void fetchLoans() {
 		try {
 			JSONArray loansArray = this.jsonObject.getJSONArray("loans");
@@ -147,35 +176,70 @@ public class Librarian {
 			e.printStackTrace();
 		}
 	}
-	
+
+/**
+ * Returns the pseudonym of the librarian.
+ *
+ * @return pseudonym of the librarian
+ */	
     public String getPseudonym() {
 		return pseudonym;
 	}
-	
+/**
+ * Sets the pseudonym of the librarian.
+ *
+ * @param pseudonym the new pseudonym to set
+ */
     public void setPseudonym(String pseudonym) {
 		this.pseudonym = pseudonym;
 	}
+/**
+ * Returns the password of the librarian.
+ *
+ * @return password of the librarian
+ */
 	
     public String getPassword() {
 		return password;
 	}
-	
+/**
+ * Sets the password of the librarian.
+ *
+ * @param password the new password to set
+ */	
     public void setPassword(String password) {
 		this.password = password;
 	}
-	
+/**
+ * Returns the list of customers.
+ *
+ * @return the list of customers
+ */	
     public ArrayList<Customer> getCustomers() {
 		return customers;
 	}
+/**
+ * Sets the list of customers.
+ *
+ * @param customers the new list of customers to set
+ */
 	
     public void setCustomers(ArrayList<Customer> customers) {
 		this.customers = customers;
 	}
-
+/**
+ * Returns the list of loans.
+ *
+ * @return the list of loans
+ */
 		public ArrayList<Loan> getLoans() {
 		return loans;
 	}
-	
+/**
+ * Generates a formatted string containing details of all customers.
+ *
+ * @return formatted string with customer details
+ */	
     public String printCustomers() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("Customers list:\n");
@@ -187,7 +251,11 @@ public class Librarian {
 		}
 		return sb.toString();
 	}
-	
+/**
+ * Generates a formatted string containing details of all loans.
+ *
+ * @return formatted string with loan details
+ */
 	public String printLoans() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("Loans list:\n");
@@ -292,7 +360,12 @@ public class Librarian {
 			throw new EmptyResearchException();
 		}
 	}
-	
+/**
+ * Adds a loan to the database for the given customer.
+ *
+ * @param loan       the loan to add to the database
+ * @param customerId the ID of the customer associated with the loan
+ */
 	public static void addToDatabaseLoan(Loan loan, int customerId) {
 		try {
 			String content = new String(Files.readAllBytes(Paths.get(filePath)));
@@ -334,6 +407,11 @@ public class Librarian {
 			e.printStackTrace();
 		}
 	}
+/**
+ * Adds a customer to the database if not already exists.
+ *
+ * @param customer the customer to add to the database
+ */
 	
 	protected void addToDatabaseCustomer(Customer customer) {
 		try {
@@ -392,7 +470,13 @@ public class Librarian {
 			e.printStackTrace();
 		}
 	}
-	
+
+/**
+ * Updates the database when a loan is returned.
+ *
+ * @param loan the loan to update in the database
+ */
+
 	private void updateDatabaseOnReturn(Loan loan) {
 		try {
 			String content = new String(Files.readAllBytes(Paths.get(filePath)));
@@ -417,7 +501,12 @@ public class Librarian {
 			e.printStackTrace();
 		}
 	}
-	
+
+/**
+ * Marks a loan as returned, updates its effective return date, and checks if it is late.
+ *
+ * @param loan the loan to mark as returned
+ *
 	public void markBack(Loan loan) {
 		for (Loan l : loans) {
 			if (l.getId() == loan.getId()) {
@@ -560,7 +649,13 @@ public class Librarian {
         }
         return (new Book(title,creator,publisher,year,ark,format));
 	}
-	
+
+/**
+ * Checks if an identifier has been borrowed more than 10 times without being returned.
+ *
+ * @param identifier the identifier to check
+ * @return true if the identifier is overborrowed, false otherwise
+ */
 	public boolean isIdentifierOverBorrowed(String identifier) {
 		try {
 			int count = 0;
@@ -579,7 +674,14 @@ public class Librarian {
 		}
 		return false;
 	}
-
+/**
+ * Finds and prints the most borrowed books in the past 30 days.
+ *
+ * @throws BookNotInDataBaseException if a book is not found in the database
+ * @throws URISyntaxException if there is a URI syntax error
+ * @throws IOException if an I/O error occurs
+ * @throws InterruptedException if the operation is interrupted
+ */
 	public void MostFamousLoan() throws BookNotInDataBaseException, URISyntaxException, IOException, InterruptedException {
 
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
