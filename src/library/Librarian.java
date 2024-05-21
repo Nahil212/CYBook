@@ -221,7 +221,7 @@ public class Librarian {
 	 * @throws EmptyResearchException
 	 * @throws BookNotInDataBaseException
 	 */
-	public ArrayList<Book> searchBooks(String creator, int yearStart, int yearEnd, Universe universe, String searchTitle, int startResearch) throws URISyntaxException, IOException, InterruptedException, EmptyResearchException{
+	public ArrayList<Book> searchBooks(String creator, int yearStart, int yearEnd, Universe universe, String searchTitle, int startResearch) throws EmptyResearchException{
 		ArrayList<Book> searchedBooks = new ArrayList<Book>();
 
 		// CREATING THE REQUEST TO THE API
@@ -267,16 +267,16 @@ public class Librarian {
 			if(!(searchTitle == "")) {
 				uri += URLEncoder.encode("bib.title any \""+searchTitle+"\"", StandardCharsets.UTF_8);
 			}
-		uri+= "&startRecord="+startResearch+"&maximumRecords=20&recordSchema=dublincore";
-		HttpRequest getRequest = HttpRequest.newBuilder()
-				.uri(new URI(uri))
-				.GET()
-				.build();
-		HttpClient httpclient = HttpClient.newHttpClient();
-		HttpResponse<String> getResponse = httpclient.send(getRequest, BodyHandlers.ofString());
 
 		// COLLECTING BOOK INFORMATIONS
 		try {
+			uri+= "&startRecord="+startResearch+"&maximumRecords=20&recordSchema=dublincore";
+			HttpRequest getRequest = HttpRequest.newBuilder()
+					.uri(new URI(uri))
+					.GET()
+					.build();
+			HttpClient httpclient = HttpClient.newHttpClient();
+			HttpResponse<String> getResponse = httpclient.send(getRequest, BodyHandlers.ofString());
 			JSONArray record = XML.toJSONObject(getResponse.body()).
 					getJSONObject("srw:searchRetrieveResponse").
 					getJSONObject("srw:records").
@@ -288,7 +288,7 @@ public class Librarian {
 		         searchedBooks.add(createBookFromJSON(obj));
 			}
 			return searchedBooks;
-		}catch(JSONException je) {
+		}catch(JSONException | InterruptedException | IOException | URISyntaxException e) {
 			throw new EmptyResearchException();
 		}
 	}
@@ -435,26 +435,23 @@ public class Librarian {
 	 *
 	 * @param isbn The ISBN (International Standard Book Number) of the book to search for.
 	 * @return A Book object representing the book found in the BNF catalog.
-	 * @throws URISyntaxException If the constructed URI for the BNF API request is malformed.
-	 * @throws IOException If an I/O error occurs while sending the HTTP request or receiving the response.
-	 * @throws InterruptedException If the operation is interrupted while waiting for the HTTP response.
 	 * @throws BookNotInDataBaseException If the book with the provided ISBN is not found in the BNF catalog.
 	 */
-	public Book searchBookFromISBN(long isbn) throws URISyntaxException, IOException, InterruptedException, BookNotInDataBaseException {
+	public Book searchBookFromISBN(long isbn) throws BookNotInDataBaseException{
 		String uri = "http://catalogue.bnf.fr/api/SRU?version=1.2&operation=searchRetrieve&query="+ URLEncoder.encode("bib.isbn= \""+isbn+"\"", StandardCharsets.UTF_8)+"&recordSchema=dublincore";
-		HttpRequest getRequest = HttpRequest.newBuilder()
-				.uri(new URI(uri))
-				.GET()
-				.build();
-		HttpClient httpclient = HttpClient.newHttpClient();
-		HttpResponse<String> getResponse = httpclient.send(getRequest, BodyHandlers.ofString());
 		try {
+			HttpRequest getRequest = HttpRequest.newBuilder()
+					.uri(new URI(uri))
+					.GET()
+					.build();
+			HttpClient httpclient = HttpClient.newHttpClient();
+			HttpResponse<String> getResponse = httpclient.send(getRequest, BodyHandlers.ofString());
 			JSONObject obj = XML.toJSONObject(getResponse.body()).
 					getJSONObject("srw:searchRetrieveResponse").
 					getJSONObject("srw:records").
 					getJSONObject("srw:record");
 			return createBookFromJSON(obj);
-		}catch(JSONException je) {
+		}catch(JSONException | InterruptedException | IOException | URISyntaxException e) {
 			throw new BookNotInDataBaseException();
 		}
 	}
@@ -464,26 +461,23 @@ public class Librarian {
 	 *
 	 * @param issn The ISSN (International Standard Serial Number) of the book to search for.
 	 * @return A Book object representing the book found in the BNF catalog.
-	 * @throws URISyntaxException If the constructed URI for the BNF API request is malformed.
-	 * @throws IOException If an I/O error occurs while sending the HTTP request or receiving the response.
-	 * @throws InterruptedException If the operation is interrupted while waiting for the HTTP response.
 	 * @throws BookNotInDataBaseException If the book with the provided ISSN is not found in the BNF catalog.
 	 */
-	public Book searchBookFromISSN(long issn) throws URISyntaxException, IOException, InterruptedException, BookNotInDataBaseException {
+	public Book searchBookFromISSN(long issn) throws BookNotInDataBaseException {
 		String uri = "http://catalogue.bnf.fr/api/SRU?version=1.2&operation=searchRetrieve&query="+ URLEncoder.encode("bib.issn= \""+issn+"\"", StandardCharsets.UTF_8)+"&recordSchema=dublincore";
-		HttpRequest getRequest = HttpRequest.newBuilder()
-				.uri(new URI(uri))
-				.GET()
-				.build();
-		HttpClient httpclient = HttpClient.newHttpClient();
-		HttpResponse<String> getResponse = httpclient.send(getRequest, BodyHandlers.ofString());
 		try {
+			HttpRequest getRequest = HttpRequest.newBuilder()
+					.uri(new URI(uri))
+					.GET()
+					.build();
+			HttpClient httpclient = HttpClient.newHttpClient();
+			HttpResponse<String> getResponse = httpclient.send(getRequest, BodyHandlers.ofString());
 			JSONObject obj = XML.toJSONObject(getResponse.body()).
 					getJSONObject("srw:searchRetrieveResponse").
 					getJSONObject("srw:records").
 					getJSONObject("srw:record");
 			return createBookFromJSON(obj);
-		}catch(JSONException je) {
+		}catch(URISyntaxException| IOException| InterruptedException| JSONException je) {
 			throw new BookNotInDataBaseException();
 		}
 	}
@@ -498,21 +492,21 @@ public class Librarian {
 	 * @throws InterruptedException If the operation is interrupted while waiting for the HTTP response.
 	 * @throws BookNotInDataBaseException If the book with the provided identifier is not found in the BNF catalog.
 	 */
-	public Book searchBookFromIdentifier(String ark) throws URISyntaxException, IOException, InterruptedException, BookNotInDataBaseException {
+	public Book searchBookFromIdentifier(String ark) throws BookNotInDataBaseException {
 		String uri = "http://catalogue.bnf.fr/api/SRU?version=1.2&operation=searchRetrieve&query="+ URLEncoder.encode("bib.persistentid= \""+ark+"\"", StandardCharsets.UTF_8)+"&recordSchema=dublincore";
-		HttpRequest getRequest = HttpRequest.newBuilder()
-				.uri(new URI(uri))
-				.GET()
-				.build();
-		HttpClient httpclient = HttpClient.newHttpClient();
-		HttpResponse<String> getResponse = httpclient.send(getRequest, BodyHandlers.ofString());
-		try {
-			JSONObject obj = XML.toJSONObject(getResponse.body()).
+		try {	
+			HttpRequest getRequest = HttpRequest.newBuilder()
+					.uri(new URI(uri))
+					.GET()
+					.build();
+			HttpClient httpclient = HttpClient.newHttpClient();
+			HttpResponse<String> getResponse = httpclient.send(getRequest, BodyHandlers.ofString());
+				JSONObject obj = XML.toJSONObject(getResponse.body()).
 					getJSONObject("srw:searchRetrieveResponse").
 					getJSONObject("srw:records").
 					getJSONObject("srw:record");
 			return createBookFromJSON(obj);
-		}catch(JSONException je) {
+		}catch(URISyntaxException| IOException| InterruptedException| JSONException je) {
 			throw new BookNotInDataBaseException();
 		}
 	}

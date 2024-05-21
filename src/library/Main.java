@@ -165,8 +165,7 @@ public class Main {
                                 try {
                                     Book book = currentUser.searchBookFromISBN(isbn);
                                     System.out.println(book);
-                                } catch (IOException | InterruptedException |
-                                         BookNotInDataBaseException | URISyntaxException e) {
+                                } catch (BookNotInDataBaseException e) {
                                     System.out.println("Error: " + e.getClass());
                                 }
                             } else if (searchChoice == 2) {
@@ -219,8 +218,7 @@ public class Main {
                                     for (Book book : searchedBooks) {
                                         System.out.println(book);
                                     }
-                                } catch (IOException | InterruptedException |
-                                         URISyntaxException | EmptyResearchException e) {
+                                } catch (EmptyResearchException e) {
                                     System.out.println("Error: " + e.getClass());
                                 }
                             } else if (choice == 3) {

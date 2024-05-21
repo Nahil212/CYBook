@@ -1,6 +1,8 @@
 package library;
 
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -37,6 +39,7 @@ public class LibraryApplication extends Application{
 		String content = new String(Files.readAllBytes(Paths.get(Librarian.filePath)));
         JSONObject jsonObject = new JSONObject(content);
         JSONArray librarians = jsonObject.getJSONArray("librarians");
+        Librarian librarian = new Librarian("","");
 		
 		// SIGN IN PAGE
 		VBox signInVBox = new VBox();
@@ -55,8 +58,8 @@ public class LibraryApplication extends Application{
 		signInButton.setOnAction(signIn->{
 			boolean isAuthentificated = false;
 			for (int i = 0; i < librarians.length(); i++) {
-                JSONObject librarian = librarians.getJSONObject(i);
-                if(librarian.getString("pseudonym").equals(pseudoField.getText()) && librarian.getString("password").equals(passwordField.getText())) {
+                JSONObject lib = librarians.getJSONObject(i);
+                if(lib.getString("pseudonym").equals(pseudoField.getText()) && lib.getString("password").equals(passwordField.getText())) {
                 	isAuthentificated = true;
                 	break;
                 }
@@ -79,7 +82,7 @@ public class LibraryApplication extends Application{
 		int searchStart = 1;
 		Universe univ = Universe.NONE;
 		ArrayList<Book> searchedBooks = new ArrayList<Book>();
-				
+		
 		// Top
 		VBox filter = new VBox();
 		filter.setAlignment(Pos.CENTER);
@@ -91,7 +94,15 @@ public class LibraryApplication extends Application{
 		idFields.setAlignment(Pos.TOP_CENTER);
 		TextField isbn = new TextField();
 		Button searchISBN = new Button("Search");
-		isbn.setPromptText("ISBN");
+		searchISBN.setOnAction(sI->{
+			searchedBooks.clear();
+			try {
+				Book book = librarian.searchBookFromISBN(Long.parseLong(isbn.getText()));
+				searchedBooks.add(book);
+			}catch(Exception e) {
+				
+			}
+		});
 		TextField issn = new TextField();
 		Button searchISSN = new Button("Search");
 		issn.setPromptText("ISSN");
