@@ -191,8 +191,8 @@ public class LibraryApplication extends Application{
 		
 		// IMPLEMENTATION
 		searchButtonFilter.setOnAction(e->{
-			String title = titleField.getText();
-			String author = authorField.getText();
+			String title = titleField.getText().toString();
+			String author = authorField.getText().toString();
 			int yearStart = -1;
 			int yearEnd = -1;
 			if(!yearStartField.getText().equals("")) {
@@ -202,11 +202,9 @@ public class LibraryApplication extends Application{
 				yearEnd = Integer.parseInt(yearEndField.getText());
 			}
 			Universe univ = universeBox.getSelectionModel().getSelectedItem();
-			System.out.println(title+"\n"+author+"\n"+yearStart+"\n"+yearEnd+"\n"+univ.toString());
 			try {
-				System.out.println("good args");
 				this.searchedBooks = librarian.searchBooks(author, yearStart, yearEnd, univ, title, this.searchStart);
-				//displayBooksInVBox(bookVBox);
+				displayBooksInVBox(bookVBox);
 			}catch(EmptyResearchException eRE) {
 				System.out.println("Error args");
 			}

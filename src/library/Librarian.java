@@ -24,24 +24,22 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Constructor for the Librarian class.
-  * @param pseudonym The pseudonym of the librarian.
-  * @param password  The password of the librarian. 
-  * @param list of customers.
-  * @param list of loans.
-  * @param The file path to the library data JSON file.
-  * @param The JSON object representing the library data.
- */
-
-
-public class Librarian {
-	private String pseudonym;
-	private String password;
-	private ArrayList<Customer> customers;
-	private ArrayList<Loan> loans;
-	protected static final String filePath = "data/LibraryData.json";
-	private JSONObject jsonObject;
+	/**
+	 * Constructor for the Librarian class.
+	  * @param pseudonym The pseudonym of the librarian.
+	  * @param password  The password of the librarian. 
+	  * @param list of customers.
+	  * @param list of loans.
+	  * @param The file path to the library data JSON file.
+	  * @param The JSON object representing the library data.
+	 */
+	public class Librarian {
+		private String pseudonym;
+		private String password;
+		private ArrayList<Customer> customers;
+		private ArrayList<Loan> loans;
+		protected static final String filePath = "data/LibraryData.json";
+		private JSONObject jsonObject;
 	
     /**
      * Constructor for the Librarian class.
@@ -62,11 +60,11 @@ public class Librarian {
 		}
 	}
 
-       /**
- 	* Loads data from a file and initializes the next IDs for Customer and Loan classes.
- 	*
- 	* @return boolean indicating success or failure
- 	*/	
+    /**
+ 	 * Loads data from a file and initializes the next IDs for Customer and Loan classes.
+ 	 *
+ 	 * @return boolean indicating success or failure
+ 	 */	
     private boolean loadData() {
 		try {
 			String content = new String(Files.readAllBytes(Paths.get(filePath)));
@@ -85,12 +83,11 @@ public class Librarian {
 		}
 	}
     
-/**
- * Authenticates a librarian by checking the pseudonym and password against stored data.
- *
- * @return boolean indicating whether authentication was successful
- */
-
+	/**
+	 * Authenticates a librarian by checking the pseudonym and password against stored data.
+	 *
+	 * @return boolean indicating whether authentication was successful
+	 */
     private boolean authentificate() {
     	boolean isAuthenticated = false;
 		try {
@@ -111,9 +108,9 @@ public class Librarian {
     }
 
 	
-/**
- * Fetches customers and their loans from the JSON object and populates the respective lists.
- */
+	/**
+	 * Fetches customers and their loans from the JSON object and populates the respective lists.
+	 */
     protected void fetchCustomers() {
 		try {
 			JSONArray customersArray = this.jsonObject.getJSONArray("customers");
@@ -150,10 +147,10 @@ public class Librarian {
 			e.printStackTrace();
 		}
 	}
-/**
- * Fetches loans from the JSON object and populates the loans list.
- */
 
+    /**
+	 * Fetches loans from the JSON object and populates the loans list.
+	 */
     protected void fetchLoans() {
 		try {
 			JSONArray loansArray = this.jsonObject.getJSONArray("loans");
@@ -177,69 +174,67 @@ public class Librarian {
 		}
 	}
 
-/**
- * Returns the pseudonym of the librarian.
- *
- * @return pseudonym of the librarian
- */	
+	/**
+	 * Returns the pseudonym of the librarian.
+	 *
+	 * @return pseudonym of the librarian
+	 */	
     public String getPseudonym() {
 		return pseudonym;
 	}
-/**
- * Sets the pseudonym of the librarian.
- *
- * @param pseudonym the new pseudonym to set
- */
+	/**
+	 * Sets the pseudonym of the librarian.
+	 *
+	 * @param pseudonym the new pseudonym to set
+	 */
     public void setPseudonym(String pseudonym) {
 		this.pseudonym = pseudonym;
 	}
-/**
- * Returns the password of the librarian.
- *
- * @return password of the librarian
- */
-	
-    public String getPassword() {
+	/**
+	 * Returns the password of the librarian.
+	 *
+	 * @return password of the librarian
+	 */
+	public String getPassword() {
 		return password;
 	}
-/**
- * Sets the password of the librarian.
- *
- * @param password the new password to set
- */	
+	/**
+	 * Sets the password of the librarian.
+	 *
+	 * @param password the new password to set
+	 */	
     public void setPassword(String password) {
 		this.password = password;
 	}
-/**
- * Returns the list of customers.
- *
- * @return the list of customers
- */	
+	/**
+	 * Returns the list of customers.
+	 *
+	 * @return the list of customers
+	 */	
     public ArrayList<Customer> getCustomers() {
 		return customers;
 	}
-/**
- * Sets the list of customers.
- *
- * @param customers the new list of customers to set
- */
-	
+	/**
+	 * Sets the list of customers.
+	 *
+	 * @param customers the new list of customers to set
+	 */
     public void setCustomers(ArrayList<Customer> customers) {
 		this.customers = customers;
 	}
-/**
- * Returns the list of loans.
- *
- * @return the list of loans
- */
-		public ArrayList<Loan> getLoans() {
+	/**
+	 * Returns the list of loans.
+	 *
+	 * @return the list of loans
+	 */
+	public ArrayList<Loan> getLoans() {
 		return loans;
 	}
-/**
- * Generates a formatted string containing details of all customers.
- *
- * @return formatted string with customer details
- */	
+	/**
+	 * Generates a formatted string containing details of all customers.
+	 *
+	 * @return formatted string with customer details
+	 */	
     public String printCustomers() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("Customers list:\n");
@@ -251,11 +246,11 @@ public class Librarian {
 		}
 		return sb.toString();
 	}
-/**
- * Generates a formatted string containing details of all loans.
- *
- * @return formatted string with loan details
- */
+	/**
+	 * Generates a formatted string containing details of all loans.
+	 *
+	 * @return formatted string with loan details
+	 */
 	public String printLoans() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("Loans list:\n");
@@ -283,10 +278,6 @@ public class Librarian {
 	 * @param searchTitle Enter text to search in titles (can be empty)
 	 * @param startResearch Where to start the call of the API so we can manage pages
 	 * @return List of Book object corresponding to filters
-	 * @throws URISyntaxException
-	 * @throws IOException
-	 * @throws InterruptedException
-	 * @throws EmptyResearchException
 	 * @throws BookNotInDataBaseException
 	 */
 	public ArrayList<Book> searchBooks(String creator, int yearStart, int yearEnd, Universe universe, String searchTitle, int startResearch) throws EmptyResearchException{
@@ -295,31 +286,31 @@ public class Librarian {
 		// CREATING THE REQUEST TO THE API
 		String uri = "http://catalogue.bnf.fr/api/SRU?version=1.2&operation=searchRetrieve&query=";
 		uri += URLEncoder.encode("bib.doctype any \"A\"", StandardCharsets.UTF_8);
-		if( !(creator == "") || !(yearStart == -1) || !(yearEnd == -1) || !(universe == Universe.NONE) || !(searchTitle == "")) {
+		if( !(creator.equals("")) || !(yearStart == -1) || !(yearEnd == -1) || !(universe == Universe.NONE) || !(searchTitle.equals(""))) {
 			uri += "+and+";
 		}
-			if(!(creator == "")) {
+			if(!(creator.equals(""))) {
 				uri += URLEncoder.encode("bib.author any \""+creator+"\"", StandardCharsets.UTF_8);
-				if( !(yearStart == -1) || !(yearEnd == -1) || !(universe == Universe.NONE) || !(searchTitle == "")) {
+				if( !(yearStart == -1) || !(yearEnd == -1) || !(universe == Universe.NONE) || !(searchTitle.equals(""))) {
 					uri += "+and+";
 				}
 			}
 			if(!(yearStart == -1) || !(yearEnd == -1)) {
 				if(yearStart == yearEnd) {
 					uri += URLEncoder.encode("bib.publicationdate= \""+yearStart+"\"", StandardCharsets.UTF_8);
-					if(!(universe == Universe.NONE) || !(searchTitle == "")) {
+					if(!(universe == Universe.NONE) || !(searchTitle.equals(""))) {
 						uri += "+and+";
 					}
 				}else {
 					if (yearEnd > -1) {
 						uri += URLEncoder.encode("bib.publicationdate<= \""+yearEnd+"\"", StandardCharsets.UTF_8);
-						if( !(yearStart == -1) || !(universe == Universe.NONE) || !(searchTitle == "")) {
+						if( !(yearStart == -1) || !(universe == Universe.NONE) || !(searchTitle.equals(""))) {
 							uri += "+and+";
 						}
 					}
 					if (yearStart > -1) {
 						uri += URLEncoder.encode("bib.publicationdate>= \""+yearStart+"\"", StandardCharsets.UTF_8);
-						if( !(universe == Universe.NONE) || !(searchTitle == "")) {
+						if( !(universe == Universe.NONE) || !(searchTitle.equals(""))) {
 							uri += "+and+";
 						}
 					}
@@ -327,12 +318,12 @@ public class Librarian {
 			}
 			if(!(universe == Universe.NONE)) {
 				String universes = ""+universe;
-				uri += URLEncoder.encode("bib.doctype all \""+universes+"\"", StandardCharsets.UTF_8);
-				if(!(searchTitle == "")) {
+				uri += URLEncoder.encode("bib.set all \""+universes+"\"", StandardCharsets.UTF_8);
+				if(!(searchTitle.equals(""))) {
 					uri += "+and+";
 				}
 			}
-			if(!(searchTitle == "")) {
+			if(!(searchTitle.equals(""))) {
 				uri += URLEncoder.encode("bib.title any \""+searchTitle+"\"", StandardCharsets.UTF_8);
 			}
 
@@ -360,12 +351,12 @@ public class Librarian {
 			throw new EmptyResearchException();
 		}
 	}
-/**
- * Adds a loan to the database for the given customer.
- *
- * @param loan       the loan to add to the database
- * @param customerId the ID of the customer associated with the loan
- */
+	/**
+	 * Adds a loan to the database for the given customer.
+	 *
+	 * @param loan       the loan to add to the database
+	 * @param customerId the ID of the customer associated with the loan
+	 */
 	public static void addToDatabaseLoan(Loan loan, int customerId) {
 		try {
 			String content = new String(Files.readAllBytes(Paths.get(filePath)));
@@ -407,12 +398,11 @@ public class Librarian {
 			e.printStackTrace();
 		}
 	}
-/**
- * Adds a customer to the database if not already exists.
- *
- * @param customer the customer to add to the database
- */
-	
+	/**
+	 * Adds a customer to the database if not already exists.
+	 *
+	 * @param customer the customer to add to the database
+	 */
 	protected void addToDatabaseCustomer(Customer customer) {
 		try {
 			String content = new String(Files.readAllBytes(Paths.get(filePath)));
@@ -471,12 +461,11 @@ public class Librarian {
 		}
 	}
 
-/**
- * Updates the database when a loan is returned.
- *
- * @param loan the loan to update in the database
- */
-
+	/**
+	 * Updates the database when a loan is returned.
+	 *
+	 * @param loan the loan to update in the database
+	 */
 	private void updateDatabaseOnReturn(Loan loan) {
 		try {
 			String content = new String(Files.readAllBytes(Paths.get(filePath)));
@@ -502,11 +491,12 @@ public class Librarian {
 		}
 	}
 
-/**
- * Marks a loan as returned, updates its effective return date, and checks if it is late.
- *
- * @param loan the loan to mark as returned
- *
+	/**
+	 * Marks a loan as returned, updates its effective return date, and checks if it is late.
+	 *
+	 * @param loan the loan to mark as returned
+	 *
+	 */
 	public void markBack(Loan loan) {
 		for (Loan l : loans) {
 			if (l.getId() == loan.getId()) {
@@ -576,9 +566,6 @@ public class Librarian {
 	 *
 	 * @param ark The ARK (Archival Resource Key) identifier of the book to search for.
 	 * @return A Book object representing the book found in the BNF catalog.
-	 * @throws URISyntaxException If the constructed URI for the BNF API request is malformed.
-	 * @throws IOException If an I/O error occurs while sending the HTTP request or receiving the response.
-	 * @throws InterruptedException If the operation is interrupted while waiting for the HTTP response.
 	 * @throws BookNotInDataBaseException If the book with the provided identifier is not found in the BNF catalog.
 	 */
 	public Book searchBookFromIdentifier(String ark) throws BookNotInDataBaseException {
@@ -620,10 +607,10 @@ public class Librarian {
 		 int year;
 		 String dateString = data.optString("dc:date", "");
 		 if (dateString.contains("-")) {
-               year = Integer.parseInt(dateString.split("-")[0]);
-           } else {
-               year = data.optInt("dc:date", 0);
-           }
+			 year = Integer.parseInt(dateString.split("-")[0]+dateString.split("-")[1])/2;
+         } else {
+             year = data.optInt("dc:date", 0);
+         }
 		 Object titleObj = data.get("dc:title");
         String title = "";
         if (titleObj instanceof JSONArray) {
@@ -650,12 +637,12 @@ public class Librarian {
         return (new Book(title,creator,publisher,year,ark,format));
 	}
 
-/**
- * Checks if an identifier has been borrowed more than 10 times without being returned.
- *
- * @param identifier the identifier to check
- * @return true if the identifier is overborrowed, false otherwise
- */
+	/**
+	 * Checks if an identifier has been borrowed more than 10 times without being returned.
+	 *
+	 * @param identifier the identifier to check
+	 * @return true if the identifier is overborrowed, false otherwise
+	 */
 	public boolean isIdentifierOverBorrowed(String identifier) {
 		try {
 			int count = 0;
@@ -674,14 +661,14 @@ public class Librarian {
 		}
 		return false;
 	}
-/**
- * Finds and prints the most borrowed books in the past 30 days.
- *
- * @throws BookNotInDataBaseException if a book is not found in the database
- * @throws URISyntaxException if there is a URI syntax error
- * @throws IOException if an I/O error occurs
- * @throws InterruptedException if the operation is interrupted
- */
+	/**
+	 * Finds and prints the most borrowed books in the past 30 days.
+	 *
+	 * @throws BookNotInDataBaseException if a book is not found in the database
+	 * @throws URISyntaxException if there is a URI syntax error
+	 * @throws IOException if an I/O error occurs
+	 * @throws InterruptedException if the operation is interrupted
+	 */
 	public void MostFamousLoan() throws BookNotInDataBaseException, URISyntaxException, IOException, InterruptedException {
 
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
@@ -721,8 +708,7 @@ public class Librarian {
 		}
 	}
 
-
-	}
+}
 
 
 
