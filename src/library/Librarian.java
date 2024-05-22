@@ -525,6 +525,7 @@ import java.util.Map;
 					.build();
 			HttpClient httpclient = HttpClient.newHttpClient();
 			HttpResponse<String> getResponse = httpclient.send(getRequest, BodyHandlers.ofString());
+			System.out.println(getResponse.body());
 			JSONObject obj = XML.toJSONObject(getResponse.body()).
 					getJSONObject("srw:searchRetrieveResponse").
 					getJSONObject("srw:records").
@@ -577,7 +578,7 @@ import java.util.Map;
 					.build();
 			HttpClient httpclient = HttpClient.newHttpClient();
 			HttpResponse<String> getResponse = httpclient.send(getRequest, BodyHandlers.ofString());
-				JSONObject obj = XML.toJSONObject(getResponse.body()).
+			JSONObject obj = XML.toJSONObject(getResponse.body()).
 					getJSONObject("srw:searchRetrieveResponse").
 					getJSONObject("srw:records").
 					getJSONObject("srw:record");
@@ -607,7 +608,27 @@ import java.util.Map;
 		 int year;
 		 String dateString = data.optString("dc:date", "");
 		 if (dateString.contains("-")) {
-			 year = Integer.parseInt(dateString.split("-")[0]+dateString.split("-")[1])/2;
+			 try {
+				 year = Integer.parseInt(dateString.split("-")[0]+dateString.split("-")[1])/2;
+			 }catch(NumberFormatException e) {
+				 StringBuilder sb1 = new StringBuilder(dateString.split("-")[0]);
+				 StringBuilder sb2 = new StringBuilder(dateString.split("-")[0]);
+				 for (int i = 0; i < sb1.length(); i++) {
+				        if (sb1.charAt(i) == '.') {
+				            sb1.setCharAt(i, '0');
+				        }
+				        if (sb2.charAt(i) == '.') {
+				            sb2.setCharAt(i, '0');
+				        }
+				 }
+				 int y1 = Integer.parseInt(sb1.toString());
+				 int y2 = Integer.parseInt(sb2.toString());
+				 if(y1>y2) {
+					 year = y1;
+				 }else {
+					 year = (y1+y2)/2;
+				 }
+			 }
          } else {
              year = data.optInt("dc:date", 0);
          }
