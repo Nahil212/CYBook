@@ -1,8 +1,5 @@
 package library;
 
-
-import java.io.IOException;
-import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -27,19 +24,20 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 public class LibraryApplication extends Application{
+	private int searchStart = 1;
+	private ArrayList<Book> searchedBooks = new ArrayList<Book>();
 
 	@Override
 	public void start(Stage stage) throws Exception {
-		
 		stage.setTitle("CY-Book");
 		Image logoshessh = new Image("file:img/book.png");
 		stage.getIcons().add(logoshessh);
 		BorderPane borderPane = new BorderPane();
 		Scene homePage = new Scene(borderPane);
 		String content = new String(Files.readAllBytes(Paths.get(Librarian.filePath)));
-        JSONObject jsonObject = new JSONObject(content);
-        JSONArray librarians = jsonObject.getJSONArray("librarians");
-        Librarian librarian = new Librarian("","");
+	        JSONObject jsonObject = new JSONObject(content);
+	        JSONArray librarians = jsonObject.getJSONArray("librarians");
+	        Librarian librarian = new Librarian("","");
 		
 		// SIGN IN PAGE
 		VBox signInVBox = new VBox();
@@ -75,13 +73,6 @@ public class LibraryApplication extends Application{
 		incorrect.setVisible(false);
 		
 		// HOME PAGE
-		String author = "";
-		int yearStart = -1;
-		int yearEnd = -1;
-		String searchTitle = "Dragon ball GT";
-		int searchStart = 1;
-		Universe univ = Universe.NONE;
-		ArrayList<Book> searchedBooks = new ArrayList<Book>();
 		
 		// Top
 		VBox filter = new VBox();
@@ -99,16 +90,34 @@ public class LibraryApplication extends Application{
 			try {
 				Book book = librarian.searchBookFromISBN(Long.parseLong(isbn.getText()));
 				searchedBooks.add(book);
-			}catch(Exception e) {
-				
+			}catch(BookNotInDataBaseException e) {
+				// to complete
 			}
 		});
 		TextField issn = new TextField();
 		Button searchISSN = new Button("Search");
+		searchISSN.setOnAction(sI->{
+			searchedBooks.clear();
+			try {
+				Book book = librarian.searchBookFromISSN(Long.parseLong(isbn.getText()));
+				searchedBooks.add(book);
+			}catch(BookNotInDataBaseException e) {
+				// to complete
+			}
+		});
 		issn.setPromptText("ISSN");
 		TextField ark = new TextField();
 		Button searchARK = new Button("Search");
 		ark.setPromptText("ARK");
+		searchARK.setOnAction(sI->{
+			searchedBooks.clear();
+			try {
+				Book book = librarian.searchBookFromIdentifier(isbn.getText());
+				searchedBooks.add(book);
+			}catch(BookNotInDataBaseException e) {
+				// to complete
+			}
+		});
 		idFields.getChildren().addAll(isbn,searchISBN,issn,searchISSN,ark,searchARK);
 		
 		Label filterSearch = new Label("Search by filters");
@@ -124,6 +133,7 @@ public class LibraryApplication extends Application{
 		yearEndField.setPromptText("Maximal year");
 		ChoiceBox<Universe> universeBox = new ChoiceBox<>();
 		universeBox.getItems().addAll(Universe.values());
+		universeBox.setValue(Universe.NONE);
 		ImageView imgSearchFilter = new ImageView(new Image("file:img/search.png"));
 		imgSearchFilter.setFitWidth(15); 
 		imgSearchFilter.setFitHeight(15);
@@ -161,9 +171,6 @@ public class LibraryApplication extends Application{
 		scrollBook.setVbarPolicy(ScrollPane.ScrollBarPolicy.ALWAYS);
 		VBox bookVBox = new VBox();
 		bookVBox.setSpacing(10);
-		for(Book book: searchedBooks) {
-			bookVBox.getChildren().add(createBookDisplayer(book));
-		}
 		scrollBook.setContent(bookVBox);
 		
 		
@@ -171,6 +178,7 @@ public class LibraryApplication extends Application{
 		HBox changePage = new HBox();
 		Button precedent = new Button("<<");
 		Button next = new Button(">>");
+		precedent.setVisible(false);
 		changePage.getChildren().addAll(precedent,next);
 		changePage.setAlignment(Pos.CENTER);
 		changePage.setPrefHeight(50);
@@ -180,7 +188,35 @@ public class LibraryApplication extends Application{
 		borderPane.setTop(filter);
 		borderPane.setCenter(scrollBook);
 		borderPane.setBottom(changePage);
-		stage.setScene(signInPage);
+		
+		// IMPLEMENTATION
+		searchButtonFilter.setOnAction(e->{
+			String title = titleField.getText();
+			String author = authorField.getText();
+			int yearStart = -1;
+			int yearEnd = -1;
+			if(!yearStartField.getText().equals("")) {
+				yearStart = Integer.parseInt(yearStartField.getText());
+			}
+			if(!yearEndField.getText().equals("")) {
+				yearEnd = Integer.parseInt(yearEndField.getText());
+			}
+			Universe univ = universeBox.getSelectionModel().getSelectedItem();
+			System.out.println(title+"\n"+author+"\n"+yearStart+"\n"+yearEnd+"\n"+univ.toString());
+			try {
+				System.out.println("good args");
+				this.searchedBooks = librarian.searchBooks(author, yearStart, yearEnd, univ, title, this.searchStart);
+				//displayBooksInVBox(bookVBox);
+			}catch(EmptyResearchException eRE) {
+				System.out.println("Error args");
+			}
+		});
+		
+		next.setOnAction(e->{
+			
+		});
+		
+		stage.setScene(homePage);
 		stage.show();
 	}
 	
@@ -193,6 +229,13 @@ public class LibraryApplication extends Application{
 		Label format = new Label(book.getFormat());
 		bookInfo.getChildren().addAll(title,author,year,publisher,format);
 		return bookInfo;
+	}
+	
+	private void displayBooksInVBox(VBox bookVbox) {
+		bookVbox.getChildren().clear();
+		for(Book book: this.searchedBooks) {
+			bookVbox.getChildren().add(createBookDisplayer(book));
+		}
 	}
 	
 	public static void main(String[] args) {
