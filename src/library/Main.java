@@ -9,6 +9,7 @@ import java.nio.file.Paths;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Map;
 import java.util.Scanner;
 import java.util.ArrayList;
 
@@ -70,7 +71,8 @@ public class Main {
                     if (choice == 1) {
                         System.out.println(currentUser.printCustomers());
                         System.out.println("1. Add a new user");
-                        System.out.println("2. Exit");
+                        System.out.println("2. Update a user");
+                        System.out.println("3. Exit");
                         choice = scanner.nextInt();
                         scanner.nextLine();
 
@@ -87,14 +89,15 @@ public class Main {
                             try {
                                 birthDate = dateFormat.parse(birthDateStr);
                             } catch (ParseException e) {
-                                e.printStackTrace();
+                                System.out.println("Invalid birth date format. Please try again.");
 
                             }
 
                             Customer newCustomer = new Customer(firstName, lastName, birthDate);
                             currentUser.addToDatabaseCustomer(newCustomer);
 
-                        } else if (choice == 2) {
+                        }
+                        else if (choice == 2) {
 
                         }
                     } else if (choice == 2) {
@@ -136,7 +139,7 @@ public class Main {
                         scanner.nextLine();
 
                         if (choice == 1) {
-                            System.out.print("Enter the book identifier: ");
+                            System.out.print("Enter the ark of the book : ");
                             String identifier = scanner.nextLine();
 
                             System.out.print("Enter the customer ID: ");
@@ -148,7 +151,6 @@ public class Main {
                             } else {
                                 Loan newLoan = new Loan(identifier);
                                 currentUser.addToDatabaseLoan(newLoan, customerId);
-                                System.out.println("Book borrowed successfully!");
                             }
                         } else if (choice == 2) {
                             System.out.println("1. Search by ISBN");
@@ -226,7 +228,21 @@ public class Main {
                             }
                         }
                     } else if (choice == 4) {
-                        currentUser.MostFamousLoan();
+                        try {
+                            ArrayList<Map.Entry<Book, Integer>> mostFamousBooksWithCount = currentUser.MostFamousLoan();
+
+                            System.out.println("Most Famous loans:");
+                            for (Map.Entry<Book, Integer> entry : mostFamousBooksWithCount) {
+                                Book book = entry.getKey();
+                                int count = entry.getValue();
+                                System.out.println(book);
+                                System.out.println("Number of loans: " + count);
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+
+
                     } else {
                         System.out.println("Invalid choice. Please try again.");
                     }
