@@ -19,16 +19,10 @@ import org.json.JSONArray;
 import org.json.JSONException; 
 import org.json.JSONObject;
 import org.json.XML;
-
 import java.util.HashMap;
 import java.util.Map;
-import java.util.regex.Pattern;
 
-
-import java.util.*;
-import java.util.stream.Collectors;
-
-/**
+	/**
 	 * Constructor for the Librarian class.
 	  * @param pseudonym The pseudonym of the librarian.
 	  * @param password  The password of the librarian. 
@@ -44,7 +38,7 @@ import java.util.stream.Collectors;
 		private ArrayList<Loan> loans;
 		protected static final String filePath = "data/LibraryData.json";
 		private JSONObject jsonObject;
-
+	
     /**
      * Constructor for the Librarian class.
      *
@@ -54,14 +48,16 @@ import java.util.stream.Collectors;
     public Librarian(String pseudonym, String password) {
 		this.pseudonym = pseudonym;
 		this.password = password;
-		this.customers = new ArrayList<>(); // Initialiser la liste customers ici
-		this.loans = new ArrayList<>();
+		this.customers = new ArrayList<>();
+		this.loans = new ArrayList<>();;
 		try {
 			String content = new String(Files.readAllBytes(Paths.get(filePath)));
 			this.jsonObject = new JSONObject(content);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		this.fetchCustomers();
+		this.fetchLoans();
 	}
 
     /**
@@ -71,6 +67,7 @@ import java.util.stream.Collectors;
  	 */	
     private boolean loadData() {
 		try {
+			JSONObject jsonObject;
 			String content = new String(Files.readAllBytes(Paths.get(filePath)));
 			this.jsonObject = new JSONObject(content);
 
@@ -87,31 +84,6 @@ import java.util.stream.Collectors;
 		}
 	}
     
-	/**
-	 * Authenticates a librarian by checking the pseudonym and password against stored data.
-	 *
-	 * @return boolean indicating whether authentication was successful
-	 */
-    private boolean authentificate() {
-    	boolean isAuthenticated = false;
-		try {
-			String content = new String(Files.readAllBytes(Paths.get(filePath)));
-			JSONObject jsonObject = new JSONObject(content);
-			JSONArray librarians = jsonObject.getJSONArray("librarians");
-			for (int i = 0; i < librarians.length(); i++) {
-				JSONObject librarian = librarians.getJSONObject(i);
-				if (librarian.getString("pseudonym").equals(this.pseudonym) && librarian.getString("password").equals(this.password)) {
-					isAuthenticated = true;
-					break;
-				}
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return isAuthenticated;
-    }
-
-	
 	/**
 	 * Fetches customers and their loans from the JSON object and populates the respective lists.
 	 */
@@ -361,7 +333,6 @@ import java.util.stream.Collectors;
 	 * @param loan       the loan to add to the database
 	 * @param customerId the ID of the customer associated with the loan
 	 */
-
 	public static void addToDatabaseLoan(Loan loan, int customerId) {
 		try {
 			String content = new String(Files.readAllBytes(Paths.get(filePath)));
@@ -373,30 +344,6 @@ import java.util.stream.Collectors;
 			maxIdLoan += 1;
 			loan.setId(maxIdLoan);
 			root.put("maxiIdLoan", maxIdLoan);
-
-			// Regex pattern for validating ARK identifier
-			Pattern arkPattern = Pattern.compile("^ark:/12148/[a-z0-9]{11}$");
-
-			if (!arkPattern.matcher(loan.getIdentifier()).matches()) {
-				System.out.println("Invalid ARK identifier format.");
-				return;
-			}
-
-			// Check if the customer has already borrowed this book and hasn't returned it
-			for (int i = 0; i < customers.length(); i++) {
-				JSONObject customerDetails = customers.getJSONObject(i);
-				if (customerDetails.getInt("idNumber") == customerId) {
-					JSONArray customerLoans = customerDetails.getJSONArray("loans");
-					for (int j = 0; j < customerLoans.length(); j++) {
-						JSONObject existingLoan = customerLoans.getJSONObject(j);
-						if (existingLoan.getString("identifier").equals(loan.getIdentifier()) && !existingLoan.getBoolean("returned")) {
-							System.out.println("The customer has already borrowed this book and has not returned it.");
-							return;
-						}
-					}
-					break;
-				}
-			}
 
 			JSONObject loanDetails = new JSONObject();
 			loanDetails.put("identifier", loan.getIdentifier());
@@ -415,7 +362,6 @@ import java.util.stream.Collectors;
 				if (customerDetails.getInt("idNumber") == customerId) {
 					JSONArray customerLoans = customerDetails.getJSONArray("loans");
 					customerLoans.put(loanDetails);
-					System.out.println("Book borrowed successfully!");
 					break;
 				}
 			}
@@ -428,7 +374,6 @@ import java.util.stream.Collectors;
 			e.printStackTrace();
 		}
 	}
-
 	/**
 	 * Adds a customer to the database if not already exists.
 	 *
@@ -444,14 +389,6 @@ import java.util.stream.Collectors;
 			maxIdCustomer += 1;
 			customer.setIdNumber(maxIdCustomer);
 			root.put("maxiIdCustomer", maxIdCustomer);
-
-			// Regex pattern for validating names
-			Pattern namePattern = Pattern.compile("^[a-zA-ZàâäéèêëîïôöùûüÿçÀÂÄÉÈÊËÎÏÔÖÙÛÜŸÇ-]+$");
-
-			if (!namePattern.matcher(customer.getFirstName()).matches() || !namePattern.matcher(customer.getLastName()).matches()) {
-				System.out.println("Invalid name format.");
-				return;
-			}
 
 			boolean customerExists = false;
 			for (int i = 0; i < customers.length(); i++) {
@@ -486,7 +423,7 @@ import java.util.stream.Collectors;
 				customerDetails.put("loans", customerLoans);
 
 				customers.put(customerDetails);
-				System.out.println("The user has been added :)");
+				System.out.println("the user has been added ::) ");
 
 				try (FileWriter file = new FileWriter(filePath)) {
 					file.write(root.toString(4));
@@ -728,59 +665,46 @@ import java.util.stream.Collectors;
 	 * @throws URISyntaxException if there is a URI syntax error
 	 * @throws IOException if an I/O error occurs
 	 * @throws InterruptedException if the operation is interrupted
-	 * @return mostFamousBooks returns the list of the 20 most borrowed books
 	 */
+	public void MostFamousLoan() throws BookNotInDataBaseException, URISyntaxException, IOException, InterruptedException {
 
-
-	public ArrayList<Map.Entry<Book, Integer>> MostFamousLoan() throws BookNotInDataBaseException, URISyntaxException, IOException, InterruptedException {
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+
 		Date currentDate = new Date();
 
-		String content = new String(Files.readAllBytes(Paths.get(filePath)));
-		JSONObject root = new JSONObject(content);
-		JSONArray loansJson = root.getJSONArray("loans");
+		ArrayList<Loan> loans = getLoans();
 
 		HashMap<String, Integer> loanCount = new HashMap<>();
 
-		for (int i = 0; i < loansJson.length(); i++) {
-			JSONObject loanJson = loansJson.getJSONObject(i);
-			String dateLoanStr = loanJson.getString("dateLoan");
 
-			try {
-				Date dateLoan = sdf.parse(dateLoanStr);
-				long diff = currentDate.getTime() - dateLoan.getTime();
+		for (Loan loan : loans) {
+
+			if (loan.getDateLoan() != null) {
+
+				long diff = currentDate.getTime() - loan.getDateLoan().getTime();
 				long diffDays = diff / (24 * 60 * 60 * 1000);
 
 				if (diffDays <= 30) {
-					String identifier = loanJson.getString("identifier");
+
+					String identifier = loan.getIdentifier();
+
 					loanCount.put(identifier, loanCount.getOrDefault(identifier, 0) + 1);
 				}
-			} catch (Exception e) {
-				e.printStackTrace();
 			}
 		}
 
-		List<Map.Entry<String, Integer>> sortedLoanCount = loanCount.entrySet()
-				.stream()
-				.sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
-				.limit(20)
-				.collect(Collectors.toList());
+		Book currentBook = new Book("", "", "", 0, "","");
+		String ark = "";
 
-		ArrayList<Map.Entry<Book, Integer>> mostFamousBooksWithCount = new ArrayList<>();
-
-		for (Map.Entry<String, Integer> entry : sortedLoanCount) {
-			String ark = entry.getKey();
-			Book currentBook = this.searchBookFromIdentifier(ark);
-			mostFamousBooksWithCount.add(new AbstractMap.SimpleEntry<>(currentBook, entry.getValue()));
+		System.out.println("Most Famous loans:");
+		for (Map.Entry<String, Integer> entry : loanCount.entrySet()) {
+			ark = entry.getKey();
+			currentBook = this.searchBookFromIdentifier(ark);
+			System.out.println(currentBook);
+			System.out.println("Number of loans: " + entry.getValue());
 		}
-
-		return mostFamousBooksWithCount;
 	}
-
-
-
-
-
+	
 	public boolean updateCustomer(int customerId, String newFirstName, String newLastName, String newBirthDate) {
 		boolean updated = false;
 		try {

@@ -101,12 +101,6 @@ public class Customer {
     @Override
     public String toString()
     {
-        return "Customer{" +
-                "idNumber=" + idNumber +
-                ", first name='" + firstName + '\'' +
-                ", last name='" + lastName + '\'' +
-                ", Date of birth='" + birthDate + '\'' +
-                ", number of loan='" + this.loans.size() +
-                '}';
+        return this.getIdNumber()+") "+this.getFirstName()+" "+this.getLastName();
     }
 }
