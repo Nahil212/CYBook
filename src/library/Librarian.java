@@ -728,7 +728,34 @@ import java.util.Map;
 			System.out.println("Number of loans: " + entry.getValue());
 		}
 	}
+		
+	public boolean updateCustomer(int customerId, String newFirstName, String newLastName, String newBirthDate) {
+		boolean updated = false;
+		try {
+			String content = new String(Files.readAllBytes(Paths.get(filePath)));
+			JSONObject root = new JSONObject(content);
+			JSONArray customers = root.getJSONArray("customers");
 
+			for (int i = 0; i < customers.length(); i++) {
+				JSONObject customer = customers.getJSONObject(i);
+				if (customer.getInt("idNumber") == customerId) {
+					customer.put("firstName", newFirstName);
+					customer.put("lastName", newLastName);
+					customer.put("birthDate", newBirthDate);
+					updated = true;
+					break;
+				}
+			}
+
+			try (FileWriter file = new FileWriter(filePath)) {
+				file.write(root.toString(4));
+				file.flush();
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return updated;
+	}
 }
 
 
