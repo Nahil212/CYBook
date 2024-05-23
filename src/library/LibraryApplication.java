@@ -165,6 +165,12 @@ public class LibraryApplication extends Application{
 		loanButton.setGraphic(imgBook);
 		userButton.setGraphic(imgUser);
 		icons.getChildren().addAll(searchButton,loanButton,userButton);
+
+		userButton.setOnAction(e -> {
+			List<Customer> customers = loadCustomers();
+			displayUsers(customers);
+			displayAddCustomerForm();
+		});
 		
 		
 		// Middle
