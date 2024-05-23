@@ -26,6 +26,8 @@ import javafx.stage.Stage;
 public class LibraryApplication extends Application{
 	private int searchStart = 1;
 	private ArrayList<Book> searchedBooks = new ArrayList<Book>();
+	private BorderPane borderPane;
+	private Librarian librarian;
 
 	@Override
 	public void start(Stage stage) throws Exception {
@@ -322,6 +324,205 @@ public class LibraryApplication extends Application{
 			precedent.setVisible(true);
 		}else {
 			precedent.setVisible(false);
+		}
+	}
+
+	// Méthode pour charger les utilisateurs à partir du fichier JSON
+	private List<Customer> loadCustomers() {
+		List<Customer> customers = new ArrayList<>();
+		try {
+			String content = new String(Files.readAllBytes(Paths.get(Librarian.filePath)));
+			JSONObject root = new JSONObject(content);
+			JSONArray customersArray = root.getJSONArray("customers");
+
+			for (int i = 0; i < customersArray.length(); i++) {
+				JSONObject customerObj = customersArray.getJSONObject(i);
+				int id = customerObj.getInt("idNumber");
+				String firstName = customerObj.getString("firstName");
+				String lastName = customerObj.getString("lastName");
+				String birthDateStr = customerObj.getString("birthDate");
+
+				Customer customer = new Customer(id, firstName, lastName, new SimpleDateFormat("yyyy-MM-dd").parse(birthDateStr));
+				customers.add(customer);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return customers;
+	}
+
+	// Méthode pour afficher les utilisateurs sous forme de boutons
+	private void displayUsers(List<Customer> customers) {
+		VBox userListVBox = new VBox();
+		userListVBox.setAlignment(Pos.CENTER);
+		userListVBox.setSpacing(10);
+		for (Customer customer : customers) {
+			Button customerButton = new Button(customer.getFirstName() + " " + customer.getLastName());
+			customerButton.setOnAction(e -> showCustomerOptions(customer));
+			userListVBox.getChildren().add(customerButton);
+		}
+		ScrollPane scrollPane = new ScrollPane(userListVBox);
+		scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.ALWAYS);
+		borderPane.setCenter(scrollPane);
+	}
+
+	// Méthode pour afficher les options de modification du client
+	private void showCustomerOptions(Customer customer) {
+		Stage dialog = new Stage();
+		dialog.initModality(Modality.APPLICATION_MODAL);
+		dialog.initOwner(borderPane.getScene().getWindow());
+
+		VBox dialogVBox = new VBox();
+		dialogVBox.setAlignment(Pos.CENTER);
+		dialogVBox.setSpacing(10);
+
+		Label messageLabel = new Label("Do you want to modify the customer?");
+		Button modifyButton = new Button("Modify");
+		Button showLoansButton = new Button("Show Loans");
+
+		modifyButton.setOnAction(e -> {
+			dialog.close();
+			showCustomerEditDialog(customer);
+		});
+		showLoansButton.setOnAction(e -> {
+			dialog.close();
+			showCustomerLoans(customer);
+		});
+
+		dialogVBox.getChildren().addAll(messageLabel, modifyButton, showLoansButton);
+
+		Scene dialogScene = new Scene(dialogVBox, 300, 200);
+		dialog.setScene(dialogScene);
+		dialog.show();
+	}
+
+	// Méthode pour afficher la boîte de dialogue de modification du client
+	private void showCustomerEditDialog(Customer customer) {
+		Stage editDialog = new Stage();
+		editDialog.initModality(Modality.APPLICATION_MODAL);
+		editDialog.initOwner(borderPane.getScene().getWindow());
+
+		VBox editVBox = new VBox();
+		editVBox.setAlignment(Pos.CENTER);
+		editVBox.setSpacing(10);
+
+		TextField idField = new TextField(String.valueOf(customer.getIdNumber()));
+		idField.setEditable(false);
+		TextField firstNameField = new TextField(customer.getFirstName());
+		TextField lastNameField = new TextField(customer.getLastName());
+		TextField birthDateField = new TextField(new SimpleDateFormat("yyyy-MM-dd").format(customer.getBirthDate()));
+		Button updateButton = new Button("Update");
+
+		updateButton.setOnAction(e -> {
+			boolean success = librarian.updateCustomer(
+					customer.getIdNumber(),
+					firstNameField.getText(),
+					lastNameField.getText(),
+					birthDateField.getText()
+			);
+			if (success) {
+				editDialog.close();
+				Alert alert = new Alert(AlertType.INFORMATION);
+				alert.setTitle("Success");
+				alert.setHeaderText(null);
+				alert.setContentText("Customer updated successfully.");
+				alert.showAndWait();
+				displayUsers(loadCustomers());
+			} else {
+				Alert alert = new Alert(AlertType.ERROR);
+				alert.setTitle("Error");
+				alert.setHeaderText(null);
+				alert.setContentText("Failed to update customer.");
+				alert.showAndWait();
+			}
+		});
+
+		editVBox.getChildren().addAll(new Label("ID"), idField, new Label("First Name"), firstNameField, new Label("Last Name"), lastNameField, new Label("Birth Date (yyyy-MM-dd)"), birthDateField, updateButton);
+
+		Scene editDialogScene = new Scene(editVBox, 300, 400);
+		editDialog.setScene(editDialogScene);
+		editDialog.show();
+	}
+
+	// Méthode pour afficher les emprunts d'un client depuis le fichier JSON
+	private void showCustomerLoans(Customer customer) {
+		Stage loansDialog = new Stage();
+		loansDialog.initModality(Modality.APPLICATION_MODAL);
+		loansDialog.initOwner(borderPane.getScene().getWindow());
+
+		VBox loansVBox = new VBox();
+		loansVBox.setAlignment(Pos.CENTER);
+		loansVBox.setSpacing(10);
+
+		try {
+			String content = new String(Files.readAllBytes(Paths.get(Librarian.filePath)));
+			JSONObject root = new JSONObject(content);
+			JSONArray customersArray = root.getJSONArray("customers");
+
+			for (int i = 0; i < customersArray.length(); i++) {
+				JSONObject customerObj = customersArray.getJSONObject(i);
+				if (customerObj.getInt("idNumber") == customer.getIdNumber()) {
+					JSONArray loansArray = customerObj.getJSONArray("loans");
+					for (int j = 0; j < loansArray.length(); j++) {
+						JSONObject loanObj = loansArray.getJSONObject(j);
+						Label loanLabel = new Label("Loan ID: " + loanObj.getInt("loanId")
+								+ ", Identifier: " + loanObj.getString("identifier")
+								+ ", Date Loan: " + loanObj.getString("dateLoan")
+								+ ", Planned Date Back: " + loanObj.getString("plannedDateBack")
+								+ ", Effective Date Back: " + (loanObj.isNull("effectiveDateBack") ? "N/A" : loanObj.getString("effectiveDateBack")));
+						loansVBox.getChildren().add(loanLabel);
+					}
+					break;
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		Scene loansDialogScene = new Scene(loansVBox, 400, 300);
+		loansDialog.setScene(loansDialogScene);
+		loansDialog.show();
+	}
+
+	// Méthode pour afficher le formulaire d'ajout de nouveau client
+	private void displayAddCustomerForm() {
+		VBox addCustomerVBox = new VBox();
+		addCustomerVBox.setAlignment(Pos.CENTER);
+		addCustomerVBox.setSpacing(10);
+
+		TextField firstNameField = new TextField();
+		firstNameField.setPromptText("First Name");
+		TextField lastNameField = new TextField();
+		lastNameField.setPromptText("Last Name");
+		TextField birthDateField = new TextField();
+		birthDateField.setPromptText("Birth Date (yyyy-MM-dd)");
+		Button addButton = new Button("Add Customer");
+
+		addButton.setOnAction(e -> {
+			Customer newCustomer = new Customer(
+					firstNameField.getText(),
+					lastNameField.getText(),
+					parseDate(birthDateField.getText())
+			);
+			librarian.addToDatabaseCustomer(newCustomer);
+			displayUsers(loadCustomers());
+			Alert alert = new Alert(AlertType.INFORMATION);
+			alert.setTitle("Success");
+			alert.setHeaderText(null);
+			alert.setContentText("Customer added successfully.");
+			alert.showAndWait();
+		});
+
+		addCustomerVBox.getChildren().addAll(new Label("Add New Customer"), new Label("First Name"), firstNameField, new Label("Last Name"), lastNameField, new Label("Birth Date (yyyy-MM-dd)"), birthDateField, addButton);
+		borderPane.setTop(addCustomerVBox);
+	}
+
+	private Date parseDate(String dateStr) {
+		try {
+			return new SimpleDateFormat("yyyy-MM-dd").parse(dateStr);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
 		}
 	}
 	
