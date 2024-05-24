@@ -13,6 +13,7 @@ import java.net.http.HttpResponse.BodyHandlers;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Date;
 import org.json.JSONArray;
@@ -20,7 +21,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.XML;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 	/**
 	 * Constructor for the Librarian class.
@@ -666,44 +669,50 @@ import java.util.Map;
 	 * @throws IOException if an I/O error occurs
 	 * @throws InterruptedException if the operation is interrupted
 	 */
-	public void MostFamousLoan() throws BookNotInDataBaseException, URISyntaxException, IOException, InterruptedException {
+	public ArrayList<Map.Entry<Book, Integer>> MostFamousLoan() throws BookNotInDataBaseException, URISyntaxException, IOException, InterruptedException {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        Date currentDate = new Date();
 
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        String content = new String(Files.readAllBytes(Paths.get(filePath)));
+        JSONObject root = new JSONObject(content);
+        JSONArray loansJson = root.getJSONArray("loans");
 
-		Date currentDate = new Date();
+        HashMap<String, Integer> loanCount = new HashMap<>();
 
-		ArrayList<Loan> loans = getLoans();
+        for (int i = 0; i < loansJson.length(); i++) {
+            JSONObject loanJson = loansJson.getJSONObject(i);
+            String dateLoanStr = loanJson.getString("dateLoan");
 
-		HashMap<String, Integer> loanCount = new HashMap<>();
+            try {
+                Date dateLoan = sdf.parse(dateLoanStr);
+                long diff = currentDate.getTime() - dateLoan.getTime();
+                long diffDays = diff / (24 * 60 * 60 * 1000);
 
+                if (diffDays <= 30) {
+                    String identifier = loanJson.getString("identifier");
+                    loanCount.put(identifier, loanCount.getOrDefault(identifier, 0) + 1);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
 
-		for (Loan loan : loans) {
+        List<Map.Entry<String, Integer>> sortedLoanCount = loanCount.entrySet()
+                .stream()
+                .sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
+                .limit(20)
+                .collect(Collectors.toList());
 
-			if (loan.getDateLoan() != null) {
+        ArrayList<Map.Entry<Book, Integer>> mostFamousBooksWithCount = new ArrayList<>();
 
-				long diff = currentDate.getTime() - loan.getDateLoan().getTime();
-				long diffDays = diff / (24 * 60 * 60 * 1000);
+        for (Map.Entry<String, Integer> entry : sortedLoanCount) {
+            String ark = entry.getKey();
+            Book currentBook = this.searchBookFromIdentifier(ark);
+            mostFamousBooksWithCount.add(new AbstractMap.SimpleEntry<>(currentBook, entry.getValue()));
+        }
 
-				if (diffDays <= 30) {
-
-					String identifier = loan.getIdentifier();
-
-					loanCount.put(identifier, loanCount.getOrDefault(identifier, 0) + 1);
-				}
-			}
-		}
-
-		Book currentBook = new Book("", "", "", 0, "","");
-		String ark = "";
-
-		System.out.println("Most Famous loans:");
-		for (Map.Entry<String, Integer> entry : loanCount.entrySet()) {
-			ark = entry.getKey();
-			currentBook = this.searchBookFromIdentifier(ark);
-			System.out.println(currentBook);
-			System.out.println("Number of loans: " + entry.getValue());
-		}
-	}
+        return mostFamousBooksWithCount;
+    }
 	
 	public boolean updateCustomer(int customerId, String newFirstName, String newLastName, String newBirthDate) {
 		boolean updated = false;

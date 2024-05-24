@@ -39,7 +39,7 @@ public class LibraryApplication extends Application{
     private Universe univ=Universe.NONE;
     private ArrayList<Book> searchedBooks = new ArrayList<Book>();
     private Stage loanCreation = new Stage();
-    Librarian librarian = new Librarian("","");
+    private Librarian librarian = new Librarian("","");
     private BorderPane borderPane;
 
     @Override
@@ -174,7 +174,7 @@ public class LibraryApplication extends Application{
         userButton.setGraphic(imgUser);
         icons.getChildren().addAll(searchButton,loanButton,userButton);
         userButton.setOnAction(e -> {
-            List<Customer> customers = loadCustomers();
+            List<Customer> customers = librarian.getCustomers();
             displayUsers(customers);
             displayAddCustomerForm();
         });
@@ -266,7 +266,7 @@ public class LibraryApplication extends Application{
                 this.displayBooksInVBox(bookVBox);
             }catch(EmptyResearchException eRE) {
                 this.displayError(bookVBox, "No result");
-            }catch(NumberFormatException nEFE) {
+            }catch(NumberFormatException nFE) {
                 this.displayError(bookVBox, "Incorrect filter informations");
             }
         });
@@ -368,30 +368,6 @@ public class LibraryApplication extends Application{
         }
     }
 
-    // Méthode pour charger les utilisateurs à partir du fichier JSON
-    private List<Customer> loadCustomers() {
-        List<Customer> customers = new ArrayList<>();
-        try {
-            String content = new String(Files.readAllBytes(Paths.get(Librarian.filePath)));
-            JSONObject root = new JSONObject(content);
-            JSONArray customersArray = root.getJSONArray("customers");
-
-            for (int i = 0; i < customersArray.length(); i++) {
-                JSONObject customerObj = customersArray.getJSONObject(i);
-                int id = customerObj.getInt("idNumber");
-                String firstName = customerObj.getString("firstName");
-                String lastName = customerObj.getString("lastName");
-                String birthDateStr = customerObj.getString("birthDate");
-
-                Customer customer = new Customer(id, firstName, lastName, new SimpleDateFormat("yyyy-MM-dd").parse(birthDateStr));
-                customers.add(customer);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return customers;
-    }
-
     // Méthode pour afficher les utilisateurs sous forme de boutons
     private void displayUsers(List<Customer> customers) {
         VBox userListVBox = new VBox();
@@ -468,7 +444,7 @@ public class LibraryApplication extends Application{
                 alert.setHeaderText(null);
                 alert.setContentText("Customer updated successfully.");
                 alert.showAndWait();
-                displayUsers(loadCustomers());
+                displayUsers(this.librarian.getCustomers());
             } else {
                 Alert alert = new Alert(Alert.AlertType.ERROR);
                 alert.setTitle("Error");
@@ -546,7 +522,7 @@ public class LibraryApplication extends Application{
                     parseDate(birthDateField.getText())
             );
             librarian.addToDatabaseCustomer(newCustomer);
-            displayUsers(loadCustomers());
+            displayUsers(this.librarian.getCustomers());
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
             alert.setTitle("Success");
             alert.setHeaderText(null);
