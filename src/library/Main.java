@@ -26,6 +26,7 @@ public class Main {
         System.out.print("Your choice: ");
         int choice = scanner.nextInt();
         scanner.nextLine();
+        System.out.print("\n");
 
         if (choice == 1) {
             while (!isAuthenticated) {
@@ -33,6 +34,7 @@ public class Main {
                 inputUsername = scanner.nextLine();
                 System.out.print("Enter your password: ");
                 inputPassword = scanner.nextLine();
+                System.out.print("\n");
                 try {
                     String content = new String(Files.readAllBytes(Paths.get(filePath)));
                     JSONObject jsonObject = new JSONObject(content);
@@ -67,6 +69,7 @@ public class Main {
                     System.out.print("Your choice: ");
                     choice = scanner.nextInt();
                     scanner.nextLine();
+                    System.out.print("\n");
 
                     if (choice == 1) {
                         System.out.println(currentUser.printCustomers());
@@ -75,6 +78,7 @@ public class Main {
                         System.out.println("3. Exit");
                         choice = scanner.nextInt();
                         scanner.nextLine();
+                        System.out.print("\n");
 
                         if (choice == 1) {
                             System.out.print("Enter the firstName: ");
@@ -83,6 +87,7 @@ public class Main {
                             String lastName = scanner.nextLine();
                             System.out.print("Enter the birthDate (yyyy-MM-dd): ");
                             String birthDateStr = scanner.nextLine();
+                            System.out.print("\n");
 
                             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
                             Date birthDate = null;
@@ -98,23 +103,9 @@ public class Main {
 
                         }
                         else if (choice == 2) {
-                            System.out.print("Enter the ID of the user to update: ");
-                            int customerId = scanner.nextInt();
-                            scanner.nextLine();
-
-                            System.out.print("Enter the new firstName: ");
-                            String newFirstName = scanner.nextLine();
-                            System.out.print("Enter the new lastName: ");
-                            String newLastName = scanner.nextLine();
-                            System.out.print("Enter the new birthDate (yyyy-MM-dd): ");
-                            String newBirthDate = scanner.nextLine();
-
-                            boolean result = currentUser.updateCustomer(customerId, newFirstName, newLastName, newBirthDate);
-                            if (result) {
-                                System.out.println("User updated successfully!");
-                            } else {
-                                System.out.println("User ID not found. Please try again.");
-                            }
+                            
+                        }
+                        else if (choice == 3) {
 
                         }
                     } else if (choice == 2) {
@@ -123,6 +114,7 @@ public class Main {
                         System.out.println("2. Exit");
                         choice = scanner.nextInt();
                         scanner.nextLine();
+                        System.out.print("\n");
 
 
                             if (choice == 1) {
@@ -154,6 +146,7 @@ public class Main {
                         System.out.println("3. Exit");
                         choice = scanner.nextInt();
                         scanner.nextLine();
+                        System.out.print("\n");
 
                         if (choice == 1) {
                             System.out.print("Enter the ark of the book : ");
@@ -175,6 +168,7 @@ public class Main {
                             System.out.print("Your choice: ");
                             int searchChoice = scanner.nextInt();
                             scanner.nextLine();
+                            System.out.print("\n");
 
                             if (searchChoice == 1) {
                                 System.out.print("Enter the ISBN: ");
@@ -216,7 +210,7 @@ public class Main {
                                 System.out.print("Enter universes (comma separated, options: MUSIC, YOUTH, IMAGEANDMAP, or 'null' to skip): ");
                                 String universesInput = scanner.nextLine();
                                 if (!universesInput.equalsIgnoreCase("null")) {
-                                    try {
+                                	try {
                                         univ = Universe.valueOf(universesInput.toUpperCase());
                                     } catch (IllegalArgumentException e) {
                                         System.out.println("Invalid universe. Please enter a valid universe.");
