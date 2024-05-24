@@ -98,6 +98,23 @@ public class Main {
 
                         }
                         else if (choice == 2) {
+                            System.out.print("Enter the ID of the user to update: ");
+                            int customerId = scanner.nextInt();
+                            scanner.nextLine();
+
+                            System.out.print("Enter the new firstName: ");
+                            String newFirstName = scanner.nextLine();
+                            System.out.print("Enter the new lastName: ");
+                            String newLastName = scanner.nextLine();
+                            System.out.print("Enter the new birthDate (yyyy-MM-dd): ");
+                            String newBirthDate = scanner.nextLine();
+
+                            boolean result = currentUser.updateCustomer(customerId, newFirstName, newLastName, newBirthDate);
+                            if (result) {
+                                System.out.println("User updated successfully!");
+                            } else {
+                                System.out.println("User ID not found. Please try again.");
+                            }
 
                         }
                     } else if (choice == 2) {
@@ -199,7 +216,7 @@ public class Main {
                                 System.out.print("Enter universes (comma separated, options: MUSIC, YOUTH, IMAGEANDMAP, or 'null' to skip): ");
                                 String universesInput = scanner.nextLine();
                                 if (!universesInput.equalsIgnoreCase("null")) {
-                                	try {
+                                    try {
                                         univ = Universe.valueOf(universesInput.toUpperCase());
                                     } catch (IllegalArgumentException e) {
                                         System.out.println("Invalid universe. Please enter a valid universe.");
