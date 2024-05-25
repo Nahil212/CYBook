@@ -5,8 +5,9 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
-import javafx.scene.control.*;
 import javafx.stage.Modality;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -22,16 +23,19 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.util.Callback;
-import java.time.LocalDate;
+
 import java.util.Date;
 import java.util.List;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.DateCell;
+import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.ScrollPane;
@@ -49,6 +53,7 @@ public class LibraryApplication extends Application{
     private Librarian librarian = new Librarian("","");
     private BorderPane borderPane;
     private BorderPane userPane;
+    private BorderPane loanPane;
 
     @Override
     public void start(Stage stage) throws Exception {
@@ -57,12 +62,13 @@ public class LibraryApplication extends Application{
         stage.getIcons().add(logoshessh);
         borderPane = new BorderPane();
         userPane = new BorderPane();
+        loanPane = new BorderPane();
         Scene homePage = new Scene(borderPane);
         Scene userPage = new Scene(userPane);
+        Scene loanPage = new Scene(loanPane);
         String content = new String(Files.readAllBytes(Paths.get(Librarian.filePath)));
         JSONObject jsonObject = new JSONObject(content);
         JSONArray librarians = jsonObject.getJSONArray("librarians");
-        Stage loanCreation = new Stage();
 
         // SIGN IN PAGE
         VBox signInVBox = new VBox();
@@ -174,6 +180,11 @@ public class LibraryApplication extends Application{
         	stage.setScene(homePage);
         });
         Button loanButton = new Button("Loans");
+        loanButton.setOnAction(e->{
+        	this.displayloanCategories();
+        	this.displayloans(this.librarian.getLoans());
+        	stage.setScene(loanPage);
+        });
         Button userButton = new Button("Users");
         icons.getChildren().addAll(searchButton,loanButton,userButton);
         userButton.setOnAction(e -> {
@@ -187,13 +198,18 @@ public class LibraryApplication extends Application{
         icons2.setPrefWidth(150);
         icons2.setSpacing(10);
         Button searchButton2 = new Button("Search");
-        searchButton.setOnAction(e->{
+        searchButton2.setOnAction(e->{
         	stage.setScene(homePage);
         });
         Button loanButton2 = new Button("Loans");
+        loanButton2.setOnAction(e->{
+        	this.displayloanCategories();
+        	this.displayloans(this.librarian.getLoans());
+        	stage.setScene(loanPage);
+        });
         Button userButton2 = new Button("Users");
         icons2.getChildren().addAll(searchButton2,loanButton2,userButton2);
-        userButton.setOnAction(e -> {
+        userButton2.setOnAction(e -> {
             displayUsers(librarian.getCustomers());
             displayAddCustomerForm();
             stage.setScene(userPage);
@@ -208,6 +224,11 @@ public class LibraryApplication extends Application{
         	stage.setScene(homePage);
         });
         Button loanButton3 = new Button("Loans");
+        loanButton3.setOnAction(e->{
+        	this.displayloanCategories();
+        	this.displayloans(this.librarian.getLoans());
+        	stage.setScene(loanPage);
+        });
         Button userButton3 = new Button("Users");
         icons3.getChildren().addAll(searchButton3,loanButton3,userButton3);
         userButton3.setOnAction(e -> {
@@ -240,6 +261,7 @@ public class LibraryApplication extends Application{
         changePage.setSpacing(10);
 
         borderPane.setLeft(icons);
+        loanPane.setLeft(icons2);
         userPane.setLeft(icons3);
         borderPane.setTop(filter);
         borderPane.setCenter(scrollBook);
@@ -462,9 +484,9 @@ public class LibraryApplication extends Application{
             customerGrid.setVgap(10); 
             customerGrid.setAlignment(Pos.CENTER_LEFT);
 
-            Label idLabel = new Label("IdNumber = " + customer.getIdNumber());
-            Label firstNameLabel = new Label("Firstname = " + customer.getFirstName());
-            Label lastNameLabel = new Label("Lastname = " + customer.getLastName());
+            Label idLabel = new Label("" + customer.getIdNumber());
+            Label firstNameLabel = new Label(customer.getFirstName());
+            Label lastNameLabel = new Label(customer.getLastName());
 
             ColumnConstraints column1 = new ColumnConstraints();
             column1.setPercentWidth(30);
@@ -505,7 +527,7 @@ public class LibraryApplication extends Application{
         searchButton.setOnAction(e -> {
             String searchText = searchField.getText().toLowerCase();
             List<Customer> filteredCustomers = new ArrayList<>();
-            for (Customer customer : customers) {
+            for (Customer customer : this.librarian.getCustomers()) {
                 if (customer.getFirstName().toLowerCase().contains(searchText) ||
                         customer.getLastName().toLowerCase().contains(searchText)) {
                     filteredCustomers.add(customer);
@@ -558,15 +580,36 @@ public class LibraryApplication extends Application{
 
         TextField firstNameField = new TextField(customer.getFirstName());
         TextField lastNameField = new TextField(customer.getLastName());
-        TextField birthDateField = new TextField(new SimpleDateFormat("yyyy-MM-dd").format(customer.getBirthDate()));
+        DatePicker datePicker = new DatePicker();
+        Callback<DatePicker, DateCell> dayCellFactory = 
+        	    new Callback<DatePicker, DateCell>() {
+        	        @Override
+        	        public DateCell call(final DatePicker datePicker) {
+        	            return new DateCell() {
+        	                @Override
+        	                public void updateItem(LocalDate date, boolean empty) {
+        	                    super.updateItem(date, empty);
+        	                    if (date.isAfter(LocalDate.now())) {
+        	                        setDisable(true);
+        	                    }
+        	                }
+        	            };
+        	        }
+        	    };
+        datePicker.setValue(customer.getBirthDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
+        datePicker.setDayCellFactory(dayCellFactory);
         Button updateButton = new Button("Update");
 
         updateButton.setOnAction(e -> {
+        	LocalDate localDate = datePicker.getValue();
+        	datePicker.setDayCellFactory(dayCellFactory);
+        	Date date = Date.from(localDate.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
+        	SimpleDateFormat formatDate = new SimpleDateFormat("yyyy-MM-dd");
             boolean success = librarian.updateCustomer(
                     customer.getIdNumber(),
                     firstNameField.getText(),
                     lastNameField.getText(),
-                    birthDateField.getText()
+                    formatDate.format(date)
             );
             if (success) {
                 editDialog.close();
@@ -576,7 +619,6 @@ public class LibraryApplication extends Application{
                 alert.setContentText("Customer updated successfully.");
                 alert.showAndWait();
                 librarian.fetchCustomers();
-                displayUsers(this.librarian.getCustomers());
             } else {
                 Alert alert = new Alert(Alert.AlertType.ERROR);
                 alert.setTitle("Error");
@@ -586,7 +628,7 @@ public class LibraryApplication extends Application{
             }
         });
 
-        editVBox.getChildren().addAll(new Label("First Name"), firstNameField, new Label("Last Name"), lastNameField, new Label("Birth Date (yyyy-MM-dd)"), birthDateField, updateButton);
+        editVBox.getChildren().addAll(new Label("First Name"), firstNameField, new Label("Last Name"), lastNameField, new Label("Birth Date"), datePicker, updateButton);
 
         Scene editDialogScene = new Scene(editVBox, 300, 400);
         editDialog.setScene(editDialogScene);
@@ -600,8 +642,14 @@ public class LibraryApplication extends Application{
         loansDialog.initOwner(userPane.getScene().getWindow());
 
         VBox loansVBox = new VBox();
-        loansVBox.setAlignment(Pos.CENTER);
+        loansVBox.setAlignment(Pos.CENTER_LEFT);
         loansVBox.setSpacing(10);
+        loansVBox.setPadding(new Insets(10));
+
+        Label titleLabel = new Label("Customer's Loans");
+        titleLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
+
+        loansVBox.getChildren().add(titleLabel);
 
         try {
             String content = new String(Files.readAllBytes(Paths.get(Librarian.filePath)));
@@ -614,12 +662,26 @@ public class LibraryApplication extends Application{
                     JSONArray loansArray = customerObj.getJSONArray("loans");
                     for (int j = 0; j < loansArray.length(); j++) {
                         JSONObject loanObj = loansArray.getJSONObject(j);
-                        Label loanLabel = new Label("Loan ID: " + loanObj.getInt("loanId")
-                                + ", Identifier: " + loanObj.getString("identifier")
-                                + ", Date Loan: " + loanObj.getString("dateLoan")
-                                + ", Planned Date Back: " + loanObj.getString("plannedDateBack")
-                                + ", Effective Date Back: " + (loanObj.isNull("effectiveDateBack") ? "N/A" : loanObj.getString("effectiveDateBack")));
-                        loansVBox.getChildren().add(loanLabel);
+
+                        VBox loanGrid = new VBox();
+                        loanGrid.setAlignment(Pos.CENTER_LEFT);
+                        loanGrid.setMaxWidth(Double.MAX_VALUE);
+
+                        Label loanIdLabel = new Label("Loan ID: " + loanObj.getInt("loanId"));
+                        Book book = this.librarian.searchBookFromIdentifier(loanObj.getString("identifier"));
+                        Label bookLabel = new Label(book.getTitle());
+                        Label dateLoanLabel = new Label("Date Loan: " + loanObj.getString("dateLoan"));
+                        Label plannedDateBackLabel = new Label("Planned Date Back: " + loanObj.getString("plannedDateBack"));
+                        Label effectiveDateBackLabel = new Label("Effective Date Back: " + (loanObj.isNull("effectiveDateBack") ? "N/A" : loanObj.getString("effectiveDateBack")));
+                        
+                        loanGrid.getChildren().addAll(loanIdLabel,bookLabel,dateLoanLabel,plannedDateBackLabel,effectiveDateBackLabel);
+
+                        Pane loanPane = new Pane();
+                        loanPane.getChildren().add(loanGrid);
+                        loanPane.setStyle("-fx-background-color: lightgray; -fx-padding: 10 20 10 20; -fx-border-radius: 5; -fx-background-radius: 5; -fx-cursor:hand");
+                        loanPane.setMaxWidth(Double.MAX_VALUE);
+
+                        loansVBox.getChildren().add(loanPane);
                     }
                     break;
                 }
@@ -628,7 +690,16 @@ public class LibraryApplication extends Application{
             e.printStackTrace();
         }
 
-        Scene loansDialogScene = new Scene(loansVBox, 400, 300);
+        ScrollPane scrollPane = new ScrollPane(loansVBox);
+        scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.ALWAYS);
+        scrollPane.setFitToWidth(true);
+
+        VBox mainVBox = new VBox();
+        mainVBox.setAlignment(Pos.CENTER);
+        mainVBox.setSpacing(10);
+        mainVBox.getChildren().add(scrollPane);
+
+        Scene loansDialogScene = new Scene(mainVBox, 600, 400);
         loansDialog.setScene(loansDialogScene);
         loansDialog.show();
     }
@@ -657,25 +728,18 @@ public class LibraryApplication extends Application{
         lastNameField.setPromptText("Last Name");
         lastNameField.setMaxWidth(150);
 
-        Label birthDateLabel = new Label("Birth Date (yyyy-MM-dd)");
-        TextField birthDateField = new TextField();
-        birthDateField.setPromptText("Birth Date (yyyy-MM-dd)");
-        birthDateField.setMaxWidth(150);
-
-        fieldsHBox.getChildren().addAll(firstNameLabel, firstNameField, lastNameLabel, lastNameField, birthDateLabel, birthDateField);
+        DatePicker datePicker = new DatePicker();
+        fieldsHBox.getChildren().addAll(firstNameLabel, firstNameField, lastNameLabel, lastNameField, new Label("Birth date"),datePicker);
 
         Button addButton = new Button("Add Customer");
 
         addButton.setOnAction(e -> {
             Customer newCustomer;
 			try {
-				newCustomer = new Customer(
-				        firstNameField.getText(),
-				        lastNameField.getText(),
-				        parseDate(birthDateField.getText())
-				);
+				LocalDate localDate = datePicker.getValue();
+		        Date date = Date.from(localDate.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
+				newCustomer = new Customer(firstNameField.getText(),lastNameField.getText(),date);
 				librarian.addToDatabaseCustomer(newCustomer);
-	            refreshCustomerList();
 	            displayUsers(this.librarian.getCustomers());
 	            Alert alert = new Alert(Alert.AlertType.INFORMATION);
 	            alert.setTitle("Success");
@@ -698,20 +762,138 @@ public class LibraryApplication extends Application{
         userPane.setTop(container);
     }
 
-    private Date parseDate(String dateStr) {
-        try {
-            return new SimpleDateFormat("yyyy-MM-dd").parse(dateStr);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
+    private void displayloanCategories() {
+        VBox categoriesVBox = new VBox();
+        categoriesVBox.setAlignment(Pos.CENTER);
+        categoriesVBox.setSpacing(20);
+        categoriesVBox.setStyle("-fx-padding: 20; -fx-border-style: solid inside; -fx-border-width: 2; -fx-border-insets: 5; -fx-border-radius: 5; -fx-border-color: gray;");
+
+        Label titleLabel = new Label("Loan Categories");
+        titleLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
+
+        HBox fieldsHBox = new HBox();
+        fieldsHBox.setAlignment(Pos.CENTER);
+        fieldsHBox.setSpacing(10);
+
+        Button notReturnedButton = new Button("Loans Not Returned");
+        notReturnedButton.setPrefWidth(150);
+        Button returnedButton = new Button("Loans Returned");
+        returnedButton.setPrefWidth(150);
+        Button lateButton = new Button("Loans Late");
+        lateButton.setPrefWidth(150);
+
+        notReturnedButton.setOnAction(e -> displayloans(getLoansByCategory("notReturned")));
+        returnedButton.setOnAction(e -> displayloans(getLoansByCategory("returned")));
+        lateButton.setOnAction(e -> displayloans(getLoansByCategory("late")));
+
+        fieldsHBox.getChildren().addAll(notReturnedButton, returnedButton, lateButton);
+
+        categoriesVBox.getChildren().addAll(titleLabel, fieldsHBox);
+
+        VBox container = new VBox();
+        container.setAlignment(Pos.CENTER);
+        container.setSpacing(20);
+        container.getChildren().add(categoriesVBox);
+
+        loanPane.setTop(container);
+    }
+
+    private List<Loan> getLoansByCategory(String category) {
+        List<Loan> loans = librarian.getLoans();
+        List<Loan> filteredLoans = new ArrayList<>();
+
+        for (Loan loan : loans) {
+            switch (category) {
+                case "notReturned":
+                    if (!loan.getReturned()) {
+                        filteredLoans.add(loan);
+                    }
+                    break;
+                case "returned":
+                    if (loan.getReturned()) {
+                        filteredLoans.add(loan);
+                    }
+                    break;
+                case "late":
+                    if (loan.getLate()) {
+                        filteredLoans.add(loan);
+                    }
+                    break;
+            }
         }
+        return filteredLoans;
     }
-    
-    private void refreshCustomerList() {
-        List<Customer> customers = librarian.getCustomers();
-        displayUsers(customers);
+
+    private void displayloans(List<Loan> loans) {
+        VBox loansListVBox = new VBox();
+        loansListVBox.setAlignment(Pos.CENTER_LEFT);
+        loansListVBox.setSpacing(10);
+        loansListVBox.setPadding(new Insets(10));
+
+        for (Loan loan : loans) {
+            GridPane loanGrid = new GridPane();
+            loanGrid.setHgap(20);
+            loanGrid.setVgap(10);
+            loanGrid.setAlignment(Pos.CENTER_LEFT);
+
+            Label loanIdLabel = new Label("Loan ID: " + loan.getId());
+            Label identifierLabel = new Label("Identifier: " + loan.getIdentifier());
+            Label dateLoanLabel = new Label("Date Loan: " + formatDate(loan.getDateLoan()));
+            Label plannedDateBackLabel = new Label("Planned Date Back: " + formatDate(loan.getPlannedDateBack()));
+            Label effectiveDateBackLabel = new Label("Effective Date Back: " + (loan.getEffectiveDateBack() != null ? formatDate(loan.getEffectiveDateBack()) : "N/A"));
+            Label returnedLabel = new Label("Returned: " + (loan.getReturned() ? "Yes" : "No"));
+            Label lateLabel = new Label("Late: " + (loan.getLate() ? "Yes" : "No"));
+
+            ColumnConstraints column1 = new ColumnConstraints();
+            column1.setPercentWidth(14);
+            ColumnConstraints column2 = new ColumnConstraints();
+            column2.setPercentWidth(14);
+            ColumnConstraints column3 = new ColumnConstraints();
+            column3.setPercentWidth(14);
+            ColumnConstraints column4 = new ColumnConstraints();
+            column4.setPercentWidth(14);
+            ColumnConstraints column5 = new ColumnConstraints();
+            column5.setPercentWidth(14);
+            ColumnConstraints column6 = new ColumnConstraints();
+            column6.setPercentWidth(14);
+            ColumnConstraints column7 = new ColumnConstraints();
+            column7.setPercentWidth(14);
+
+            loanGrid.getColumnConstraints().addAll(column1, column2, column3, column4, column5, column6, column7);
+
+            loanGrid.add(loanIdLabel, 0, 0);
+            loanGrid.add(identifierLabel, 1, 0);
+            loanGrid.add(dateLoanLabel, 2, 0);
+            loanGrid.add(plannedDateBackLabel, 3, 0);
+            loanGrid.add(effectiveDateBackLabel, 4, 0);
+            loanGrid.add(returnedLabel, 5, 0);
+            loanGrid.add(lateLabel, 6, 0);
+
+            Pane loanPane = new Pane();
+            loanPane.getChildren().add(loanGrid);
+            loanPane.setStyle("-fx-background-color: lightgray; -fx-padding: 10 20 10 20; -fx-border-radius: 5; -fx-background-radius: 5;");
+
+            loansListVBox.getChildren().add(loanPane);
+        }
+
+        ScrollPane scrollPane = new ScrollPane(loansListVBox);
+        scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.ALWAYS);
+        scrollPane.setFitToWidth(true);
+
+        VBox mainVBox = new VBox();
+        mainVBox.setAlignment(Pos.CENTER);
+        mainVBox.setSpacing(10);
+        mainVBox.getChildren().add(scrollPane);
+
+        VBox.setVgrow(scrollPane, Priority.ALWAYS);
+        BorderPane.setAlignment(mainVBox, Pos.CENTER);
+
+        loanPane.setCenter(mainVBox);
     }
-    
+
+    private String formatDate(Date date) {
+        return new SimpleDateFormat("yyyy-MM-dd").format(date);
+    }
     public static void main(String[] args) {
         launch(args);
     }

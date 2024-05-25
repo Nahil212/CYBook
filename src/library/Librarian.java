@@ -54,30 +54,6 @@ import java.util.stream.Collectors;
 		this.fetchCustomers();
 		this.fetchLoans();
 	}
-
-    /**
- 	 * Loads data from a file and initializes the next IDs for Customer and Loan classes.
- 	 *
- 	 * @return boolean indicating success or failure
- 	 */	
-    private boolean loadData() {
-		try {
-			JSONObject jsonObject;
-			String content = new String(Files.readAllBytes(Paths.get(filePath)));
-			this.jsonObject = new JSONObject(content);
-
-			int maxIdCustomer = this.jsonObject.getInt("maxiIdCustomer");
-			Customer.initializeNextId(maxIdCustomer);
-
-			int maxIdLoan = this.jsonObject.getInt("maxiIdLoan");
-			Loan.initializeNextId(maxIdLoan);
-
-			return true;
-		} catch (IOException e) {
-			e.printStackTrace();
-			return false;
-		}
-	}
     
 	/**
 	 * Fetches customers and their loans from the JSON object and populates the respective lists.
@@ -402,6 +378,7 @@ import java.util.stream.Collectors;
 				customerDetails.put("firstName", customer.getFirstName());
 				customerDetails.put("lastName", customer.getLastName());
 				customerDetails.put("birthDate", new SimpleDateFormat("yyyy-MM-dd").format(customer.getBirthDate()));
+				this.customers.add(customer);
 
 				JSONArray customerLoans = new JSONArray();
 				for (Loan loan : customer.getLoans()) {

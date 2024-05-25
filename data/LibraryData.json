@@ -1,16 +1,36 @@
 {
-	"maxiIdLoan": 1,
-	"maxiIdCustomer": 1,
+    "maxiIdCustomer": 6,
+    "maxiIdLoan": 3,
     "loans": [
         {
+            "identifier": "ark:/12148/cb43555472z",
             "effectiveDateBack": "2024-02-14",
             "late": false,
-            "identifier": "okokokokok",
             "customerId": 1,
             "plannedDateBack": "2024-02-15",
             "dateLoan": "2024-01-15",
-            "loanId": 1,
-            "returned": true
+            "returned": true,
+            "loanId": 1
+        },
+        {
+            "identifier": "ark:/12148/cb474359411",
+            "effectiveDateBack": null,
+            "late": false,
+            "customerId": 5,
+            "plannedDateBack": "2024-06-08",
+            "dateLoan": "2024-05-25",
+            "returned": false,
+            "loanId": 2
+        },
+        {
+            "identifier": "ark:/12148/cb392385106",
+            "effectiveDateBack": null,
+            "late": false,
+            "customerId": 5,
+            "plannedDateBack": "2024-06-08",
+            "dateLoan": "2024-05-25",
+            "returned": false,
+            "loanId": 3
         }
     ],
     "customers": [
@@ -18,15 +38,71 @@
             "firstName": "John",
             "lastName": "Doe",
             "loans": [{
+                "identifier": "ark:/12148/cb43555472z",
                 "effectiveDateBack": "2024-02-14",
                 "late": false,
-                "identifier": "okokokokok",
                 "plannedDateBack": "2024-02-15",
                 "dateLoan": "2024-01-15",
                 "loanId": 1
             }],
             "idNumber": 1,
             "birthDate": "1990-01-01"
+        },
+        {
+            "firstName": "Marius",
+            "lastName": "Brosset",
+            "loans": [],
+            "idNumber": 2,
+            "birthDate": "2010-04-26"
+        },
+        {
+            "firstName": "Zakaria",
+            "lastName": "Leshob",
+            "loans": [],
+            "idNumber": 3,
+            "birthDate": "2003-07-02"
+        },
+        {
+            "firstName": "Travis",
+            "lastName": "Hua",
+            "loans": [],
+            "idNumber": 4,
+            "birthDate": "2003-07-15"
+        },
+        {
+            "firstName": "Rayen",
+            "lastName": "Mezni",
+            "loans": [
+                {
+                    "identifier": "ark:/12148/cb474359411",
+                    "effectiveDateBack": null,
+                    "late": false,
+                    "customerId": 5,
+                    "plannedDateBack": "2024-06-08",
+                    "dateLoan": "2024-05-25",
+                    "returned": false,
+                    "loanId": 2
+                },
+                {
+                    "identifier": "ark:/12148/cb392385106",
+                    "effectiveDateBack": null,
+                    "late": false,
+                    "customerId": 5,
+                    "plannedDateBack": "2024-06-08",
+                    "dateLoan": "2024-05-25",
+                    "returned": false,
+                    "loanId": 3
+                }
+            ],
+            "idNumber": 5,
+            "birthDate": "2003-06-28"
+        },
+        {
+            "firstName": "Nahil",
+            "lastName": "EL BEZZARI",
+            "loans": [],
+            "idNumber": 6,
+            "birthDate": "2024-05-01"
         }
     ],
     "librarians": [{
