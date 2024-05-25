@@ -1,6 +1,7 @@
 package library;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -26,7 +27,6 @@ public class Main {
         System.out.print("Your choice: ");
         int choice = scanner.nextInt();
         scanner.nextLine();
-        System.out.print("\n");
 
         if (choice == 1) {
             while (!isAuthenticated) {
@@ -34,7 +34,6 @@ public class Main {
                 inputUsername = scanner.nextLine();
                 System.out.print("Enter your password: ");
                 inputPassword = scanner.nextLine();
-                System.out.print("\n");
                 try {
                     String content = new String(Files.readAllBytes(Paths.get(filePath)));
                     JSONObject jsonObject = new JSONObject(content);
@@ -69,7 +68,6 @@ public class Main {
                     System.out.print("Your choice: ");
                     choice = scanner.nextInt();
                     scanner.nextLine();
-                    System.out.print("\n");
 
                     if (choice == 1) {
                         System.out.println(currentUser.printCustomers());
@@ -78,7 +76,6 @@ public class Main {
                         System.out.println("3. Exit");
                         choice = scanner.nextInt();
                         scanner.nextLine();
-                        System.out.print("\n");
 
                         if (choice == 1) {
                             System.out.print("Enter the firstName: ");
@@ -87,7 +84,6 @@ public class Main {
                             String lastName = scanner.nextLine();
                             System.out.print("Enter the birthDate (yyyy-MM-dd): ");
                             String birthDateStr = scanner.nextLine();
-                            System.out.print("\n");
 
                             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
                             Date birthDate = null;
@@ -98,14 +94,17 @@ public class Main {
 
                             }
 
-                            Customer newCustomer = new Customer(firstName, lastName, birthDate);
-                            currentUser.addToDatabaseCustomer(newCustomer);
+                            Customer newCustomer;
+							try {
+								newCustomer = new Customer(firstName, lastName, birthDate);
+								 currentUser.addToDatabaseCustomer(newCustomer);
+							} catch (JSONException | IOException | ParseException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
 
                         }
                         else if (choice == 2) {
-                            
-                        }
-                        else if (choice == 3) {
 
                         }
                     } else if (choice == 2) {
@@ -114,7 +113,6 @@ public class Main {
                         System.out.println("2. Exit");
                         choice = scanner.nextInt();
                         scanner.nextLine();
-                        System.out.print("\n");
 
 
                             if (choice == 1) {
@@ -146,7 +144,6 @@ public class Main {
                         System.out.println("3. Exit");
                         choice = scanner.nextInt();
                         scanner.nextLine();
-                        System.out.print("\n");
 
                         if (choice == 1) {
                             System.out.print("Enter the ark of the book : ");
@@ -168,7 +165,6 @@ public class Main {
                             System.out.print("Your choice: ");
                             int searchChoice = scanner.nextInt();
                             scanner.nextLine();
-                            System.out.print("\n");
 
                             if (searchChoice == 1) {
                                 System.out.print("Enter the ISBN: ");
@@ -240,14 +236,11 @@ public class Main {
                         }
                     } else if (choice == 4) {
                         try {
-                            ArrayList<Map.Entry<Book, Integer>> mostFamousBooksWithCount = currentUser.MostFamousLoan();
+                            ArrayList<Book> mostFamousBooksWithCount = currentUser.MostFamousLoan();
 
                             System.out.println("Most Famous loans:");
-                            for (Map.Entry<Book, Integer> entry : mostFamousBooksWithCount) {
-                                Book book = entry.getKey();
-                                int count = entry.getValue();
-                                System.out.println(book);
-                                System.out.println("Number of loans: " + count);
+                            for (Book entry : mostFamousBooksWithCount) {
+                                System.out.println(entry);
                             }
                         } catch (Exception e) {
                             e.printStackTrace();

@@ -1,21 +1,28 @@
 package library;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import javafx.scene.control.*;
 import javafx.stage.Modality;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import javafx.application.Application;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.ColumnConstraints;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.util.Callback;
@@ -41,6 +48,7 @@ public class LibraryApplication extends Application{
     private Stage loanCreation = new Stage();
     private Librarian librarian = new Librarian("","");
     private BorderPane borderPane;
+    private BorderPane userPane;
 
     @Override
     public void start(Stage stage) throws Exception {
@@ -48,7 +56,9 @@ public class LibraryApplication extends Application{
         Image logoshessh = new Image("file:img/book.png");
         stage.getIcons().add(logoshessh);
         borderPane = new BorderPane();
+        userPane = new BorderPane();
         Scene homePage = new Scene(borderPane);
+        Scene userPage = new Scene(userPane);
         String content = new String(Files.readAllBytes(Paths.get(Librarian.filePath)));
         JSONObject jsonObject = new JSONObject(content);
         JSONArray librarians = jsonObject.getJSONArray("librarians");
@@ -96,6 +106,7 @@ public class LibraryApplication extends Application{
         filter.setAlignment(Pos.CENTER);
         filter.setSpacing(10);
         filter.setPrefHeight(125);
+        filter.setStyle("-fx-padding: 20; -fx-border-style: solid inside; -fx-border-width: 2; -fx-border-insets: 5; -fx-border-radius: 5; -fx-border-color: gray;");
 
         Label idSearch = new Label("Search by identifier");
         HBox idFields = new HBox();
@@ -148,35 +159,62 @@ public class LibraryApplication extends Application{
         imgSearchFilter.setFitHeight(15);
         Button searchButtonFilter = new Button();
         searchButtonFilter.setGraphic(imgSearchFilter);
-        filterFields.getChildren().addAll(titleField,authorField,yearStartField,yearEndField,universeBox,searchButtonFilter);
+        Button popularSearch = new Button("Popular");
+        filterFields.getChildren().addAll(popularSearch,titleField,authorField,yearStartField,yearEndField,universeBox,searchButtonFilter);
         filter.getChildren().addAll(idSearch,idFields,filterSearch,filterFields);
 
-
+        
         // Left
         VBox icons = new VBox();
         icons.setAlignment(Pos.TOP_CENTER);
         icons.setPrefWidth(150);
         icons.setSpacing(10);
-        ImageView imgSearch = new ImageView(new Image("file:img/search.png"));
-        ImageView imgBook = new ImageView(new Image("file:img/book.png"));
-        ImageView imgUser = new ImageView(new Image("file:img/user.png"));
-        imgSearch.setFitWidth(75);
-        imgSearch.setFitHeight(75);
-        imgBook.setFitWidth(75);
-        imgBook.setFitHeight(75);
-        imgUser.setFitWidth(75);
-        imgUser.setFitHeight(75);
-        Button searchButton = new Button();
-        Button loanButton = new Button();
-        Button userButton = new Button();
-        searchButton.setGraphic(imgSearch);
-        loanButton.setGraphic(imgBook);
-        userButton.setGraphic(imgUser);
+        Button searchButton = new Button("Search");
+        searchButton.setOnAction(e->{
+        	stage.setScene(homePage);
+        });
+        Button loanButton = new Button("Loans");
+        Button userButton = new Button("Users");
         icons.getChildren().addAll(searchButton,loanButton,userButton);
         userButton.setOnAction(e -> {
+            displayUsers(librarian.getCustomers());
+            displayAddCustomerForm();
+            stage.setScene(userPage);
+        });
+        
+        VBox icons2 = new VBox();
+        icons2.setAlignment(Pos.TOP_CENTER);
+        icons2.setPrefWidth(150);
+        icons2.setSpacing(10);
+        Button searchButton2 = new Button("Search");
+        searchButton.setOnAction(e->{
+        	stage.setScene(homePage);
+        });
+        Button loanButton2 = new Button("Loans");
+        Button userButton2 = new Button("Users");
+        icons2.getChildren().addAll(searchButton2,loanButton2,userButton2);
+        userButton.setOnAction(e -> {
+            displayUsers(librarian.getCustomers());
+            displayAddCustomerForm();
+            stage.setScene(userPage);
+        });
+        
+        VBox icons3 = new VBox();
+        icons3.setAlignment(Pos.TOP_CENTER);
+        icons3.setPrefWidth(150);
+        icons3.setSpacing(10);
+        Button searchButton3 = new Button("Search");
+        searchButton3.setOnAction(e->{
+        	stage.setScene(homePage);
+        });
+        Button loanButton3 = new Button("Loans");
+        Button userButton3 = new Button("Users");
+        icons3.getChildren().addAll(searchButton3,loanButton3,userButton3);
+        userButton3.setOnAction(e -> {
             List<Customer> customers = librarian.getCustomers();
             displayUsers(customers);
             displayAddCustomerForm();
+            stage.setScene(userPage);
         });
 
 
@@ -184,7 +222,9 @@ public class LibraryApplication extends Application{
         ScrollPane scrollBook = new ScrollPane();
         scrollBook.setVbarPolicy(ScrollPane.ScrollBarPolicy.ALWAYS);
         VBox bookVBox = new VBox();
+        bookVBox.setStyle("-fx-padding: 10px;");
         bookVBox.setSpacing(10);
+        bookVBox.setAlignment(Pos.TOP_CENTER);
         scrollBook.setContent(bookVBox);
 
 
@@ -200,11 +240,22 @@ public class LibraryApplication extends Application{
         changePage.setSpacing(10);
 
         borderPane.setLeft(icons);
+        userPane.setLeft(icons3);
         borderPane.setTop(filter);
         borderPane.setCenter(scrollBook);
         borderPane.setBottom(changePage);
 
         // IMPLEMENTATION
+        popularSearch.setOnAction(e->{
+        	this.searchedBooks.clear();
+        	try {
+				this.searchedBooks = this.librarian.MostFamousLoan();
+				this.visibleButton(precedent,next);
+                this.displayBooksInVBox(bookVBox);
+			} catch (MissingDataFileException e1) {
+				this.displayError(bookVBox, "Error while extracting data");
+			}
+        });
         searchISBN.setOnAction(sI->{
             Stage newStage = new Stage();
             newStage.show();
@@ -300,14 +351,19 @@ public class LibraryApplication extends Application{
     private VBox createBookDisplayer(Book book) {
         VBox bookInfo = new VBox();
         Label title = new Label(book.getTitle());
+        title.setStyle("-fx-font-size: 16px;");
         Label author = new Label(book.getCreator());
+        author.setStyle("-fx-font-style: italic;");
         bookInfo.getChildren().addAll(title,author);
-        bookInfo.setStyle("-fx-background-color: blue; -fx-cursor: hand;");
+        bookInfo.setStyle("-fx-background-color: lightgray; -fx-cursor: hand; -fx-padding: 10 20 10 20;-fx-background-radius: 10;");
         bookInfo.setOnMouseClicked(event -> {
             if (event.getButton() == MouseButton.PRIMARY && event.getClickCount() == 1) {
                 ImageView imgBook = new ImageView(new Image("file:img/book.png"));
                 VBox loanVB = new VBox();
+                loanVB.setAlignment(Pos.TOP_CENTER);
+                loanVB.setSpacing(10);
                 HBox infoHB = new HBox();
+                infoHB.setAlignment(Pos.CENTER);
                 VBox infoVB = new VBox(
                         new Label("Title: "+book.getTitle()),
                         new Label("Author(s): "+book.getCreator()),
@@ -315,27 +371,44 @@ public class LibraryApplication extends Application{
                         new Label("Edition: "+book.getPublisher()),
                         new Label("Format: "+book.getFormat()),
                         new Label("Identifier: "+book.getIdentifier()));
-                DatePicker datePicker = new DatePicker();
-                datePicker.setDayCellFactory(new Callback<DatePicker, DateCell>() {
-                    @Override
-                    public DateCell call(DatePicker datePicker) {
-                        return new DateCell() {
-                            @Override
-                            public void updateItem(LocalDate date, boolean empty) {
-                                super.updateItem(date, empty);
-                                if (date.isBefore(LocalDate.now())) {
-                                    setDisable(true);
-                                }
-                            }
-                        };
-                    }
-                });
+                infoVB.setAlignment(Pos.CENTER_LEFT);
+                infoVB.setStyle("-fx-font-size: 16px;");
+                infoVB.setSpacing(10);
                 infoHB.getChildren().addAll(imgBook,infoVB);
                 ChoiceBox<Customer> customerBox = new ChoiceBox<>();
                 customerBox.getItems().addAll(this.librarian.getCustomers());
                 Button loanButton = new Button("Borrow");
-                loanVB.getChildren().addAll(infoHB,datePicker,customerBox,loanButton);
+                loanVB.getChildren().addAll(infoHB,customerBox,loanButton);
                 Scene loanInfoScene = new Scene(loanVB);
+                loanButton.setOnAction(e->{
+                	if(customerBox.getSelectionModel().getSelectedItem()!=null) {
+                		Customer choosen = customerBox.getValue();
+                		if(!(choosen.canBorrow())) {
+                			Alert alert = new Alert(Alert.AlertType.INFORMATION);
+	                        alert.setTitle("Error");
+	                        alert.setHeaderText(null);
+	                        alert.setContentText("This customer can't borrow a book for now");
+	                        alert.showAndWait();
+                		}else if(librarian.isIdentifierOverBorrowed(book.getIdentifier())){
+                			Alert alert = new Alert(Alert.AlertType.INFORMATION);
+	                        alert.setTitle("Error");
+	                        alert.setHeaderText(null);
+	                        alert.setContentText("This book is out of stock for now");
+	                        alert.showAndWait();
+	                        this.loanCreation.close();
+                		}else {
+	                		Loan newLoan = new Loan(book.getIdentifier());
+	                		Librarian.addToDatabaseLoan(newLoan, choosen.getIdNumber());
+	                		Alert alert = new Alert(Alert.AlertType.INFORMATION);
+	                        alert.setTitle("Success");
+	                        alert.setHeaderText(null);
+	                        alert.setContentText("Loan has been registered");
+	                        alert.showAndWait();
+	                        this.loanCreation.close();
+                		}
+                	}
+                	
+                });
                 this.loanCreation.setScene(loanInfoScene);
                 this.loanCreation.show();
             }
@@ -371,16 +444,76 @@ public class LibraryApplication extends Application{
     // Méthode pour afficher les utilisateurs sous forme de boutons
     private void displayUsers(List<Customer> customers) {
         VBox userListVBox = new VBox();
-        userListVBox.setAlignment(Pos.CENTER);
+        userListVBox.setAlignment(Pos.CENTER_LEFT);
         userListVBox.setSpacing(10);
+        userListVBox.setPadding(new Insets(10));
+
+        HBox searchBox = new HBox();
+        searchBox.setAlignment(Pos.CENTER_LEFT);
+        searchBox.setSpacing(10);
+        TextField searchField = new TextField();
+        searchField.setPromptText("Search by name");
+        Button searchButton = new Button("Search");
+        searchBox.getChildren().addAll(searchField, searchButton);
+
         for (Customer customer : customers) {
-            Button customerButton = new Button(customer.getFirstName() + " " + customer.getLastName());
+            GridPane customerGrid = new GridPane();
+            customerGrid.setHgap(20);
+            customerGrid.setVgap(10); 
+            customerGrid.setAlignment(Pos.CENTER_LEFT);
+
+            Label idLabel = new Label("IdNumber = " + customer.getIdNumber());
+            Label firstNameLabel = new Label("Firstname = " + customer.getFirstName());
+            Label lastNameLabel = new Label("Lastname = " + customer.getLastName());
+
+            ColumnConstraints column1 = new ColumnConstraints();
+            column1.setPercentWidth(30);
+            ColumnConstraints column2 = new ColumnConstraints();
+            column2.setPercentWidth(35);
+            ColumnConstraints column3 = new ColumnConstraints();
+            column3.setPercentWidth(35);
+
+            customerGrid.getColumnConstraints().addAll(column1, column2, column3);
+
+            customerGrid.add(idLabel, 0, 0);
+            customerGrid.add(firstNameLabel, 1, 0);
+            customerGrid.add(lastNameLabel, 2, 0);
+
+            Button customerButton = new Button();
+            customerButton.setMaxWidth(Double.MAX_VALUE);
+            customerButton.setGraphic(customerGrid);
+            customerButton.setStyle("-fx-background-color: lightgray; -fx-cursor: hand; -fx-padding: 10 20 10 20;");
+
             customerButton.setOnAction(e -> showCustomerOptions(customer));
             userListVBox.getChildren().add(customerButton);
         }
+
         ScrollPane scrollPane = new ScrollPane(userListVBox);
         scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.ALWAYS);
-        borderPane.setCenter(scrollPane);
+        scrollPane.setFitToWidth(true); // S'assurer que le contenu s'adapte Ã la largeur
+
+        VBox mainVBox = new VBox();
+        mainVBox.setAlignment(Pos.CENTER);
+        mainVBox.setSpacing(10);
+        mainVBox.getChildren().addAll(searchBox, scrollPane);
+
+        VBox.setVgrow(scrollPane, Priority.ALWAYS); // Permettre au ScrollPane de grandir
+        BorderPane.setAlignment(mainVBox, Pos.CENTER);
+
+        userPane.setCenter(mainVBox);
+
+        searchButton.setOnAction(e -> {
+            String searchText = searchField.getText().toLowerCase();
+            List<Customer> filteredCustomers = new ArrayList<>();
+            for (Customer customer : customers) {
+                if (customer.getFirstName().toLowerCase().contains(searchText) ||
+                        customer.getLastName().toLowerCase().contains(searchText)) {
+                    filteredCustomers.add(customer);
+                }
+            }
+            displayUsers(filteredCustomers);
+            searchField.clear();
+        });
     }
 
     // Méthode pour afficher les options de modification du client
@@ -393,7 +526,7 @@ public class LibraryApplication extends Application{
         dialogVBox.setAlignment(Pos.CENTER);
         dialogVBox.setSpacing(10);
 
-        Label messageLabel = new Label("Do you want to modify the customer?");
+        Label messageLabel = new Label("Manage a customer");
         Button modifyButton = new Button("Modify");
         Button showLoansButton = new Button("Show Loans");
 
@@ -417,14 +550,12 @@ public class LibraryApplication extends Application{
     private void showCustomerEditDialog(Customer customer) {
         Stage editDialog = new Stage();
         editDialog.initModality(Modality.APPLICATION_MODAL);
-        editDialog.initOwner(borderPane.getScene().getWindow());
+        editDialog.initOwner(userPane.getScene().getWindow());
 
         VBox editVBox = new VBox();
         editVBox.setAlignment(Pos.CENTER);
         editVBox.setSpacing(10);
 
-        TextField idField = new TextField(String.valueOf(customer.getIdNumber()));
-        idField.setEditable(false);
         TextField firstNameField = new TextField(customer.getFirstName());
         TextField lastNameField = new TextField(customer.getLastName());
         TextField birthDateField = new TextField(new SimpleDateFormat("yyyy-MM-dd").format(customer.getBirthDate()));
@@ -444,6 +575,7 @@ public class LibraryApplication extends Application{
                 alert.setHeaderText(null);
                 alert.setContentText("Customer updated successfully.");
                 alert.showAndWait();
+                librarian.fetchCustomers();
                 displayUsers(this.librarian.getCustomers());
             } else {
                 Alert alert = new Alert(Alert.AlertType.ERROR);
@@ -454,7 +586,7 @@ public class LibraryApplication extends Application{
             }
         });
 
-        editVBox.getChildren().addAll(new Label("ID"), idField, new Label("First Name"), firstNameField, new Label("Last Name"), lastNameField, new Label("Birth Date (yyyy-MM-dd)"), birthDateField, updateButton);
+        editVBox.getChildren().addAll(new Label("First Name"), firstNameField, new Label("Last Name"), lastNameField, new Label("Birth Date (yyyy-MM-dd)"), birthDateField, updateButton);
 
         Scene editDialogScene = new Scene(editVBox, 300, 400);
         editDialog.setScene(editDialogScene);
@@ -465,7 +597,7 @@ public class LibraryApplication extends Application{
     private void showCustomerLoans(Customer customer) {
         Stage loansDialog = new Stage();
         loansDialog.initModality(Modality.APPLICATION_MODAL);
-        loansDialog.initOwner(borderPane.getScene().getWindow());
+        loansDialog.initOwner(userPane.getScene().getWindow());
 
         VBox loansVBox = new VBox();
         loansVBox.setAlignment(Pos.CENTER);
@@ -505,33 +637,65 @@ public class LibraryApplication extends Application{
     private void displayAddCustomerForm() {
         VBox addCustomerVBox = new VBox();
         addCustomerVBox.setAlignment(Pos.CENTER);
-        addCustomerVBox.setSpacing(10);
+        addCustomerVBox.setSpacing(20);
+        addCustomerVBox.setStyle("-fx-padding: 20; -fx-border-style: solid inside; -fx-border-width: 2; -fx-border-insets: 5; -fx-border-radius: 5; -fx-border-color: gray;");
 
+        Label titleLabel = new Label("Add New Customer");
+        titleLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
+
+        HBox fieldsHBox = new HBox();
+        fieldsHBox.setAlignment(Pos.CENTER);
+        fieldsHBox.setSpacing(10);
+
+        Label firstNameLabel = new Label("First Name");
         TextField firstNameField = new TextField();
         firstNameField.setPromptText("First Name");
+        firstNameField.setMaxWidth(150);
+
+        Label lastNameLabel = new Label("Last Name");
         TextField lastNameField = new TextField();
         lastNameField.setPromptText("Last Name");
+        lastNameField.setMaxWidth(150);
+
+        Label birthDateLabel = new Label("Birth Date (yyyy-MM-dd)");
         TextField birthDateField = new TextField();
         birthDateField.setPromptText("Birth Date (yyyy-MM-dd)");
+        birthDateField.setMaxWidth(150);
+
+        fieldsHBox.getChildren().addAll(firstNameLabel, firstNameField, lastNameLabel, lastNameField, birthDateLabel, birthDateField);
+
         Button addButton = new Button("Add Customer");
 
         addButton.setOnAction(e -> {
-            Customer newCustomer = new Customer(
-                    firstNameField.getText(),
-                    lastNameField.getText(),
-                    parseDate(birthDateField.getText())
-            );
-            librarian.addToDatabaseCustomer(newCustomer);
-            displayUsers(this.librarian.getCustomers());
-            Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.setTitle("Success");
-            alert.setHeaderText(null);
-            alert.setContentText("Customer added successfully.");
-            alert.showAndWait();
+            Customer newCustomer;
+			try {
+				newCustomer = new Customer(
+				        firstNameField.getText(),
+				        lastNameField.getText(),
+				        parseDate(birthDateField.getText())
+				);
+				librarian.addToDatabaseCustomer(newCustomer);
+	            refreshCustomerList();
+	            displayUsers(this.librarian.getCustomers());
+	            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+	            alert.setTitle("Success");
+	            alert.setHeaderText(null);
+	            alert.setContentText("Customer added successfully.");
+	            alert.showAndWait();
+			} catch (JSONException | IOException | ParseException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
         });
 
-        addCustomerVBox.getChildren().addAll(new Label("Add New Customer"), new Label("First Name"), firstNameField, new Label("Last Name"), lastNameField, new Label("Birth Date (yyyy-MM-dd)"), birthDateField, addButton);
-        borderPane.setTop(addCustomerVBox);
+        addCustomerVBox.getChildren().addAll(titleLabel, fieldsHBox, addButton);
+
+        VBox container = new VBox();
+        container.setAlignment(Pos.CENTER);
+        container.setSpacing(20);
+        container.getChildren().add(addCustomerVBox);
+
+        userPane.setTop(container);
     }
 
     private Date parseDate(String dateStr) {
@@ -542,8 +706,12 @@ public class LibraryApplication extends Application{
             return null;
         }
     }
-
-
+    
+    private void refreshCustomerList() {
+        List<Customer> customers = librarian.getCustomers();
+        displayUsers(customers);
+    }
+    
     public static void main(String[] args) {
         launch(args);
     }

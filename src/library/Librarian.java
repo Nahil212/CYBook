@@ -25,15 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-	/**
-	 * Constructor for the Librarian class.
-	  * @param pseudonym The pseudonym of the librarian.
-	  * @param password  The password of the librarian. 
-	  * @param list of customers.
-	  * @param list of loans.
-	  * @param The file path to the library data JSON file.
-	  * @param The JSON object representing the library data.
-	 */
+	
 	public class Librarian {
 		private String pseudonym;
 		private String password;
@@ -217,7 +209,7 @@ import java.util.stream.Collectors;
     public String printCustomers() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("Customers list:\n");
-		for (Customer customer : customers) {
+		for (Customer customer : this.getCustomers()) {
 			sb.append("First Name: ").append(customer.getFirstName()).append("\n");
 			sb.append("Last Name: ").append(customer.getLastName()).append("\n");
 			sb.append("Birth Date: ").append(customer.getBirthDate()).append("\n");
@@ -233,7 +225,7 @@ import java.util.stream.Collectors;
 	public String printLoans() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("Loans list:\n");
-		for (Loan loan : loans) {
+		for (Loan loan : this.getLoans()) {
 			sb.append("Loan ID: ").append(loan.getId()).append("\n");
 			sb.append("Identifier: ").append(loan.getIdentifier()).append("\n");
 			sb.append("Date Loan: ").append(loan.getDateLoan()).append("\n");
@@ -663,55 +655,60 @@ import java.util.stream.Collectors;
 	}
 	/**
 	 * Finds and prints the most borrowed books in the past 30 days.
-	 *
+	 * @throws MissingDataFileException 
 	 * @throws BookNotInDataBaseException if a book is not found in the database
 	 * @throws URISyntaxException if there is a URI syntax error
 	 * @throws IOException if an I/O error occurs
 	 * @throws InterruptedException if the operation is interrupted
 	 */
-	public ArrayList<Map.Entry<Book, Integer>> MostFamousLoan() throws BookNotInDataBaseException, URISyntaxException, IOException, InterruptedException {
+	@SuppressWarnings("finally")
+	public ArrayList<Book> MostFamousLoan() throws MissingDataFileException {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         Date currentDate = new Date();
-
-        String content = new String(Files.readAllBytes(Paths.get(filePath)));
-        JSONObject root = new JSONObject(content);
-        JSONArray loansJson = root.getJSONArray("loans");
-
-        HashMap<String, Integer> loanCount = new HashMap<>();
-
-        for (int i = 0; i < loansJson.length(); i++) {
-            JSONObject loanJson = loansJson.getJSONObject(i);
-            String dateLoanStr = loanJson.getString("dateLoan");
-
-            try {
-                Date dateLoan = sdf.parse(dateLoanStr);
-                long diff = currentDate.getTime() - dateLoan.getTime();
-                long diffDays = diff / (24 * 60 * 60 * 1000);
-
-                if (diffDays <= 30) {
-                    String identifier = loanJson.getString("identifier");
-                    loanCount.put(identifier, loanCount.getOrDefault(identifier, 0) + 1);
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+        ArrayList<Book> mostFamousBooksWithCount = new ArrayList<>();
+        try {
+	        String content = new String(Files.readAllBytes(Paths.get(filePath)));
+	        JSONObject root = new JSONObject(content);
+	        JSONArray loansJson = root.getJSONArray("loans");
+	
+	        HashMap<String, Integer> loanCount = new HashMap<>();
+	
+	        for (int i = 0; i < loansJson.length(); i++) {
+	            JSONObject loanJson = loansJson.getJSONObject(i);
+	            String dateLoanStr = loanJson.getString("dateLoan");
+	
+	            try {
+	                Date dateLoan = sdf.parse(dateLoanStr);
+	                long diff = currentDate.getTime() - dateLoan.getTime();
+	                long diffDays = diff / (24 * 60 * 60 * 1000);
+	
+	                if (diffDays <= 30) {
+	                    String identifier = loanJson.getString("identifier");
+	                    loanCount.put(identifier, loanCount.getOrDefault(identifier, 0) + 1);
+	                }
+	            } catch (Exception e) {
+	                e.printStackTrace();
+	            }
+	        }
+	
+	        List<Map.Entry<String, Integer>> sortedLoanCount = loanCount.entrySet()
+	                .stream()
+	                .sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
+	                .limit(20)
+	                .collect(Collectors.toList());
+	
+	        for (Map.Entry<String, Integer> entry : sortedLoanCount) {
+	            String ark = entry.getKey();
+	            Book currentBook = this.searchBookFromIdentifier(ark);
+	            mostFamousBooksWithCount.add(currentBook);
+	        }
+        }catch(JSONException|IOException je) {
+        	throw new MissingDataFileException();
+        }catch(BookNotInDataBaseException bE) {
+        	bE.printStackTrace();
+        }finally{
+        	return mostFamousBooksWithCount;
         }
-
-        List<Map.Entry<String, Integer>> sortedLoanCount = loanCount.entrySet()
-                .stream()
-                .sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
-                .limit(20)
-                .collect(Collectors.toList());
-
-        ArrayList<Map.Entry<Book, Integer>> mostFamousBooksWithCount = new ArrayList<>();
-
-        for (Map.Entry<String, Integer> entry : sortedLoanCount) {
-            String ark = entry.getKey();
-            Book currentBook = this.searchBookFromIdentifier(ark);
-            mostFamousBooksWithCount.add(new AbstractMap.SimpleEntry<>(currentBook, entry.getValue()));
-        }
-
-        return mostFamousBooksWithCount;
     }
 	
 	public boolean updateCustomer(int customerId, String newFirstName, String newLastName, String newBirthDate) {
