@@ -72,23 +72,6 @@ import java.util.stream.Collectors;
 
 				Customer customer = new Customer(id, firstName, lastName, birthDate);
 				this.customers.add(customer);
-
-				JSONArray loansArray = customerObj.getJSONArray("loans");
-				for (int j = 0; j < loansArray.length(); j++) {
-					JSONObject loanObj = loansArray.getJSONObject(j);
-					int loanId = loanObj.getInt("loanId");
-					String identifier = loanObj.getString("identifier");
-					Date dateLoan = sdf.parse(loanObj.getString("dateLoan"));
-					Date plannedDateBack = sdf.parse(loanObj.getString("plannedDateBack"));
-					Date effectiveDateBack = loanObj.isNull("effectiveDateBack") ? null : sdf.parse(loanObj.getString("effectiveDateBack"));
-
-					boolean returned = loanObj.has("returned") && loanObj.getBoolean("returned");
-					boolean late = loanObj.has("late") && loanObj.getBoolean("late");
-
-
-					Loan loan = new Loan(loanId, identifier, dateLoan, plannedDateBack, effectiveDateBack, returned, late);
-					this.loans.add(loan);
-				}
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -99,6 +82,7 @@ import java.util.stream.Collectors;
 	 * Fetches loans from the JSON object and populates the loans list.
 	 */
     protected void fetchLoans() {
+    	this.loans.clear();
 		try {
 			JSONArray loansArray = this.jsonObject.getJSONArray("loans");
 			for (int i = 0; i < loansArray.length(); i++) {
@@ -193,27 +177,6 @@ import java.util.stream.Collectors;
 		}
 		return sb.toString();
 	}
-	/**
-	 * Generates a formatted string containing details of all loans.
-	 *
-	 * @return formatted string with loan details
-	 */
-	public String printLoans() {
-		StringBuilder sb = new StringBuilder();
-		sb.append("Loans list:\n");
-		for (Loan loan : this.getLoans()) {
-			sb.append("Loan ID: ").append(loan.getId()).append("\n");
-			sb.append("Identifier: ").append(loan.getIdentifier()).append("\n");
-			sb.append("Date Loan: ").append(loan.getDateLoan()).append("\n");
-			sb.append("Planned Date Back: ").append(loan.getPlannedDateBack()).append("\n");
-			sb.append("Effective Date Back: ").append(loan.getEffectiveDateBack()).append("\n");
-			sb.append("Late: ").append(loan.getLate()).append("\n");
-			sb.append("Returned: ").append(loan.getReturned()).append("\n");
-			sb.append("CustomerId: ").append(loan.getCustomerId()).append("\n");
-			sb.append("\n");
-		}
-		return sb.toString();
-	}
 	
 	/**
 	 * This method call the BNF API to search a list of book according to filters
@@ -304,7 +267,7 @@ import java.util.stream.Collectors;
 	 * @param loan       the loan to add to the database
 	 * @param customerId the ID of the customer associated with the loan
 	 */
-	public static void addToDatabaseLoan(Loan loan, int customerId) {
+	public void addToDatabaseLoan(Loan loan, int customerId) {
 		try {
 			String content = new String(Files.readAllBytes(Paths.get(filePath)));
 			JSONObject root = new JSONObject(content);
@@ -334,6 +297,12 @@ import java.util.stream.Collectors;
 					JSONArray customerLoans = customerDetails.getJSONArray("loans");
 					customerLoans.put(loanDetails);
 					break;
+				}
+			}
+			this.loans.add(loan);
+			for(Customer customer: this.getCustomers()) {
+				if(customer.getIdNumber()==customerId) {
+					customer.getLoans().add(loan);
 				}
 			}
 
@@ -429,10 +398,14 @@ import java.util.stream.Collectors;
 					break;
 				}
 			}
-
 			try (FileWriter file = new FileWriter(filePath)) {
 				file.write(root.toString(4));
 				file.flush();
+			}
+			for(Loan l: this.getLoans()) {
+				if(l.getId()==loan.getId()) {
+					l.setReturned(true);
+				}
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -714,6 +687,28 @@ import java.util.stream.Collectors;
 			e.printStackTrace();
 		}
 		return updated;
+	}
+	
+	public String printLoans() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Loans list:\n");
+        for (Loan loan : loans) {
+            sb.append("Loan ID: ").append(loan.getId()).append("\n");
+            sb.append("Identifier: ").append(loan.getIdentifier()).append("\n");
+            sb.append("Date Loan: ").append(loan.getDateLoan()).append("\n");
+            sb.append("Planned Date Back: ").append(loan.getPlannedDateBack()).append("\n");
+            sb.append("Effective Date Back: ").append(loan.getEffectiveDateBack()).append("\n");
+            sb.append("Late: ").append(loan.getLate()).append("\n");
+            sb.append("Returned: ").append(loan.getReturned()).append("\n");
+            sb.append("CustomerId: ").append(loan.getCustomerId()).append("\n");
+            sb.append("\n");
+        }
+        return sb.toString();
+    }
+	
+	public static void main(String[] args) {
+		Librarian l = new Librarian("","");
+		System.out.println(l.getLoans());
 	}
 }
 

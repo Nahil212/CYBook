@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.Scanner;
 import java.util.ArrayList;
 
+
 public class Main {
     public static void main(String[] args) throws BookNotInDataBaseException, URISyntaxException, IOException, InterruptedException {
         String inputUsername = "";
@@ -97,7 +98,7 @@ public class Main {
                             Customer newCustomer;
 							try {
 								newCustomer = new Customer(firstName, lastName, birthDate);
-								 currentUser.addToDatabaseCustomer(newCustomer);
+								currentUser.addToDatabaseCustomer(newCustomer);
 							} catch (JSONException | IOException | ParseException e) {
 								// TODO Auto-generated catch block
 								e.printStackTrace();
@@ -105,6 +106,9 @@ public class Main {
 
                         }
                         else if (choice == 2) {
+                            
+                        }
+                        else if (choice == 3) {
 
                         }
                     } else if (choice == 2) {
@@ -239,8 +243,8 @@ public class Main {
                             ArrayList<Book> mostFamousBooksWithCount = currentUser.MostFamousLoan();
 
                             System.out.println("Most Famous loans:");
-                            for (Book entry : mostFamousBooksWithCount) {
-                                System.out.println(entry);
+                            for (Book book: mostFamousBooksWithCount) {
+                                System.out.println(book);
                             }
                         } catch (Exception e) {
                             e.printStackTrace();

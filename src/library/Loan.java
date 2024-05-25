@@ -105,6 +105,9 @@ public class Loan {
     }
 
     public boolean getLate() {
+    	if(!(this.getReturned()) && this.getPlannedDateBack().before(new Date()) ){
+    		this.setLate(true);
+    	}
         return late;
     }
 

@@ -420,7 +420,7 @@ public class LibraryApplication extends Application{
 	                        this.loanCreation.close();
                 		}else {
 	                		Loan newLoan = new Loan(book.getIdentifier());
-	                		Librarian.addToDatabaseLoan(newLoan, choosen.getIdNumber());
+	                		this.librarian.addToDatabaseLoan(newLoan, choosen.getIdNumber());
 	                		Alert alert = new Alert(Alert.AlertType.INFORMATION);
 	                        alert.setTitle("Success");
 	                        alert.setHeaderText(null);
@@ -645,63 +645,78 @@ public class LibraryApplication extends Application{
         loansVBox.setAlignment(Pos.CENTER_LEFT);
         loansVBox.setSpacing(10);
         loansVBox.setPadding(new Insets(10));
-
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         Label titleLabel = new Label("Customer's Loans");
         titleLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
-
-        loansVBox.getChildren().add(titleLabel);
-
+        
         try {
-            String content = new String(Files.readAllBytes(Paths.get(Librarian.filePath)));
-            JSONObject root = new JSONObject(content);
-            JSONArray customersArray = root.getJSONArray("customers");
-
-            for (int i = 0; i < customersArray.length(); i++) {
-                JSONObject customerObj = customersArray.getJSONObject(i);
-                if (customerObj.getInt("idNumber") == customer.getIdNumber()) {
-                    JSONArray loansArray = customerObj.getJSONArray("loans");
-                    for (int j = 0; j < loansArray.length(); j++) {
-                        JSONObject loanObj = loansArray.getJSONObject(j);
-
-                        VBox loanGrid = new VBox();
-                        loanGrid.setAlignment(Pos.CENTER_LEFT);
-                        loanGrid.setMaxWidth(Double.MAX_VALUE);
-
-                        Label loanIdLabel = new Label("Loan ID: " + loanObj.getInt("loanId"));
-                        Book book = this.librarian.searchBookFromIdentifier(loanObj.getString("identifier"));
-                        Label bookLabel = new Label(book.getTitle());
-                        Label dateLoanLabel = new Label("Date Loan: " + loanObj.getString("dateLoan"));
-                        Label plannedDateBackLabel = new Label("Planned Date Back: " + loanObj.getString("plannedDateBack"));
-                        Label effectiveDateBackLabel = new Label("Effective Date Back: " + (loanObj.isNull("effectiveDateBack") ? "N/A" : loanObj.getString("effectiveDateBack")));
-                        
-                        loanGrid.getChildren().addAll(loanIdLabel,bookLabel,dateLoanLabel,plannedDateBackLabel,effectiveDateBackLabel);
-
-                        Pane loanPane = new Pane();
-                        loanPane.getChildren().add(loanGrid);
-                        loanPane.setStyle("-fx-background-color: lightgray; -fx-padding: 10 20 10 20; -fx-border-radius: 5; -fx-background-radius: 5; -fx-cursor:hand");
-                        loanPane.setMaxWidth(Double.MAX_VALUE);
-
-                        loansVBox.getChildren().add(loanPane);
-                    }
-                    break;
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+	        loansVBox.getChildren().add(titleLabel);
+	        for(Loan loanedBook: customer.getLoans()) {
+	        	VBox loanGrid = new VBox();
+		        loanGrid.setAlignment(Pos.CENTER_LEFT);
+		        loanGrid.setMaxWidth(Double.MAX_VALUE);
+		        Book book = this.librarian.searchBookFromIdentifier(loanedBook.getIdentifier());
+		        Label bookLabel = new Label(book.getTitle());
+		        Label dateLoanLabel = new Label("Date Loan: "+sdf.format(loanedBook.getDateLoan()));
+		        Label plannedDateBackLabel = new Label("Planned Date Back: "+sdf.format(loanedBook.getPlannedDateBack()));
+		        Label effectiveDateBackLabel;
+		        if(loanedBook.getEffectiveDateBack()!=null) {
+		        	effectiveDateBackLabel = new Label("Returne Date: "+sdf.format(loanedBook.getEffectiveDateBack())); 
+		        }else {
+		        	effectiveDateBackLabel = new Label("Returne Date: N/A"); 
+		        }
+		        Label returned = new Label("Returned ?: "+loanedBook.getReturned());
+		        Label late = new Label("Late ?: "+loanedBook.getLate());
+		        loanGrid.getChildren().addAll(bookLabel,dateLoanLabel,plannedDateBackLabel,effectiveDateBackLabel,returned,late);
+		        if(!(loanedBook.getReturned())) {
+			        loanGrid.setOnMouseClicked(event -> {
+			        if (event.getButton() == MouseButton.PRIMARY && event.getClickCount() == 1) {
+				        Stage returnStage = new Stage();
+				        VBox returnVBox = new VBox();
+				        HBox returnHBox = new HBox();
+				        Scene returnScene = new Scene(returnVBox);
+				        Button yes = new Button("Yes");
+				        yes.setOnAction(e->{
+				        	this.librarian.markBack(loanedBook);
+				        	Alert alert = new Alert(Alert.AlertType.INFORMATION);
+				            alert.setTitle("Success");
+				            alert.setHeaderText(null);
+				            alert.setContentText("The book has been returned");
+				            alert.showAndWait();
+				            returnStage.close();
+				        });
+				        Button no = new Button("No");
+				        no.setOnAction(e->{
+				        	returnStage.close();
+				        });
+				        returnHBox.getChildren().addAll(yes,no);
+				        returnVBox.getChildren().addAll(new Label("Do you want to return this book ?"),returnHBox);
+				        returnStage.setScene(returnScene);
+				        returnStage.show();
+				        }
+			        });
+		        }
+		        Pane loanPane = new Pane();
+		        loanPane.getChildren().add(loanGrid);
+		        loanPane.setStyle("-fx-background-color: lightgray; -fx-padding: 10 20 10 20; -fx-border-radius: 5; -fx-background-radius: 5; -fx-cursor:hand");
+		        loanPane.setMaxWidth(Double.MAX_VALUE);
+		        loansVBox.getChildren().add(loanPane);
+	        }	        
+	        ScrollPane scrollPane = new ScrollPane(loansVBox);
+	        scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.ALWAYS);
+	        scrollPane.setFitToWidth(true);
+	
+	        VBox mainVBox = new VBox();
+	        mainVBox.setAlignment(Pos.CENTER);
+	        mainVBox.setSpacing(10);
+	        mainVBox.getChildren().add(scrollPane);
+	
+	        Scene loansDialogScene = new Scene(mainVBox, 600, 400);
+	        loansDialog.setScene(loansDialogScene);
+	        loansDialog.show();
+        }catch(Exception e) {
+        	e.printStackTrace();
         }
-
-        ScrollPane scrollPane = new ScrollPane(loansVBox);
-        scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.ALWAYS);
-        scrollPane.setFitToWidth(true);
-
-        VBox mainVBox = new VBox();
-        mainVBox.setAlignment(Pos.CENTER);
-        mainVBox.setSpacing(10);
-        mainVBox.getChildren().add(scrollPane);
-
-        Scene loansDialogScene = new Scene(mainVBox, 600, 400);
-        loansDialog.setScene(loansDialogScene);
-        loansDialog.show();
     }
 
     // Méthode pour afficher le formulaire d'ajout de nouveau client
@@ -799,6 +814,7 @@ public class LibraryApplication extends Application{
     }
 
     private List<Loan> getLoansByCategory(String category) {
+    	this.librarian.fetchLoans();
         List<Loan> loans = librarian.getLoans();
         List<Loan> filteredLoans = new ArrayList<>();
 
@@ -825,70 +841,69 @@ public class LibraryApplication extends Application{
     }
 
     private void displayloans(List<Loan> loans) {
-        VBox loansListVBox = new VBox();
-        loansListVBox.setAlignment(Pos.CENTER_LEFT);
-        loansListVBox.setSpacing(10);
-        loansListVBox.setPadding(new Insets(10));
-
-        for (Loan loan : loans) {
-            GridPane loanGrid = new GridPane();
-            loanGrid.setHgap(20);
-            loanGrid.setVgap(10);
-            loanGrid.setAlignment(Pos.CENTER_LEFT);
-
-            Label loanIdLabel = new Label("Loan ID: " + loan.getId());
-            Label identifierLabel = new Label("Identifier: " + loan.getIdentifier());
-            Label dateLoanLabel = new Label("Date Loan: " + formatDate(loan.getDateLoan()));
-            Label plannedDateBackLabel = new Label("Planned Date Back: " + formatDate(loan.getPlannedDateBack()));
-            Label effectiveDateBackLabel = new Label("Effective Date Back: " + (loan.getEffectiveDateBack() != null ? formatDate(loan.getEffectiveDateBack()) : "N/A"));
-            Label returnedLabel = new Label("Returned: " + (loan.getReturned() ? "Yes" : "No"));
-            Label lateLabel = new Label("Late: " + (loan.getLate() ? "Yes" : "No"));
-
-            ColumnConstraints column1 = new ColumnConstraints();
-            column1.setPercentWidth(14);
-            ColumnConstraints column2 = new ColumnConstraints();
-            column2.setPercentWidth(14);
-            ColumnConstraints column3 = new ColumnConstraints();
-            column3.setPercentWidth(14);
-            ColumnConstraints column4 = new ColumnConstraints();
-            column4.setPercentWidth(14);
-            ColumnConstraints column5 = new ColumnConstraints();
-            column5.setPercentWidth(14);
-            ColumnConstraints column6 = new ColumnConstraints();
-            column6.setPercentWidth(14);
-            ColumnConstraints column7 = new ColumnConstraints();
-            column7.setPercentWidth(14);
-
-            loanGrid.getColumnConstraints().addAll(column1, column2, column3, column4, column5, column6, column7);
-
-            loanGrid.add(loanIdLabel, 0, 0);
-            loanGrid.add(identifierLabel, 1, 0);
-            loanGrid.add(dateLoanLabel, 2, 0);
-            loanGrid.add(plannedDateBackLabel, 3, 0);
-            loanGrid.add(effectiveDateBackLabel, 4, 0);
-            loanGrid.add(returnedLabel, 5, 0);
-            loanGrid.add(lateLabel, 6, 0);
-
-            Pane loanPane = new Pane();
-            loanPane.getChildren().add(loanGrid);
-            loanPane.setStyle("-fx-background-color: lightgray; -fx-padding: 10 20 10 20; -fx-border-radius: 5; -fx-background-radius: 5;");
-
-            loansListVBox.getChildren().add(loanPane);
-        }
-
-        ScrollPane scrollPane = new ScrollPane(loansListVBox);
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        ScrollPane scrollPane = new ScrollPane();
         scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.ALWAYS);
         scrollPane.setFitToWidth(true);
-
-        VBox mainVBox = new VBox();
-        mainVBox.setAlignment(Pos.CENTER);
-        mainVBox.setSpacing(10);
-        mainVBox.getChildren().add(scrollPane);
-
-        VBox.setVgrow(scrollPane, Priority.ALWAYS);
-        BorderPane.setAlignment(mainVBox, Pos.CENTER);
-
-        loanPane.setCenter(mainVBox);
+        
+        VBox loanVbox = new VBox();
+        loanVbox.setSpacing(10);
+        loanVbox.setStyle("-fx-padding: 10 10 10 10;");
+        scrollPane.setContent(loanVbox);
+        try {
+	        for (Loan loanedBook : loans) {
+	        	VBox loanGrid = new VBox();
+	        	loanGrid.setStyle("-fx-padding: 10 10 10 10; -fx-background-color: lightgray; -fx-cursor: hand;");
+		        loanGrid.setAlignment(Pos.CENTER_LEFT);
+		        loanGrid.setMaxWidth(Double.MAX_VALUE);
+		        Book book = this.librarian.searchBookFromIdentifier(loanedBook.getIdentifier());
+		        Label bookLabel = new Label(book.getTitle());
+		        Label dateLoanLabel = new Label("Date Loan: "+sdf.format(loanedBook.getDateLoan()));
+		        Label plannedDateBackLabel = new Label("Planned Date Back: "+sdf.format(loanedBook.getPlannedDateBack()));
+		        Label effectiveDateBackLabel;
+		        if(loanedBook.getEffectiveDateBack()!=null) {
+		        	effectiveDateBackLabel = new Label("Returne Date: "+sdf.format(loanedBook.getEffectiveDateBack())); 
+		        }else {
+		        	effectiveDateBackLabel = new Label("Returne Date: N/A"); 
+		        }
+		        Label returned = new Label("Returned ?: "+loanedBook.getReturned());
+		        Label late = new Label("Late ?: "+loanedBook.getLate());
+		        loanGrid.getChildren().addAll(bookLabel,dateLoanLabel,plannedDateBackLabel,effectiveDateBackLabel,returned,late);
+		        if(!(loanedBook.getReturned())) {
+			        loanGrid.setOnMouseClicked(event -> {
+			        if (event.getButton() == MouseButton.PRIMARY && event.getClickCount() == 1) {
+				        Stage returnStage = new Stage();
+				        VBox returnVBox = new VBox();
+				        HBox returnHBox = new HBox();
+				        Scene returnScene = new Scene(returnVBox);
+				        Button yes = new Button("Yes");
+				        yes.setOnAction(e->{
+				        	this.librarian.markBack(loanedBook);
+				        	this.displayloans(this.librarian.getLoans());
+				        	Alert alert = new Alert(Alert.AlertType.INFORMATION);
+				            alert.setTitle("Success");
+				            alert.setHeaderText(null);
+				            alert.setContentText("The book has been returned");
+				            alert.showAndWait();
+				            returnStage.close();
+				        });
+				        Button no = new Button("No");
+				        no.setOnAction(e->{
+				        	returnStage.close();
+				        });
+				        returnHBox.getChildren().addAll(yes,no);
+				        returnVBox.getChildren().addAll(new Label("Do you want to return this book ?"),returnHBox);
+				        returnStage.setScene(returnScene);
+				        returnStage.show();
+				        }
+			        });
+		        }
+		        loanVbox.getChildren().add(loanGrid);
+	        }
+        }catch(BookNotInDataBaseException be) {
+        	System.out.println("Missing data file");
+        }
+        loanPane.setCenter(scrollPane);
     }
 
     private String formatDate(Date date) {

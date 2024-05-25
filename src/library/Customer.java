@@ -103,13 +103,14 @@ public class Customer {
     		if((Integer) loan.get("customerId")==this.getIdNumber()) {
     			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
     			Date effectiveDateBack = loan.isNull("effectiveDateBack") ? null : sdf.parse(loan.getString("effectiveDateBack"));
-    			list.add(new Loan(this.getIdNumber(),
+    			list.add(new Loan(loan.getInt("loanId"),
     					loan.getString("identifier"),
     					sdf.parse(loan.getString("dateLoan")),
     					sdf.parse(loan.getString("plannedDateBack")),
     					effectiveDateBack,
+    					loan.getBoolean("returned"),
     					loan.getBoolean("late"),
-    					loan.getBoolean("returned")
+    					this.getIdNumber()
     					));
     		}
     	}
@@ -271,4 +272,26 @@ public class Customer {
     public String toString() {
         return this.getIdNumber() + ") " + this.getFirstName() + " " + this.getLastName();
     }
+    
+	/**
+	 * Generates a formatted string containing details of all loans.
+	 *
+	 * @return formatted string with loan details
+	 */
+	public String printLoans() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("Loans list:\n");
+		for (Loan loan : this.getLoans()) {
+			sb.append("Loan ID: ").append(loan.getId()).append("\n");
+			sb.append("Identifier: ").append(loan.getIdentifier()).append("\n");
+			sb.append("Date Loan: ").append(loan.getDateLoan()).append("\n");
+			sb.append("Planned Date Back: ").append(loan.getPlannedDateBack()).append("\n");
+			sb.append("Effective Date Back: ").append(loan.getEffectiveDateBack()).append("\n");
+			sb.append("Late: ").append(loan.getLate()).append("\n");
+			sb.append("Returned: ").append(loan.getReturned()).append("\n");
+			sb.append("CustomerId: ").append(loan.getCustomerId()).append("\n");
+			sb.append("\n");
+		}
+		return sb.toString();
+	}
 }
