@@ -14,9 +14,7 @@ import java.util.Map;
 import java.util.Scanner;
 import java.util.ArrayList;
 
-/**
- * The main class for the library management system.   (Terminal version)
- */
+
 public class Main {
     public static void main(String[] args) throws BookNotInDataBaseException, URISyntaxException, IOException, InterruptedException {
         String inputUsername = "";
