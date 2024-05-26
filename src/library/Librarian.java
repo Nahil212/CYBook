@@ -17,7 +17,7 @@ import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Date;
 import org.json.JSONArray;
-import org.json.JSONException; 
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.XML;
 import java.util.HashMap;
@@ -25,26 +25,51 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-	
-	public class Librarian {
-		private String pseudonym;
-		private String password;
-		private ArrayList<Customer> customers;
-		private ArrayList<Loan> loans;
-		protected static final String filePath = "data/LibraryData.json";
-		private JSONObject jsonObject;
-	
-    /**
-     * Constructor for the Librarian class.
-     *
-     * @param pseudonym The pseudonym of the librarian.
-     * @param password  The password of the librarian.
-     */
-    public Librarian(String pseudonym, String password) {
+/**
+ * Represents a librarian who manages customers and loans in a library.
+ */
+public class Librarian {
+	/**
+	 * The pseudonym of the librarian.
+	 */
+	private String pseudonym;
+
+	/**
+	 * The password of the librarian.
+	 */
+	private String password;
+
+	/**
+	 * The list of customers managed by the librarian.
+	 */
+	private ArrayList<Customer> customers;
+
+	/**
+	 * The list of loans managed by the librarian.
+	 */
+	private ArrayList<Loan> loans;
+
+	/**
+	 * The file path for the library data.
+	 */
+	protected static final String filePath = "data/LibraryData.json";
+
+	/**
+	 * The JSON object representing the library data.
+	 */
+	private JSONObject jsonObject;
+
+	/**
+	 * Constructor for the Librarian class.
+	 *
+	 * @param pseudonym The pseudonym of the librarian.
+	 * @param password  The password of the librarian.
+	 */
+	public Librarian(String pseudonym, String password) {
 		this.pseudonym = pseudonym;
 		this.password = password;
 		this.customers = new ArrayList<>();
-		this.loans = new ArrayList<>();;
+		this.loans = new ArrayList<>();
 		try {
 			String content = new String(Files.readAllBytes(Paths.get(filePath)));
 			this.jsonObject = new JSONObject(content);
@@ -54,11 +79,11 @@ import java.util.stream.Collectors;
 		this.fetchCustomers();
 		this.fetchLoans();
 	}
-    
+
 	/**
 	 * Fetches customers and their loans from the JSON object and populates the respective lists.
 	 */
-    protected void fetchCustomers() {
+	protected void fetchCustomers() {
 		try {
 			JSONArray customersArray = this.jsonObject.getJSONArray("customers");
 			for (int i = 0; i < customersArray.length(); i++) {
@@ -78,11 +103,11 @@ import java.util.stream.Collectors;
 		}
 	}
 
-    /**
+	/**
 	 * Fetches loans from the JSON object and populates the loans list.
 	 */
-    protected void fetchLoans() {
-    	this.loans.clear();
+	protected void fetchLoans() {
+		this.loans.clear();
 		try {
 			JSONArray loansArray = this.jsonObject.getJSONArray("loans");
 			for (int i = 0; i < loansArray.length(); i++) {
@@ -109,18 +134,20 @@ import java.util.stream.Collectors;
 	 * Returns the pseudonym of the librarian.
 	 *
 	 * @return pseudonym of the librarian
-	 */	
-    public String getPseudonym() {
+	 */
+	public String getPseudonym() {
 		return pseudonym;
 	}
+
 	/**
 	 * Sets the pseudonym of the librarian.
 	 *
 	 * @param pseudonym the new pseudonym to set
 	 */
-    public void setPseudonym(String pseudonym) {
+	public void setPseudonym(String pseudonym) {
 		this.pseudonym = pseudonym;
 	}
+
 	/**
 	 * Returns the password of the librarian.
 	 *
@@ -129,30 +156,34 @@ import java.util.stream.Collectors;
 	public String getPassword() {
 		return password;
 	}
+
 	/**
 	 * Sets the password of the librarian.
 	 *
 	 * @param password the new password to set
-	 */	
-    public void setPassword(String password) {
+	 */
+	public void setPassword(String password) {
 		this.password = password;
 	}
+
 	/**
 	 * Returns the list of customers.
 	 *
 	 * @return the list of customers
-	 */	
-    public ArrayList<Customer> getCustomers() {
+	 */
+	public ArrayList<Customer> getCustomers() {
 		return customers;
 	}
+
 	/**
 	 * Sets the list of customers.
 	 *
 	 * @param customers the new list of customers to set
 	 */
-    public void setCustomers(ArrayList<Customer> customers) {
+	public void setCustomers(ArrayList<Customer> customers) {
 		this.customers = customers;
 	}
+
 	/**
 	 * Returns the list of loans.
 	 *
@@ -161,12 +192,13 @@ import java.util.stream.Collectors;
 	public ArrayList<Loan> getLoans() {
 		return loans;
 	}
+
 	/**
 	 * Generates a formatted string containing details of all customers.
 	 *
 	 * @return formatted string with customer details
-	 */	
-    public String printCustomers() {
+	 */
+	public String printCustomers() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("Customers list:\n");
 		for (Customer customer : this.getCustomers()) {
@@ -177,90 +209,90 @@ import java.util.stream.Collectors;
 		}
 		return sb.toString();
 	}
-	
+
 	/**
-	 * This method call the BNF API to search a list of book according to filters
+	 * Calls the BNF API to search for books according to filters.
 	 *
 	 * @param creator Searched author (can be empty)
-	 * @param yearStart Minimum year publication (-1 means no filter)
-	 * @param yearEnd Maximum year publication (-1 means no filter)
+	 * @param yearStart Minimum year of publication (-1 means no filter)
+	 * @param yearEnd Maximum year of publication (-1 means no filter)
 	 * @param universe Searched document universe (can be empty)
-	 * @param searchTitle Enter text to search in titles (can be empty)
-	 * @param startResearch Where to start the call of the API so we can manage pages
-	 * @return List of Book object corresponding to filters
-	 * @throws BookNotInDataBaseException
+	 * @param searchTitle Text to search in titles (can be empty)
+	 * @param startResearch Where to start the API call to manage pages
+	 * @return List of Book objects corresponding to filters
+	 * @throws EmptyResearchException if the research results are empty
 	 */
-	public ArrayList<Book> searchBooks(String creator, int yearStart, int yearEnd, Universe universe, String searchTitle, int startResearch) throws EmptyResearchException{
+	public ArrayList<Book> searchBooks(String creator, int yearStart, int yearEnd, Universe universe, String searchTitle, int startResearch) throws EmptyResearchException {
 		ArrayList<Book> searchedBooks = new ArrayList<Book>();
 
 		// CREATING THE REQUEST TO THE API
 		String uri = "http://catalogue.bnf.fr/api/SRU?version=1.2&operation=searchRetrieve&query=";
 		uri += URLEncoder.encode("bib.doctype any \"A\"", StandardCharsets.UTF_8);
-		if( !(creator.equals("")) || !(yearStart == -1) || !(yearEnd == -1) || !(universe == Universe.NONE) || !(searchTitle.equals(""))) {
+		if (!creator.equals("") || yearStart != -1 || yearEnd != -1 || universe != Universe.NONE || !searchTitle.equals("")) {
 			uri += "+and+";
 		}
-			if(!(creator.equals(""))) {
-				uri += URLEncoder.encode("bib.author any \""+creator+"\"", StandardCharsets.UTF_8);
-				if( !(yearStart == -1) || !(yearEnd == -1) || !(universe == Universe.NONE) || !(searchTitle.equals(""))) {
+		if (!creator.equals("")) {
+			uri += URLEncoder.encode("bib.author any \"" + creator + "\"", StandardCharsets.UTF_8);
+			if (yearStart != -1 || yearEnd != -1 || universe != Universe.NONE || !searchTitle.equals("")) {
+				uri += "+and+";
+			}
+		}
+		if (yearStart != -1 || yearEnd != -1) {
+			if (yearStart == yearEnd) {
+				uri += URLEncoder.encode("bib.publicationdate= \"" + yearStart + "\"", StandardCharsets.UTF_8);
+				if (universe != Universe.NONE || !searchTitle.equals("")) {
 					uri += "+and+";
 				}
-			}
-			if(!(yearStart == -1) || !(yearEnd == -1)) {
-				if(yearStart == yearEnd) {
-					uri += URLEncoder.encode("bib.publicationdate= \""+yearStart+"\"", StandardCharsets.UTF_8);
-					if(!(universe == Universe.NONE) || !(searchTitle.equals(""))) {
+			} else {
+				if (yearEnd > -1) {
+					uri += URLEncoder.encode("bib.publicationdate<= \"" + yearEnd + "\"", StandardCharsets.UTF_8);
+					if (yearStart != -1 || universe != Universe.NONE || !searchTitle.equals("")) {
 						uri += "+and+";
 					}
-				}else {
-					if (yearEnd > -1) {
-						uri += URLEncoder.encode("bib.publicationdate<= \""+yearEnd+"\"", StandardCharsets.UTF_8);
-						if( !(yearStart == -1) || !(universe == Universe.NONE) || !(searchTitle.equals(""))) {
-							uri += "+and+";
-						}
-					}
-					if (yearStart > -1) {
-						uri += URLEncoder.encode("bib.publicationdate>= \""+yearStart+"\"", StandardCharsets.UTF_8);
-						if( !(universe == Universe.NONE) || !(searchTitle.equals(""))) {
-							uri += "+and+";
-						}
+				}
+				if (yearStart > -1) {
+					uri += URLEncoder.encode("bib.publicationdate>= \"" + yearStart + "\"", StandardCharsets.UTF_8);
+					if (universe != Universe.NONE || !searchTitle.equals("")) {
+						uri += "+and+";
 					}
 				}
 			}
-			if(!(universe == Universe.NONE)) {
-				String universes = ""+universe;
-				uri += URLEncoder.encode("bib.set all \""+universes+"\"", StandardCharsets.UTF_8);
-				if(!(searchTitle.equals(""))) {
-					uri += "+and+";
-				}
+		}
+		if (universe != Universe.NONE) {
+			String universes = "" + universe;
+			uri += URLEncoder.encode("bib.set all \"" + universes + "\"", StandardCharsets.UTF_8);
+			if (!searchTitle.equals("")) {
+				uri += "+and+";
 			}
-			if(!(searchTitle.equals(""))) {
-				uri += URLEncoder.encode("bib.title any \""+searchTitle+"\"", StandardCharsets.UTF_8);
-			}
+		}
+		if (!searchTitle.equals("")) {
+			uri += URLEncoder.encode("bib.title any \"" + searchTitle + "\"", StandardCharsets.UTF_8);
+		}
 
-		// COLLECTING BOOK INFORMATIONS
+		// COLLECTING BOOK INFORMATION
 		try {
-			uri+= "&startRecord="+startResearch+"&maximumRecords=20&recordSchema=dublincore";
+			uri += "&startRecord=" + startResearch + "&maximumRecords=20&recordSchema=dublincore";
 			HttpRequest getRequest = HttpRequest.newBuilder()
 					.uri(new URI(uri))
 					.GET()
 					.build();
 			HttpClient httpclient = HttpClient.newHttpClient();
 			HttpResponse<String> getResponse = httpclient.send(getRequest, BodyHandlers.ofString());
-			JSONArray record = XML.toJSONObject(getResponse.body()).
-					getJSONObject("srw:searchRetrieveResponse").
-					getJSONObject("srw:records").
-					getJSONArray("srw:record");
+			JSONArray record = XML.toJSONObject(getResponse.body())
+					.getJSONObject("srw:searchRetrieveResponse")
+					.getJSONObject("srw:records")
+					.getJSONArray("srw:record");
 			JSONObject obj;
-			JSONObject data;
-			for (int i=0;i<record.length();i++) {
-				 obj = record.getJSONObject(i);
-		         searchedBooks.add(createBookFromJSON(obj));
+			for (int i = 0; i < record.length(); i++) {
+				obj = record.getJSONObject(i);
+				searchedBooks.add(createBookFromJSON(obj));
 			}
 			return searchedBooks;
-		}catch(JSONException | InterruptedException | IOException | URISyntaxException e) {
+		} catch (JSONException | InterruptedException | IOException | URISyntaxException e) {
 			throw new EmptyResearchException();
 		}
 	}
+
 	/**
 	 * Adds a loan to the database for the given customer.
 	 *
@@ -300,8 +332,8 @@ import java.util.stream.Collectors;
 				}
 			}
 			this.loans.add(loan);
-			for(Customer customer: this.getCustomers()) {
-				if(customer.getIdNumber()==customerId) {
+			for (Customer customer : this.getCustomers()) {
+				if (customer.getIdNumber() == customerId) {
 					customer.getLoans().add(loan);
 				}
 			}
@@ -314,6 +346,7 @@ import java.util.stream.Collectors;
 			e.printStackTrace();
 		}
 	}
+
 	/**
 	 * Adds a customer to the database if not already exists.
 	 *
@@ -348,11 +381,11 @@ import java.util.stream.Collectors;
 				customerDetails.put("lastName", customer.getLastName());
 				customerDetails.put("birthDate", new SimpleDateFormat("yyyy-MM-dd").format(customer.getBirthDate()));
 				this.customers.add(customer);
-				
+
 				customerDetails.put("loans", new JSONArray());
 
 				customers.put(customerDetails);
-				System.out.println("the user has been added ::) ");
+				System.out.println("The user has been added :) ");
 
 				try (FileWriter file = new FileWriter(filePath)) {
 					file.write(root.toString(4));
@@ -390,20 +423,20 @@ import java.util.stream.Collectors;
 				file.write(root.toString(4));
 				file.flush();
 			}
-			for(Loan l: this.getLoans()) {
-				if(l.getId()==loan.getId()) {
+			for (Loan l : this.getLoans()) {
+				if (l.getId() == loan.getId()) {
 					l.setReturned(true);
 				}
 			}
-			for(Customer c: this.getCustomers()) {
-				if(c.getIdNumber()==loan.getCustomerId()) {
-					for(Loan l: c.getLoans()) {
-						if(l.getId()==loan.getId()) {
+			for (Customer c : this.getCustomers()) {
+				if (c.getIdNumber() == loan.getCustomerId()) {
+					for (Loan l : c.getLoans()) {
+						if (l.getId() == loan.getId()) {
 							l.setReturned(true);
 							l.setEffectiveDateBack(new Date());
-							if(l.getPlannedDateBack().before(new Date())) {
+							if (l.getPlannedDateBack().before(new Date())) {
 								l.setLate(true);
-							}else {
+							} else {
 								l.setLate(false);
 							}
 						}
@@ -419,7 +452,6 @@ import java.util.stream.Collectors;
 	 * Marks a loan as returned, updates its effective return date, and checks if it is late.
 	 *
 	 * @param loan the loan to mark as returned
-	 *
 	 */
 	public void markBack(Loan loan) {
 		for (Loan l : loans) {
@@ -432,7 +464,7 @@ import java.util.stream.Collectors;
 			}
 		}
 	}
-	
+
 	/**
 	 * Searches for a book in the BNF catalog using the provided ISBN.
 	 *
@@ -440,8 +472,8 @@ import java.util.stream.Collectors;
 	 * @return A Book object representing the book found in the BNF catalog.
 	 * @throws BookNotInDataBaseException If the book with the provided ISBN is not found in the BNF catalog.
 	 */
-	public Book searchBookFromISBN(long isbn) throws BookNotInDataBaseException{
-		String uri = "http://catalogue.bnf.fr/api/SRU?version=1.2&operation=searchRetrieve&query="+ URLEncoder.encode("bib.isbn= \""+isbn+"\"", StandardCharsets.UTF_8)+"&recordSchema=dublincore";
+	public Book searchBookFromISBN(long isbn) throws BookNotInDataBaseException {
+		String uri = "http://catalogue.bnf.fr/api/SRU?version=1.2&operation=searchRetrieve&query=" + URLEncoder.encode("bib.isbn= \"" + isbn + "\"", StandardCharsets.UTF_8) + "&recordSchema=dublincore";
 		try {
 			HttpRequest getRequest = HttpRequest.newBuilder()
 					.uri(new URI(uri))
@@ -449,16 +481,16 @@ import java.util.stream.Collectors;
 					.build();
 			HttpClient httpclient = HttpClient.newHttpClient();
 			HttpResponse<String> getResponse = httpclient.send(getRequest, BodyHandlers.ofString());
-			JSONObject obj = XML.toJSONObject(getResponse.body()).
-					getJSONObject("srw:searchRetrieveResponse").
-					getJSONObject("srw:records").
-					getJSONObject("srw:record");
+			JSONObject obj = XML.toJSONObject(getResponse.body())
+					.getJSONObject("srw:searchRetrieveResponse")
+					.getJSONObject("srw:records")
+					.getJSONObject("srw:record");
 			return createBookFromJSON(obj);
-		}catch(JSONException | InterruptedException | IOException | URISyntaxException e) {
+		} catch (JSONException | InterruptedException | IOException | URISyntaxException e) {
 			throw new BookNotInDataBaseException();
 		}
 	}
-	
+
 	/**
 	 * Searches for a book in the BNF catalog using the provided ISSN.
 	 *
@@ -467,7 +499,7 @@ import java.util.stream.Collectors;
 	 * @throws BookNotInDataBaseException If the book with the provided ISSN is not found in the BNF catalog.
 	 */
 	public Book searchBookFromISSN(long issn) throws BookNotInDataBaseException {
-		String uri = "http://catalogue.bnf.fr/api/SRU?version=1.2&operation=searchRetrieve&query="+ URLEncoder.encode("bib.issn= \""+issn+"\"", StandardCharsets.UTF_8)+"&recordSchema=dublincore";
+		String uri = "http://catalogue.bnf.fr/api/SRU?version=1.2&operation=searchRetrieve&query=" + URLEncoder.encode("bib.issn= \"" + issn + "\"", StandardCharsets.UTF_8) + "&recordSchema=dublincore";
 		try {
 			HttpRequest getRequest = HttpRequest.newBuilder()
 					.uri(new URI(uri))
@@ -475,16 +507,16 @@ import java.util.stream.Collectors;
 					.build();
 			HttpClient httpclient = HttpClient.newHttpClient();
 			HttpResponse<String> getResponse = httpclient.send(getRequest, BodyHandlers.ofString());
-			JSONObject obj = XML.toJSONObject(getResponse.body()).
-					getJSONObject("srw:searchRetrieveResponse").
-					getJSONObject("srw:records").
-					getJSONObject("srw:record");
+			JSONObject obj = XML.toJSONObject(getResponse.body())
+					.getJSONObject("srw:searchRetrieveResponse")
+					.getJSONObject("srw:records")
+					.getJSONObject("srw:record");
 			return createBookFromJSON(obj);
-		}catch(URISyntaxException| IOException| InterruptedException| JSONException je) {
+		} catch (URISyntaxException | IOException | InterruptedException | JSONException je) {
 			throw new BookNotInDataBaseException();
 		}
 	}
-	
+
 	/**
 	 * Searches for a book in the BNF catalog using the provided identifier (ARK).
 	 *
@@ -493,24 +525,24 @@ import java.util.stream.Collectors;
 	 * @throws BookNotInDataBaseException If the book with the provided identifier is not found in the BNF catalog.
 	 */
 	public Book searchBookFromIdentifier(String ark) throws BookNotInDataBaseException {
-		String uri = "http://catalogue.bnf.fr/api/SRU?version=1.2&operation=searchRetrieve&query="+ URLEncoder.encode("bib.persistentid= \""+ark+"\"", StandardCharsets.UTF_8)+"&recordSchema=dublincore";
-		try {	
+		String uri = "http://catalogue.bnf.fr/api/SRU?version=1.2&operation=searchRetrieve&query=" + URLEncoder.encode("bib.persistentid= \"" + ark + "\"", StandardCharsets.UTF_8) + "&recordSchema=dublincore";
+		try {
 			HttpRequest getRequest = HttpRequest.newBuilder()
 					.uri(new URI(uri))
 					.GET()
 					.build();
 			HttpClient httpclient = HttpClient.newHttpClient();
 			HttpResponse<String> getResponse = httpclient.send(getRequest, BodyHandlers.ofString());
-			JSONObject obj = XML.toJSONObject(getResponse.body()).
-					getJSONObject("srw:searchRetrieveResponse").
-					getJSONObject("srw:records").
-					getJSONObject("srw:record");
+			JSONObject obj = XML.toJSONObject(getResponse.body())
+					.getJSONObject("srw:searchRetrieveResponse")
+					.getJSONObject("srw:records")
+					.getJSONObject("srw:record");
 			return createBookFromJSON(obj);
-		}catch(URISyntaxException| IOException| InterruptedException| JSONException je) {
+		} catch (URISyntaxException | IOException | InterruptedException | JSONException je) {
 			throw new BookNotInDataBaseException();
 		}
 	}
-	
+
 	/**
 	 * Creates a Book object from the provided JSON data obtained from the BNF catalog API response.
 	 *
@@ -518,67 +550,67 @@ import java.util.stream.Collectors;
 	 * @return A Book object representing the book data.
 	 */
 	private Book createBookFromJSON(JSONObject obj) {
-		 JSONObject data = obj.getJSONObject("srw:recordData").getJSONObject("oai_dc:dc");
-		 String ark = obj.getString("srw:recordIdentifier");
-		 String publisher = data.optString("dc:publisher", "");
-		 String format;
-		 
-		 if(data.has("dc:format")) {
+		JSONObject data = obj.getJSONObject("srw:recordData").getJSONObject("oai_dc:dc");
+		String ark = obj.getString("srw:recordIdentifier");
+		String publisher = data.optString("dc:publisher", "");
+		String format;
+
+		if (data.has("dc:format")) {
 			format = data.optString("dc:format", "");
-		 }else {
+		} else {
 			format = "Not specified";
-		 }
-		 int year;
-		 String dateString = data.optString("dc:date", "");
-		 if (dateString.contains("-")) {
-			 try {
-				 year = Integer.parseInt(dateString.split("-")[0]+dateString.split("-")[1])/2;
-			 }catch(NumberFormatException e) {
-				 StringBuilder sb1 = new StringBuilder(dateString.split("-")[0]);
-				 StringBuilder sb2 = new StringBuilder(dateString.split("-")[0]);
-				 for (int i = 0; i < sb1.length(); i++) {
-				        if (sb1.charAt(i) == '.') {
-				            sb1.setCharAt(i, '0');
-				        }
-				        if (sb2.charAt(i) == '.') {
-				            sb2.setCharAt(i, '0');
-				        }
-				 }
-				 int y1 = Integer.parseInt(sb1.toString());
-				 int y2 = Integer.parseInt(sb2.toString());
-				 if(y1>y2) {
-					 year = y1;
-				 }else {
-					 year = (y1+y2)/2;
-				 }
-			 }
-         } else {
-             year = data.optInt("dc:date", 0);
-         }
-		 Object titleObj = data.get("dc:title");
-        String title = "";
-        if (titleObj instanceof JSONArray) {
-       	 JSONArray titles = (JSONArray) titleObj;
-            for (int j=0;j<titles.length();j++) {
-           	 title += titles.getString(j);
-            }
-        } else {
-            title = data.getString("dc:title");
-        }
-        String creator = "Not specified";
-        if(data.has("dc:creator")) {
-	         Object CreatorObj = data.get("dc:creator");
-	         creator = "";
-	         if (CreatorObj instanceof JSONArray) {
-	        	 JSONArray creators = (JSONArray) CreatorObj;
-	             for (int j=0;j<creators.length();j++) {
-	            	 creator += creators.getString(j)+" ";
-	             }
-	         } else {
-	             creator = data.getString("dc:creator");
-	         }
-        }
-        return (new Book(title,creator,publisher,year,ark,format));
+		}
+		int year;
+		String dateString = data.optString("dc:date", "");
+		if (dateString.contains("-")) {
+			try {
+				year = Integer.parseInt(dateString.split("-")[0] + dateString.split("-")[1]) / 2;
+			} catch (NumberFormatException e) {
+				StringBuilder sb1 = new StringBuilder(dateString.split("-")[0]);
+				StringBuilder sb2 = new StringBuilder(dateString.split("-")[0]);
+				for (int i = 0; i < sb1.length(); i++) {
+					if (sb1.charAt(i) == '.') {
+						sb1.setCharAt(i, '0');
+					}
+					if (sb2.charAt(i) == '.') {
+						sb2.setCharAt(i, '0');
+					}
+				}
+				int y1 = Integer.parseInt(sb1.toString());
+				int y2 = Integer.parseInt(sb2.toString());
+				if (y1 > y2) {
+					year = y1;
+				} else {
+					year = (y1 + y2) / 2;
+				}
+			}
+		} else {
+			year = data.optInt("dc:date", 0);
+		}
+		Object titleObj = data.get("dc:title");
+		String title = "";
+		if (titleObj instanceof JSONArray) {
+			JSONArray titles = (JSONArray) titleObj;
+			for (int j = 0; j < titles.length(); j++) {
+				title += titles.getString(j);
+			}
+		} else {
+			title = data.getString("dc:title");
+		}
+		String creator = "Not specified";
+		if (data.has("dc:creator")) {
+			Object CreatorObj = data.get("dc:creator");
+			creator = "";
+			if (CreatorObj instanceof JSONArray) {
+				JSONArray creators = (JSONArray) CreatorObj;
+				for (int j = 0; j < creators.length(); j++) {
+					creator += creators.getString(j) + " ";
+				}
+			} else {
+				creator = data.getString("dc:creator");
+			}
+		}
+		return (new Book(title, creator, publisher, year, ark, format));
 	}
 
 	/**
@@ -605,64 +637,74 @@ import java.util.stream.Collectors;
 		}
 		return false;
 	}
+
 	/**
-	 * Finds and prints the most borrowed books in the past 30 days.
-	 * @throws MissingDataFileException 
-	 * @throws BookNotInDataBaseException if a book is not found in the database
-	 * @throws URISyntaxException if there is a URI syntax error
-	 * @throws IOException if an I/O error occurs
-	 * @throws InterruptedException if the operation is interrupted
+	 * Finds and returns the most borrowed books in the past 30 days.
+	 * @throws MissingDataFileException If the data file is missing.
+	 * @throws BookNotInDataBaseException If a book is not found in the database.
+	 * @throws URISyntaxException If there is a URI syntax error.
+	 * @throws IOException If an I/O error occurs.
+	 * @throws InterruptedException If the operation is interrupted.
 	 */
 	@SuppressWarnings("finally")
 	public ArrayList<Book> MostFamousLoan() throws MissingDataFileException {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        Date currentDate = new Date();
-        ArrayList<Book> mostFamousBooksWithCount = new ArrayList<>();
-        try {
-	        String content = new String(Files.readAllBytes(Paths.get(filePath)));
-	        JSONObject root = new JSONObject(content);
-	        JSONArray loansJson = root.getJSONArray("loans");
-	
-	        HashMap<String, Integer> loanCount = new HashMap<>();
-	
-	        for (int i = 0; i < loansJson.length(); i++) {
-	            JSONObject loanJson = loansJson.getJSONObject(i);
-	            String dateLoanStr = loanJson.getString("dateLoan");
-	
-	            try {
-	                Date dateLoan = sdf.parse(dateLoanStr);
-	                long diff = currentDate.getTime() - dateLoan.getTime();
-	                long diffDays = diff / (24 * 60 * 60 * 1000);
-	
-	                if (diffDays <= 30) {
-	                    String identifier = loanJson.getString("identifier");
-	                    loanCount.put(identifier, loanCount.getOrDefault(identifier, 0) + 1);
-	                }
-	            } catch (Exception e) {
-	                e.printStackTrace();
-	            }
-	        }
-	
-	        List<Map.Entry<String, Integer>> sortedLoanCount = loanCount.entrySet()
-	                .stream()
-	                .sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
-	                .limit(20)
-	                .collect(Collectors.toList());
-	
-	        for (Map.Entry<String, Integer> entry : sortedLoanCount) {
-	            String ark = entry.getKey();
-	            Book currentBook = this.searchBookFromIdentifier(ark);
-	            mostFamousBooksWithCount.add(currentBook);
-	        }
-        }catch(JSONException|IOException je) {
-        	throw new MissingDataFileException();
-        }catch(BookNotInDataBaseException bE) {
-        	bE.printStackTrace();
-        }finally{
-        	return mostFamousBooksWithCount;
-        }
-    }
-	
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+		Date currentDate = new Date();
+		ArrayList<Book> mostFamousBooksWithCount = new ArrayList<>();
+		try {
+			String content = new String(Files.readAllBytes(Paths.get(filePath)));
+			JSONObject root = new JSONObject(content);
+			JSONArray loansJson = root.getJSONArray("loans");
+
+			HashMap<String, Integer> loanCount = new HashMap<>();
+
+			for (int i = 0; i < loansJson.length(); i++) {
+				JSONObject loanJson = loansJson.getJSONObject(i);
+				String dateLoanStr = loanJson.getString("dateLoan");
+
+				try {
+					Date dateLoan = sdf.parse(dateLoanStr);
+					long diff = currentDate.getTime() - dateLoan.getTime();
+					long diffDays = diff / (24 * 60 * 60 * 1000);
+
+					if (diffDays <= 30) {
+						String identifier = loanJson.getString("identifier");
+						loanCount.put(identifier, loanCount.getOrDefault(identifier, 0) + 1);
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+
+			List<Map.Entry<String, Integer>> sortedLoanCount = loanCount.entrySet()
+					.stream()
+					.sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
+					.limit(20)
+					.collect(Collectors.toList());
+
+			for (Map.Entry<String, Integer> entry : sortedLoanCount) {
+				String ark = entry.getKey();
+				Book currentBook = this.searchBookFromIdentifier(ark);
+				mostFamousBooksWithCount.add(currentBook);
+			}
+		} catch (JSONException | IOException je) {
+			throw new MissingDataFileException();
+		} catch (BookNotInDataBaseException bE) {
+			bE.printStackTrace();
+		} finally {
+			return mostFamousBooksWithCount;
+		}
+	}
+
+	/**
+	 * Updates a customer's information in the database.
+	 *
+	 * @param customerId    The ID of the customer to update.
+	 * @param newFirstName  The new first name of the customer.
+	 * @param newLastName   The new last name of the customer.
+	 * @param newBirthDate  The new birth date of the customer.
+	 * @return true if the customer was updated, false otherwise.
+	 */
 	public boolean updateCustomer(int customerId, String newFirstName, String newLastName, String newBirthDate) {
 		boolean updated = false;
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
@@ -681,8 +723,8 @@ import java.util.stream.Collectors;
 					break;
 				}
 			}
-			for(Customer customer:this.getCustomers()) {
-				if(customer.getIdNumber()==customerId) {
+			for (Customer customer : this.getCustomers()) {
+				if (customer.getIdNumber() == customerId) {
 					customer.setFirstName(newFirstName);
 					customer.setLastName(newLastName);
 					customer.setBirthDate(sdf.parse(newBirthDate));
@@ -698,25 +740,26 @@ import java.util.stream.Collectors;
 		}
 		return updated;
 	}
-	
+
+	/**
+	 * Generates a formatted string containing details of all loans.
+	 *
+	 * @return formatted string with loan details
+	 */
 	public String printLoans() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("Loans list:\n");
-        for (Loan loan : loans) {
-            sb.append("Loan ID: ").append(loan.getId()).append("\n");
-            sb.append("Identifier: ").append(loan.getIdentifier()).append("\n");
-            sb.append("Date Loan: ").append(loan.getDateLoan()).append("\n");
-            sb.append("Planned Date Back: ").append(loan.getPlannedDateBack()).append("\n");
-            sb.append("Effective Date Back: ").append(loan.getEffectiveDateBack()).append("\n");
-            sb.append("Late: ").append(loan.getLate()).append("\n");
-            sb.append("Returned: ").append(loan.getReturned()).append("\n");
-            sb.append("CustomerId: ").append(loan.getCustomerId()).append("\n");
-            sb.append("\n");
-        }
-        return sb.toString();
-    }
+		StringBuilder sb = new StringBuilder();
+		sb.append("Loans list:\n");
+		for (Loan loan : loans) {
+			sb.append("Loan ID: ").append(loan.getId()).append("\n");
+			sb.append("Identifier: ").append(loan.getIdentifier()).append("\n");
+			sb.append("Date Loan: ").append(loan.getDateLoan()).append("\n");
+			sb.append("Planned Date Back: ").append(loan.getPlannedDateBack()).append("\n");
+			sb.append("Effective Date Back: ").append(loan.getEffectiveDateBack()).append("\n");
+			sb.append("Late: ").append(loan.getLate()).append("\n");
+			sb.append("Returned: ").append(loan.getReturned()).append("\n");
+			sb.append("Customer ID: ").append(loan.getCustomerId()).append("\n");
+			sb.append("\n");
+		}
+		return sb.toString();
+	}
 }
-
-
-
-
