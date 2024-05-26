@@ -18,6 +18,14 @@ import java.util.ArrayList;
  * The main class for the library application. It handles user authentication, menu navigation, and interaction with the librarian's functionalities.     (terminal's version)
  */
 public class Main {
+	/**
+	 * The main method simulating the use of the librarian software in the operator terminal
+	 * @param args
+	 * @throws BookNotInDataBaseException
+	 * @throws URISyntaxException
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
     public static void main(String[] args) throws BookNotInDataBaseException, URISyntaxException, IOException, InterruptedException {
         String inputUsername = "";
         String inputPassword = "";
