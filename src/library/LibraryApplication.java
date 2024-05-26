@@ -61,8 +61,8 @@ public class LibraryApplication extends Application {
     @Override
     public void start(Stage stage) throws Exception {
         stage.setTitle("CY-Book");
-        Image logoshessh = new Image("file:img/book.png");
-        stage.getIcons().add(logoshessh);
+        Image logo = new Image("file:img/logo.png");
+        stage.getIcons().add(logo);
         borderPane = new BorderPane();
         userPane = new BorderPane();
         loanPane = new BorderPane();
@@ -112,6 +112,7 @@ public class LibraryApplication extends Application {
 
         // Top
         VBox filter = new VBox();
+        VBox bookVBox = new VBox();
         filter.setAlignment(Pos.CENTER);
         filter.setSpacing(10);
         filter.setPrefHeight(125);
@@ -123,26 +124,8 @@ public class LibraryApplication extends Application {
         TextField isbn = new TextField();
         isbn.setPromptText("ISBN");
         Button searchISBN = new Button("Search");
-        searchISBN.setOnAction(sI -> {
-            searchedBooks.clear();
-            try {
-                Book book = librarian.searchBookFromISBN(Long.parseLong(isbn.getText()));
-                searchedBooks.add(book);
-            } catch (BookNotInDataBaseException e) {
-                // to complete
-            }
-        });
         TextField issn = new TextField();
         Button searchISSN = new Button("Search");
-        searchISSN.setOnAction(sI -> {
-            searchedBooks.clear();
-            try {
-                Book book = librarian.searchBookFromISSN(Long.parseLong(isbn.getText()));
-                searchedBooks.add(book);
-            } catch (BookNotInDataBaseException e) {
-                // to complete
-            }
-        });
         issn.setPromptText("ISSN");
         TextField ark = new TextField();
         Button searchARK = new Button("Search");
@@ -253,7 +236,6 @@ public class LibraryApplication extends Application {
         // Middle
         ScrollPane scrollBook = new ScrollPane();
         scrollBook.setVbarPolicy(ScrollPane.ScrollBarPolicy.ALWAYS);
-        VBox bookVBox = new VBox();
         bookVBox.setStyle("-fx-padding: 10px;");
         bookVBox.setSpacing(10);
         bookVBox.setAlignment(Pos.TOP_CENTER);
@@ -325,8 +307,6 @@ public class LibraryApplication extends Application {
             }
         });
         searchISBN.setOnAction(sI -> {
-            Stage newStage = new Stage();
-            newStage.show();
             this.searchStart = 1;
             searchedBooks.clear();
             try {

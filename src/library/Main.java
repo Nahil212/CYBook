@@ -21,10 +21,10 @@ public class Main {
 	/**
 	 * The main method simulating the use of the librarian software in the operator terminal
 	 * @param args
-	 * @throws BookNotInDataBaseException
-	 * @throws URISyntaxException
-	 * @throws IOException
-	 * @throws InterruptedException
+	 * @throws BookNotInDataBaseException	no book correspond to the wanted filters or identifier
+	 * @throws URISyntaxException	the request to the api is not correctly make
+	 * @throws IOException	the entered informations are incorrect
+	 * @throws InterruptedException		thread interrupted
 	 */
     public static void main(String[] args) throws BookNotInDataBaseException, URISyntaxException, IOException, InterruptedException {
         String inputUsername = "";
