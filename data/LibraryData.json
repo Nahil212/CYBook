@@ -1,5 +1,5 @@
 {
-    "maxiIdCustomer": 3,
+    "maxiIdCustomer": 5,
     "maxiIdLoan": 3,
     "loans": [
         {
@@ -16,7 +16,7 @@
             "identifier": "ark:/12148/cb42131143b",
             "effectiveDateBack": null,
             "late": false,
-            "customerId": 3,
+            "customerId": 4,
             "plannedDateBack": "2024-06-08",
             "dateLoan": "2024-05-25",
             "returned": false,
@@ -26,7 +26,7 @@
             "identifier": "ark:/12148/cb43781694t",
             "effectiveDateBack": "2024-05-25",
             "late": false,
-            "customerId": 3,
+            "customerId": 4,
             "plannedDateBack": "2024-06-08",
             "dateLoan": "2024-05-25",
             "returned": true,
@@ -89,7 +89,14 @@
             ],
             "idNumber": 4,
             "birthDate": "2003-12-24"
-        }
+        },
+        {
+            "firstName": "Elyes",
+            "lastName": "Dachraouis",
+            "loans": [],
+            "idNumber": 5,
+            "birthDate": "2003-11-17"
+        
     ],
     "librarians": [{
         "password": "groupe17",
