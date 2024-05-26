@@ -62,8 +62,6 @@ public class Main {
 
                     if (isAuthenticated) {
                         Librarian currentUser = new Librarian(inputUsername, inputPassword);
-                        currentUser.fetchCustomers();
-                        currentUser.fetchLoans();
 
                         while (true) {
                             try {
@@ -109,7 +107,6 @@ public class Main {
                                         System.out.print("Enter the ID of the user to update: ");
                                         int customerId = scanner.nextInt();
                                         scanner.nextLine();
-
                                         System.out.print("Enter the new firstName: ");
                                         String newFirstName = scanner.nextLine();
                                         System.out.print("Enter the new lastName: ");
@@ -118,6 +115,7 @@ public class Main {
                                         String newBirthDate = scanner.nextLine();
 
                                         boolean result = currentUser.updateCustomer(customerId, newFirstName, newLastName, newBirthDate);
+                                        System.out.println(currentUser.getCustomers());
                                         if (result) {
                                             System.out.println("User updated successfully!");
                                         } else {
@@ -163,34 +161,37 @@ public class Main {
                                     scanner.nextLine();
 
                                     if (choice == 1) {
-                                        System.out.print("Enter the ark of the book: ");
-                                        String identifier = scanner.nextLine();
-
-                                        System.out.print("Enter the customer ID: ");
-                                        int customerId = scanner.nextInt();
-                                        scanner.nextLine();
-
-                                        if (currentUser.isIdentifierOverBorrowed(identifier)) {
-                                            System.out.println("This book has been borrowed too many times.");
-                                        } else {
-                                            Loan newLoan = new Loan(identifier);
-                                            currentUser.addToDatabaseLoan(newLoan, customerId);
-                                            System.out.println("Book borrowed successfully!");
-                                        }
+                                    	try {
+	                                        System.out.print("Enter the ark of the book: ");
+	                                        String identifier = scanner.nextLine();
+	
+	                                        System.out.print("Enter the customer ID: ");
+	                                        int customerId = scanner.nextInt();
+	                                        scanner.nextLine();
+	                                        Book book = currentUser.searchBookFromIdentifier(identifier);
+	                                        if (currentUser.isIdentifierOverBorrowed(identifier)) {
+	                                            System.out.println("This book "+book.getTitle()+" has been borrowed too many times.");
+	                                        } else {
+	                                        	Loan temp = new Loan(identifier);
+	                                            Loan newLoan = new Loan(Loan.nextId.getAndIncrement(),identifier, new Date(), temp.calculateScheduledReturnDate(), null, false, false, customerId);
+	                                            currentUser.addToDatabaseLoan(newLoan, customerId);
+	                                            System.out.println("Book borrowed successfully!");
+	                                        }
+                                    	}catch(BookNotInDataBaseException e) {
+                                    		System.out.println("This ark doesn't correspond to any book");
+                                    	}
                                     } else if (choice == 2) {
-                                        System.out.println("1. Search by ISBN");
+                                        System.out.println("1. Search by ark");
                                         System.out.println("2. Search by filters");
                                         System.out.print("Your choice: ");
                                         int searchChoice = scanner.nextInt();
                                         scanner.nextLine();
 
                                         if (searchChoice == 1) {
-                                            System.out.print("Enter the ISBN: ");
-                                            long isbn = scanner.nextLong();
-                                            scanner.nextLine();
-
+                                            System.out.print("Enter the ARK: ");
+                                            String ark = scanner.nextLine();
                                             try {
-                                                Book book = currentUser.searchBookFromISBN(isbn);
+                                                Book book = currentUser.searchBookFromIdentifier(ark);
                                                 System.out.println(book);
                                             } catch (BookNotInDataBaseException e) {
                                                 System.out.println("Book not found in database.");
