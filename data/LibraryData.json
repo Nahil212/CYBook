@@ -35,8 +35,8 @@
     ],
     "customers": [
         {
-            "firstName": "John",
-            "lastName": "Doe",
+            "firstName": "Travis",
+            "lastName": "Hua",
             "loans": [{
                 "identifier": "ark:/12148/cb43555472z",
                 "effectiveDateBack": "2024-02-14",
@@ -46,14 +46,21 @@
                 "loanId": 1
             }],
             "idNumber": 1,
-            "birthDate": "1990-01-01"
+            "birthDate": "2003-07-15"
         },
         {
-            "firstName": "Alexy",
-            "lastName": "Andre",
+            "firstName": "Rayen",
+            "lastName": "Mezni",
             "loans": [],
             "idNumber": 2,
-            "birthDate": "2003-02-23"
+            "birthDate": "2003-06-29"
+        },
+        {
+            "firstName": "Romain",
+            "lastName": "Magalhaes",
+            "loans": [],
+            "idNumber": 3,
+            "birthDate": "2003-11-17"
         },
         {
             "firstName": "Nahil",
@@ -63,7 +70,7 @@
                     "identifier": "ark:/12148/cb42131143b",
                     "effectiveDateBack": null,
                     "late": false,
-                    "customerId": 3,
+                    "customerId": 4,
                     "plannedDateBack": "2024-06-08",
                     "dateLoan": "2024-05-25",
                     "returned": false,
@@ -73,14 +80,14 @@
                     "identifier": "ark:/12148/cb43781694t",
                     "effectiveDateBack": null,
                     "late": false,
-                    "customerId": 3,
+                    "customerId": 4,
                     "plannedDateBack": "2024-06-08",
                     "dateLoan": "2024-05-25",
                     "returned": false,
                     "loanId": 3
                 }
             ],
-            "idNumber": 3,
+            "idNumber": 4,
             "birthDate": "2003-12-24"
         }
     ],
