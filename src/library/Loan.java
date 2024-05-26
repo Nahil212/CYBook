@@ -5,7 +5,7 @@ import java.util.Date;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class Loan {
-    private static AtomicInteger nextId = new AtomicInteger(2);
+    protected static AtomicInteger nextId = new AtomicInteger(2);
 
     private int id;
     private String identifier;
@@ -14,8 +14,8 @@ public class Loan {
     private Date effectiveDateBack;
     private boolean late;
     private boolean returned;
-
     private int customerId;
+    
     public Loan(String identifier) {
         this.identifier = identifier;
         this.dateLoan = new Date();
@@ -53,7 +53,7 @@ public class Loan {
         nextId.set(maxIdLoan + 1);
     }
 
-    private Date calculateScheduledReturnDate() {
+    protected Date calculateScheduledReturnDate() {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(dateLoan);
         calendar.add(Calendar.DAY_OF_MONTH, 14);

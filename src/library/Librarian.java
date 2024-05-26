@@ -348,20 +348,8 @@ import java.util.stream.Collectors;
 				customerDetails.put("lastName", customer.getLastName());
 				customerDetails.put("birthDate", new SimpleDateFormat("yyyy-MM-dd").format(customer.getBirthDate()));
 				this.customers.add(customer);
-
-				JSONArray customerLoans = new JSONArray();
-				for (Loan loan : customer.getLoans()) {
-					JSONObject loanDetails = new JSONObject();
-					loanDetails.put("identifier", loan.getIdentifier());
-					loanDetails.put("loanId", loan.getId());
-					loanDetails.put("dateLoan", new SimpleDateFormat("yyyy-MM-dd").format(loan.getDateLoan()));
-					loanDetails.put("plannedDateBack", new SimpleDateFormat("yyyy-MM-dd").format(loan.getPlannedDateBack()));
-					loanDetails.put("effectiveDateBack", loan.getEffectiveDateBack() != null ? new SimpleDateFormat("yyyy-MM-dd").format(loan.getEffectiveDateBack()) : JSONObject.NULL);
-					loanDetails.put("late", loan.getLate());
-					loanDetails.put("returned", loan.getReturned());
-					customerLoans.put(loanDetails);
-				}
-				customerDetails.put("loans", customerLoans);
+				
+				customerDetails.put("loans", new JSONArray());
 
 				customers.put(customerDetails);
 				System.out.println("the user has been added ::) ");
@@ -407,6 +395,21 @@ import java.util.stream.Collectors;
 					l.setReturned(true);
 				}
 			}
+			for(Customer c: this.getCustomers()) {
+				if(c.getIdNumber()==loan.getCustomerId()) {
+					for(Loan l: c.getLoans()) {
+						if(l.getId()==loan.getId()) {
+							l.setReturned(true);
+							l.setEffectiveDateBack(new Date());
+							if(l.getPlannedDateBack().before(new Date())) {
+								l.setLate(true);
+							}else {
+								l.setLate(false);
+							}
+						}
+					}
+				}
+			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -446,7 +449,6 @@ import java.util.stream.Collectors;
 					.build();
 			HttpClient httpclient = HttpClient.newHttpClient();
 			HttpResponse<String> getResponse = httpclient.send(getRequest, BodyHandlers.ofString());
-			System.out.println(getResponse.body());
 			JSONObject obj = XML.toJSONObject(getResponse.body()).
 					getJSONObject("srw:searchRetrieveResponse").
 					getJSONObject("srw:records").
@@ -663,6 +665,7 @@ import java.util.stream.Collectors;
 	
 	public boolean updateCustomer(int customerId, String newFirstName, String newLastName, String newBirthDate) {
 		boolean updated = false;
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 		try {
 			String content = new String(Files.readAllBytes(Paths.get(filePath)));
 			JSONObject root = new JSONObject(content);
@@ -678,14 +681,19 @@ import java.util.stream.Collectors;
 					break;
 				}
 			}
-			this.customers.clear();
-			this.fetchCustomers();
-
+			for(Customer customer:this.getCustomers()) {
+				if(customer.getIdNumber()==customerId) {
+					customer.setFirstName(newFirstName);
+					customer.setLastName(newLastName);
+					customer.setBirthDate(sdf.parse(newBirthDate));
+					break;
+				}
+			}
 			try (FileWriter file = new FileWriter(filePath)) {
 				file.write(root.toString(4));
 				file.flush();
 			}
-		} catch (IOException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return updated;
@@ -707,11 +715,6 @@ import java.util.stream.Collectors;
         }
         return sb.toString();
     }
-	
-	public static void main(String[] args) {
-		Librarian l = new Librarian("","");
-		System.out.println(l.getLoans());
-	}
 }
 
 

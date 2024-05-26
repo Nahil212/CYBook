@@ -410,7 +410,7 @@ public class LibraryApplication extends Application{
             }
         });
 
-        stage.setScene(homePage);
+        stage.setScene(signInPage);
         stage.show();
     }
 
@@ -427,19 +427,25 @@ public class LibraryApplication extends Application{
     	loanVB.setMaxWidth(Double.MAX_VALUE);
     	SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
     	try {
+    		Label customerLabel = new Label("Customer ID: "+loan.getCustomerId());
 	        Book book = this.librarian.searchBookFromIdentifier(loan.getIdentifier());
 	        Label bookLabel = new Label(book.getTitle());
 	        Label dateLoanLabel = new Label("Date Loan: "+sdf.format(loan.getDateLoan()));
+	        dateLoanLabel.setStyle("-fx-font-style: italic;");
 	        Label plannedDateBackLabel = new Label("Planned Date Back: "+sdf.format(loan.getPlannedDateBack()));
+	        plannedDateBackLabel.setStyle("-fx-font-style: italic;");
 	        Label effectiveDateBackLabel;
 	        if(loan.getEffectiveDateBack()!=null) {
-	        	effectiveDateBackLabel = new Label("Returne Date: "+sdf.format(loan.getEffectiveDateBack())); 
+	        	effectiveDateBackLabel = new Label("Return Date: "+sdf.format(loan.getEffectiveDateBack())); 
 	        }else {
-	        	effectiveDateBackLabel = new Label("Returne Date: N/A"); 
+	        	effectiveDateBackLabel = new Label("Return Date: N/A"); 
 	        }
+	        effectiveDateBackLabel.setStyle("-fx-font-style: italic;");
 	        Label returned = new Label("Returned : "+loan.getReturned());
-	        Label late = new Label("Late ?: "+loan.getLate());
-	        loanVB.getChildren().addAll(bookLabel,dateLoanLabel,plannedDateBackLabel,effectiveDateBackLabel,returned,late);
+	        returned.setStyle("-fx-font-style: italic;");
+	        Label late = new Label("Late : "+loan.getLate());
+	        late.setStyle("-fx-font-style: italic;");
+	        loanVB.getChildren().addAll(customerLabel,bookLabel,dateLoanLabel,plannedDateBackLabel,effectiveDateBackLabel,returned,late);
 	        if(!(loan.getReturned())){
 	        	loanVB.setStyle("-fx-background-color: lightgray; -fx-padding: 10 20 10 20; -fx-border-radius: 5; -fx-background-radius: 10; -fx-cursor: hand");
 		        loanVB.setOnMouseClicked(event -> {
@@ -456,6 +462,7 @@ public class LibraryApplication extends Application{
 		            		this.librarian.markBack(loan);
 		            		this.wantedLoans = this.librarian.getLoans();
 		                	this.displayLoansInVBox(loanVBox);
+		                	this.displayUsers(this.librarian.getCustomers());
 		                	returnStage.close();
 		            	});
 		            	Button no = new Button("NO");
@@ -475,6 +482,7 @@ public class LibraryApplication extends Application{
 	        	loanVB.setStyle("-fx-background-color: lightgray; -fx-padding: 10 20 10 20; -fx-border-radius: 5; -fx-background-radius: 10;");
 	        }
     	}catch(Exception e) {
+    		e.printStackTrace();
     		loanVB.getChildren().add(new Label("Data not found"));
     	}
         return loanVB;
@@ -529,7 +537,8 @@ public class LibraryApplication extends Application{
 	                        alert.showAndWait();
 	                        this.loanCreation.close();
                 		}else {
-	                		Loan newLoan = new Loan(book.getIdentifier());
+	                		Loan temp = new Loan(book.getIdentifier());
+	                		Loan newLoan = new Loan(Loan.nextId.getAndIncrement(),book.getIdentifier(),new Date(),temp.calculateScheduledReturnDate(),null,false,false,choosen.getIdNumber());
 	                		this.librarian.addToDatabaseLoan(newLoan, choosen.getIdNumber());
 	                		Alert alert = new Alert(Alert.AlertType.INFORMATION);
 	                        alert.setTitle("Success");
@@ -573,7 +582,6 @@ public class LibraryApplication extends Application{
         }
     }
 
-    // Méthode pour afficher les utilisateurs sous forme de boutons
     private void displayUsers(List<Customer> customers) {
         VBox userListVBox = new VBox();
         userListVBox.setAlignment(Pos.CENTER_LEFT);
@@ -622,14 +630,14 @@ public class LibraryApplication extends Application{
 
         ScrollPane scrollPane = new ScrollPane(userListVBox);
         scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.ALWAYS);
-        scrollPane.setFitToWidth(true); // S'assurer que le contenu s'adapte Ã la largeur
+        scrollPane.setFitToWidth(true);
 
         VBox mainVBox = new VBox();
         mainVBox.setAlignment(Pos.CENTER);
         mainVBox.setSpacing(10);
         mainVBox.getChildren().addAll(searchBox, scrollPane);
 
-        VBox.setVgrow(scrollPane, Priority.ALWAYS); // Permettre au ScrollPane de grandir
+        VBox.setVgrow(scrollPane, Priority.ALWAYS);
         BorderPane.setAlignment(mainVBox, Pos.CENTER);
 
         userPane.setCenter(mainVBox);
@@ -648,7 +656,6 @@ public class LibraryApplication extends Application{
         });
     }
 
-    // Méthode pour afficher les options de modification du client
     private void showCustomerOptions(Customer customer) {
         Stage dialog = new Stage();
         dialog.initModality(Modality.APPLICATION_MODAL);
@@ -678,7 +685,6 @@ public class LibraryApplication extends Application{
         dialog.show();
     }
 
-    // Méthode pour afficher la boîte de dialogue de modification du client
     private void showCustomerEditDialog(Customer customer) {
         Stage editDialog = new Stage();
         editDialog.initModality(Modality.APPLICATION_MODAL);
@@ -723,12 +729,12 @@ public class LibraryApplication extends Application{
             );
             if (success) {
                 editDialog.close();
+                this.displayUsers(this.librarian.getCustomers());
                 Alert alert = new Alert(Alert.AlertType.INFORMATION);
                 alert.setTitle("Success");
                 alert.setHeaderText(null);
                 alert.setContentText("Customer updated successfully.");
                 alert.showAndWait();
-                this.displayUsers(this.librarian.getCustomers());
             } else {
                 Alert alert = new Alert(Alert.AlertType.ERROR);
                 alert.setTitle("Error");
@@ -745,22 +751,30 @@ public class LibraryApplication extends Application{
         editDialog.show();
     }
 
-    // Méthode pour afficher les emprunts d'un client depuis le fichier JSON
     private void showCustomerLoans(Customer customer) {
         Stage loansDialog = new Stage();
         loansDialog.initModality(Modality.APPLICATION_MODAL);
         loansDialog.initOwner(userPane.getScene().getWindow());
-
+        
+        HBox loans = new HBox();
         VBox loansVBox = new VBox();
-        loansVBox.setAlignment(Pos.CENTER_LEFT);
+        loansVBox.setAlignment(Pos.TOP_LEFT);
         loansVBox.setSpacing(10);
         loansVBox.setPadding(new Insets(10));
+        VBox lateVBox = new VBox();
+        lateVBox.setAlignment(Pos.TOP_LEFT);
+        lateVBox.setSpacing(10);
+        lateVBox.setPadding(new Insets(10));
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        Label titleLabel = new Label("Customer's Loans");
+        Label titleLabel = new Label("Loans");
         titleLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
+        Label lateLabel = new Label("Late loans");
+        lateLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
+        loans.getChildren().addAll(loansVBox,lateVBox);
         
         try {
 	        loansVBox.getChildren().add(titleLabel);
+	        lateVBox.getChildren().add(lateLabel);
 	        for(Loan loanedBook: customer.getLoans()) {
 	        	VBox loanGrid = new VBox();
 		        loanGrid.setAlignment(Pos.CENTER_LEFT);
@@ -778,22 +792,20 @@ public class LibraryApplication extends Application{
 		        Label returned = new Label("Returned ?: "+loanedBook.getReturned());
 		        Label late = new Label("Late ?: "+loanedBook.getLate());
 		        loanGrid.getChildren().addAll(bookLabel,dateLoanLabel,plannedDateBackLabel,effectiveDateBackLabel,returned,late);
-		        Pane loanPane = new Pane();
-		        loanPane.getChildren().add(loanGrid);
-		        loanPane.setStyle("-fx-background-color: lightgray; -fx-padding: 10 20 10 20; -fx-border-radius: 5; -fx-background-radius: 10;");
-		        loanPane.setMaxWidth(Double.MAX_VALUE);
-		        loansVBox.getChildren().add(loanPane);
+		        loanGrid.setStyle("-fx-background-color: lightgray; -fx-padding: 10 20 10 20; -fx-border-radius: 5; -fx-background-radius: 10;");
+		        loanGrid.setMaxWidth(Double.MAX_VALUE);
+		        if(loanedBook.getLate()) {
+		        	lateVBox.getChildren().addAll(loanGrid);
+		        }else {
+		        	loansVBox.getChildren().add(loanGrid);
+		        }
 	        }	        
 	        ScrollPane scrollPane = new ScrollPane(loansVBox);
 	        scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.ALWAYS);
 	        scrollPane.setFitToWidth(true);
+	        scrollPane.setContent(loans);
 	
-	        VBox mainVBox = new VBox();
-	        mainVBox.setAlignment(Pos.CENTER);
-	        mainVBox.setSpacing(10);
-	        mainVBox.getChildren().add(scrollPane);
-	
-	        Scene loansDialogScene = new Scene(mainVBox, 600, 400);
+	        Scene loansDialogScene = new Scene(scrollPane);
 	        loansDialog.setScene(loansDialogScene);
 	        loansDialog.show();
         }catch(Exception e) {
@@ -801,7 +813,6 @@ public class LibraryApplication extends Application{
         }
     }
 
-    // Méthode pour afficher le formulaire d'ajout de nouveau client
     private void displayAddCustomerForm() {
         VBox addCustomerVBox = new VBox();
         addCustomerVBox.setAlignment(Pos.CENTER);
@@ -836,6 +847,7 @@ public class LibraryApplication extends Application{
 				LocalDate localDate = datePicker.getValue();
 		        Date date = Date.from(localDate.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
 				newCustomer = new Customer(firstNameField.getText(),lastNameField.getText(),date);
+				newCustomer.setLoans(new ArrayList<>());
 				librarian.addToDatabaseCustomer(newCustomer);
 	            displayUsers(this.librarian.getCustomers());
 	            Alert alert = new Alert(Alert.AlertType.INFORMATION);
