@@ -110,11 +110,11 @@ public class Main {
                                         int customerId = scanner.nextInt();
                                         scanner.nextLine();
 
-                                        System.out.print("Enter the new firstName (or 'null' to skip): ");
+                                        System.out.print("Enter the new firstName: ");
                                         String newFirstName = scanner.nextLine();
-                                        System.out.print("Enter the new lastName (or 'null' to skip): ");
+                                        System.out.print("Enter the new lastName: ");
                                         String newLastName = scanner.nextLine();
-                                        System.out.print("Enter the new birthDate (yyyy-MM-dd) (or 'null' to skip): ");
+                                        System.out.print("Enter the new birthDate (yyyy-MM-dd): ");
                                         String newBirthDate = scanner.nextLine();
 
                                         boolean result = currentUser.updateCustomer(customerId, newFirstName, newLastName, newBirthDate);
