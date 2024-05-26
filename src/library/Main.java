@@ -14,7 +14,9 @@ import java.util.Map;
 import java.util.Scanner;
 import java.util.ArrayList;
 
-
+/**
+ * The main class for the library application. It handles user authentication, menu navigation, and interaction with the librarian's functionalities.     (terminal's version)
+ */
 public class Main {
     public static void main(String[] args) throws BookNotInDataBaseException, URISyntaxException, IOException, InterruptedException {
         String inputUsername = "";
