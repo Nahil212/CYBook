@@ -1,10 +1,19 @@
 package library;
 
-public class LoanNotFoundException extends Exception{
+/**
+ * Custom exception to be thrown when a loan is not found.
+ */
+public class LoanNotFoundException extends Exception {
 
-	private static final long serialVersionUID = 1787548330231118500L;
+    /**
+     * Unique identifier for serialization.
+     */
+    private static final long serialVersionUID = 1787548330231118500L;
 
-	public LoanNotFoundException(){
+    /**
+     * Constructs a new LoanNotFoundException with a default error message.
+     */
+    public LoanNotFoundException() {
         super("Error: this customer has never made this loan");
     }
 }
