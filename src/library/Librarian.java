@@ -385,7 +385,7 @@ public class Librarian {
 				customerDetails.put("loans", new JSONArray());
 
 				customers.put(customerDetails);
-				System.out.println("The user has been added :) ");
+				
 
 				try (FileWriter file = new FileWriter(filePath)) {
 					file.write(root.toString(4));
