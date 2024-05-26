@@ -1,0 +1,44 @@
+Read-me Cy-Book 📚️
+
+Voici notre application de gestion d'une bibliothèque 📖️
+
+Fonctionnement à partir du terminal :
+./Lancer le main 🤙️
+
+./Options :
+
+Connect 🔑️: identifiant : Cy-Book, Mot de passe : groupe17
+Exit
+./Options :
+
+List of users : Affiche la liste des utilisateurs
+Sous-options liées aux utilisateurs :
+
+Add a new user : Ajouter un utilisateur (prénom, nom, date de naissance)
+
+Update a user : Modifier les informations d'un utilisateur (prénom, nom, date de naissance)
+
+Exit to main menu : Retourner au menu principal
+
+List of loans : Affiche la liste des emprunts
+Sous-options liées aux emprunts :
+
+Return a book : Retourner le livre en changeant son état (False ou True)
+
+Exit to main menu : Retourner au menu principal
+
+Book :
+Sous-options liées aux livres :
+
+Borrow a book : Emprunter un livre en indiquant son ark et l'ID de l'utilisateur
+
+Search a book : Chercher un livre selon différents critères
+
+Exit to main menu : Retourner au menu principal
+
+List of most famous loans : Affiche les livres les plus empruntés sur les 30 derniers jours
+
+Return to main menu : Retourner au menu de connexion.
+
+Fonctionnement pour l'interface graphique :
+Lancer depuis le terminal Linux : "mvn clean javafx:run"
