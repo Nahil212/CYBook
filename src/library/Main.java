@@ -108,7 +108,23 @@ public class Main {
 
                         }
                         else if (choice == 2) {
-                            
+                            System.out.print("Enter the ID of the user to update: ");
+                            int customerId = scanner.nextInt();
+                            scanner.nextLine();
+
+                            System.out.print("Enter the new firstName (or 'null' to skip): ");
+                            String newFirstName = scanner.nextLine();
+                            System.out.print("Enter the new lastName (or 'null' to skip): ");
+                            String newLastName = scanner.nextLine();
+                            System.out.print("Enter the new birthDate (yyyy-MM-dd) (or 'null' to skip): ");
+                            String newBirthDate = scanner.nextLine();
+
+                            boolean result = currentUser.updateCustomer(customerId, newFirstName, newLastName, newBirthDate);
+                            if (result) {
+                                System.out.println("User updated successfully!");
+                            } else {
+                                System.out.println("User ID not found. Please try again.");
+                            }
                         }
                         else if (choice == 3) {
 
@@ -126,7 +142,7 @@ public class Main {
                                 int loanId = scanner.nextInt();
                                 scanner.nextLine();
 
-                                
+
                                 Loan loanToReturn = null;
                                 for (Loan loan : currentUser.getLoans()) {
                                     if (loan.getId() == loanId) {
@@ -136,7 +152,7 @@ public class Main {
                                 }
 
                                 if (loanToReturn != null) {
-                                    
+
                                     currentUser.markBack(loanToReturn);
                                     System.out.println("Book returned successfully!");
                                 } else {
@@ -189,7 +205,7 @@ public class Main {
                                 int yearStart = -1;
                                 int yearEnd = -1;
                                 String searchTitle = "";
-                                int startResearch = 20; 
+                                int startResearch = 20;
 
                                 System.out.print("Enter author (or 'null' to skip): ");
                                 String authorsInput = scanner.nextLine();
@@ -247,6 +263,7 @@ public class Main {
                             System.out.println("Most Famous loans:");
                             for (Book book: mostFamousBooksWithCount) {
                                 System.out.println(book);
+                                System.out.println("\n");
                             }
                         } catch (Exception e) {
                             e.printStackTrace();
